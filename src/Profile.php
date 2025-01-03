@@ -18,10 +18,17 @@ class Profile extends Model
 
     protected string $table = 'profiles';
     protected string $path = _BASE_PATH . 'admin/profile';
+    protected array $columns = [
+        'user_id',
+        'username',
+        'email',
+        'users_image'
+    ];
 
-    public int $id;
     public int $user_id;
     public string $username;
+    public string $email;
+    public ?string $users_image;
 
     public function __construct()
     {

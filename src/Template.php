@@ -16,6 +16,7 @@ class Template extends Model
 
     public static bool|string $file;
 
+    public static string $identifier;
     public static string $route;
     public static string $url = "";
 

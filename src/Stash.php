@@ -4,11 +4,26 @@ namespace Ivy;
 
 trait Stash
 {
-    public static array $stash = array();
+    private static array $stash = [];
 
-    public function stash(): static
+    public static function stashByColumnKey(string $column): void
     {
-        self::$stash = $this->rows;
-        return $this;
+        $model = new static();
+
+        if (!in_array($column, $model->columns)) {
+            throw new \InvalidArgumentException("Column '$column' is not a valid column for this model.");
+        }
+
+        $models = $model->fetchAll();
+
+        foreach ($models as $instance) {
+            $key = strtolower(str_replace(' ', '_', $instance->{$column}));
+            self::$stash[$key] = $instance;
+        }
+    }
+
+    public static function getFromStashByKey(string $key): ?static
+    {
+        return self::$stash[$key] ?? null;
     }
 }
