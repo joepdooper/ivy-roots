@@ -7,7 +7,7 @@ use Delight\Db\Throwable\IntegrityConstraintViolationException;
 use HTMLPurifier_Config;
 use HTMLPurifier;
 
-abstract class ModelNew
+abstract class Model
 {
     protected string $table;
     protected string $path;
