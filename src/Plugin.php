@@ -2,7 +2,7 @@
 
 namespace Ivy;
 
-class Plugin extends ModelNew
+class Plugin extends Model
 {
     protected string $table = 'plugin';
     protected string $path = _BASE_PATH . 'admin/plugin';
