@@ -317,4 +317,8 @@ class User extends Model
         self::$auth->confirmEmail($selector, $token);
     }
 
+    public static function canResetPasswordOrThrow($selector, $token): void
+    {
+        self::$auth->canResetPasswordOrThrow($selector, $token);
+    }
 }

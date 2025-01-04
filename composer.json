@@ -3,10 +3,10 @@
     "type": "library",
     "license": "MIT",
     "autoload": {
-        "psr-4": {
-            "Ivy\\": "src/"
-        }
-    },
+    "psr-4": {
+        "Ivy\\": "src/"
+    }
+},
     "authors": [
         {
             "name": "Joep Dooper"

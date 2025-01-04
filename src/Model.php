@@ -7,18 +7,15 @@ use Delight\Db\Throwable\IntegrityConstraintViolationException;
 use HTMLPurifier_Config;
 use HTMLPurifier;
 
-abstract class ModelNew
+abstract class Model
 {
     protected string $table;
     protected string $path;
-
     protected array $columns = [];
     protected string $query = '';
     protected array $bindings = [];
-    protected array $rows = [];
     protected ?HTMLPurifier $purifier = null;
     protected int $id;
-
 
     public function __construct()
     {
@@ -53,12 +50,10 @@ abstract class ModelNew
                 ? " AND `$this->table`.`$column` IS NULL"
                 : " WHERE `$this->table`.`$column` IS NULL";
         } else {
-            // Add filter with the given column, value, and operator
             $this->query .= str_contains($this->query, 'WHERE')
                 ? " AND `$this->table`.`$column` $operator :$column"
                 : " WHERE `$this->table`.`$column` $operator :$column";
 
-            // Bind the value to the query
             $this->bindings[$column] = $value;
         }
 
@@ -110,15 +105,13 @@ abstract class ModelNew
         return $this;
     }
 
-    public function fetchAll(): static
+    public function fetchAll(): array
     {
         $rows = !empty($this->bindings)
             ? DB::$connection->select($this->query, $this->bindings)
             : DB::$connection->select($this->query);
 
-        $this->rows = array_map(fn($row) => static::createInstance()->populate($row), $rows ?? []);
-
-        return $this;
+        return array_map(fn($row) => static::createInstance()->populate($row), $rows ?? []);
     }
 
     public function fetchOne(): ?static
@@ -132,18 +125,13 @@ abstract class ModelNew
 
     public function organizeByColumn(string $columnName): static
     {
-        $this->rows = array_reduce($this->rows, function ($carry, $object) use ($columnName) {
+        $this->rows = array_reduce($this->fetchAll(), function ($carry, $object) use ($columnName) {
             $key = str_replace(' ', '_', strtolower($object->{$columnName} ?? ''));
             $carry[$key] = $object;
             return $carry;
         }, []);
 
         return $this;
-    }
-
-    public function getRows(): array
-    {
-        return $this->rows;
     }
 
     public function toAssocArray(): array
