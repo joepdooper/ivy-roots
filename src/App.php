@@ -6,13 +6,7 @@ class App
 {
     use Stash;
 
-    private Router $router;
-
-    private function includeAutoLoaders():void
-    {
-        require_once _PUBLIC_PATH . 'vendor/autoload.php';
-        require_once _PUBLIC_PATH . 'core/include/autoloader.php';
-    }
+    private static \Bramus\Router\Router $router;
 
     private function includeGlobalFunctions(): void
     {
@@ -67,18 +61,21 @@ class App
     }
 
     public function run() {
-        $this->includeAutoloaders();
         $this->includeGlobalFunctions();
         $this->initialize();
         $this->stashSettings();
         $this->setTemplate();
         // start router
-        $this->router = new Router();
-        $this->router->setBasePath(_SUBFOLDER);
+        self::$router = new \Bramus\Router\Router();
+        self::$router->setBasePath(_SUBFOLDER);
         // template, plugin and core assets and routes
         $this->loadRoutes();
         // run router
-        $this->router->run();
+        self::$router->run();
+    }
+
+    public static function router() {
+        return self::$router;
     }
 
 }
