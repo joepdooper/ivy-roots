@@ -7,11 +7,9 @@ class App
     use Stash;
 
     private static \Bramus\Router\Router $router;
-
-    private function includeGlobalFunctions(): void
-    {
-        require_once _PUBLIC_PATH . 'core/include/functions.php';
-    }
+    private string $templateRoutesAssets = 'template.php';
+    private string $pluginRoutesAssets = 'plugin.php';
+    private string $coreRoutesAssets = 'routes.php';
 
     private function initialize(): void
     {
@@ -31,8 +29,11 @@ class App
         $sql = "SELECT `value` FROM `template` WHERE `type` = :type";
         define('_TEMPLATE_BASE', _TEMPLATES_PATH . DB::$connection->selectValue($sql, ['base']) . DIRECTORY_SEPARATOR);
         define('_TEMPLATE_SUB', _TEMPLATES_PATH . DB::$connection->selectValue($sql, ['sub']) . DIRECTORY_SEPARATOR);
+    }
 
-        Template::addJS("core/js/helper.js");
+    private function setLanguage(): void
+    {
+        Language::setDefaultLang(substr(Setting::getFromStashByKey('language')->value, 0, 2));
     }
 
     private function loadPlugins(): void
@@ -41,7 +42,7 @@ class App
         if (!empty($plugins)) {
             $_SESSION['plugin_actives'] = array_column($plugins, 'name');
             foreach ($plugins as $plugin) {
-                $pluginPath = _PUBLIC_PATH . _PLUGIN_PATH . $plugin->getUrl() . DIRECTORY_SEPARATOR . 'plugin.php';
+                $pluginPath = _PUBLIC_PATH . _PLUGIN_PATH . $plugin->getUrl() . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets;
                 if (file_exists($pluginPath)) {
                     include $pluginPath;
                 }
@@ -49,22 +50,26 @@ class App
         }
     }
 
+    private function loadTemplate() {
+        include Template::file($this->templateRoutesAssets);
+    }
+
+    private function loadCore() {
+        include _PUBLIC_PATH . $this->coreRoutesAssets;
+    }
+
     private function loadRoutes(): void
     {
-        include Template::file('template.php');
-
-        Language::setDefaultLang(substr(Setting::getFromStashByKey('language')->value, 0, 2));
-
+        $this->loadTemplate();
         $this->loadPlugins();
-
-        include _PUBLIC_PATH . 'core/include/routes.php';
+        $this->loadCore();
     }
 
     public function run() {
-        $this->includeGlobalFunctions();
         $this->initialize();
         $this->stashSettings();
         $this->setTemplate();
+        $this->setLanguage();
         // start router
         self::$router = new \Bramus\Router\Router();
         self::$router->setBasePath(_SUBFOLDER);
@@ -76,6 +81,10 @@ class App
 
     public static function router() {
         return self::$router;
+    }
+
+    public function loadCoreRoutes(string $routes){
+        $this->coreRoutesAssets = $routes;
     }
 
 }
