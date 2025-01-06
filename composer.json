@@ -1,5 +1,6 @@
 {
     "name": "joepdooper/ivy-roots",
+  "description": "a collection of core classes for building and extending functionality with Ivy",
     "type": "library",
     "license": "MIT",
     "autoload": {
