@@ -65,26 +65,31 @@ class App
         $this->loadCore();
     }
 
+    public static function router() {
+        return self::$router;
+    }
+
+    public function loadCoreRoutesAssets(string $routes){
+        $this->coreRoutesAssets = $routes;
+    }
+
+    public function loadPluginRoutesAssets(string $routes){
+        $this->pluginRoutesAssets = $routes;
+    }
+
+    public function loadTemplateRoutesAssets(string $routes){
+        $this->templateRoutesAssets = $routes;
+    }
+
     public function run() {
         $this->initialize();
         $this->stashSettings();
         $this->setTemplate();
         $this->setLanguage();
-        // start router
         self::$router = new \Bramus\Router\Router();
         self::$router->setBasePath(_SUBFOLDER);
-        // template, plugin and core assets and routes
         $this->loadRoutes();
-        // run router
         self::$router->run();
-    }
-
-    public static function router() {
-        return self::$router;
-    }
-
-    public function loadCoreRoutes(string $routes){
-        $this->coreRoutesAssets = $routes;
     }
 
 }
