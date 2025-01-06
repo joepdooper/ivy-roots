@@ -2,6 +2,8 @@
 
 namespace Ivy;
 
+use Bramus\Router\Router;
+
 class App
 {
     use Stash;
@@ -11,17 +13,9 @@ class App
     private string $pluginRoutesAssets = 'plugin.php';
     private string $coreRoutesAssets = 'routes.php';
 
-    private function initialize(): void
+    public static function router(): Router
     {
-        $dotenv = \Dotenv\Dotenv::createImmutable(_PUBLIC_PATH);
-        $dotenv->load();
-        new DB();
-        User::auth();
-    }
-
-    private function stashSettings(): void
-    {
-        Setting::stashByColumnKey('name');
+        return self::$router;
     }
 
     private function setTemplate(): void
@@ -33,7 +27,8 @@ class App
 
     private function setLanguage(): void
     {
-        Language::setDefaultLang(substr(Setting::getFromStashByKey('language')->value, 0, 2));
+        self::stashByColumnKey(Setting::class, 'name');
+        Language::setDefaultLang(substr(self::getStashFrom(Setting::class)['language']->value, 0, 2));
     }
 
     private function loadPlugins(): void
@@ -50,11 +45,13 @@ class App
         }
     }
 
-    private function loadTemplate() {
+    private function loadTemplate(): void
+    {
         include Template::file($this->templateRoutesAssets);
     }
 
-    private function loadCore() {
+    private function loadCore(): void
+    {
         include _PUBLIC_PATH . $this->coreRoutesAssets;
     }
 
@@ -65,27 +62,33 @@ class App
         $this->loadCore();
     }
 
-    public static function router() {
-        return self::$router;
-    }
-
-    public function loadCoreRoutesAssets(string $routes){
+    public function setCoreRoutesAssets(string $routes): void
+    {
         $this->coreRoutesAssets = $routes;
     }
 
-    public function loadPluginRoutesAssets(string $routes){
+    public function setPluginRoutesAssets(string $routes): void
+    {
         $this->pluginRoutesAssets = $routes;
     }
 
-    public function loadTemplateRoutesAssets(string $routes){
+    public function setTemplateRoutesAssets(string $routes): void
+    {
         $this->templateRoutesAssets = $routes;
     }
 
-    public function run() {
-        $this->initialize();
-        $this->stashSettings();
+    private function bootstrap(): void
+    {
+        (\Dotenv\Dotenv::createImmutable(_PUBLIC_PATH))->load();
+        new DB();
+        User::auth();
         $this->setTemplate();
         $this->setLanguage();
+    }
+
+    public function run(): void
+    {
+        $this->bootstrap();
         self::$router = new \Bramus\Router\Router();
         self::$router->setBasePath(_SUBFOLDER);
         $this->loadRoutes();

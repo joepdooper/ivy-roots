@@ -6,24 +6,42 @@ trait Stash
 {
     private static array $stash = [];
 
-    public static function stashByColumnKey(string $column): void
+    /**
+     * Stash objects by column key into the given type (e.g., Setting).
+     *
+     * @param string $type The class name of the object to stash.
+     * @param string $column The column name to use as the key.
+     * @return void
+     * @throws \InvalidArgumentException
+     */
+    public static function stashByColumnKey(string $type, string $column): void
     {
-        $model = new static();
+        if (!class_exists($type)) {
+            throw new \InvalidArgumentException("Class '$type' does not exist.");
+        }
 
-        if (!in_array($column, $model->columns)) {
-            throw new \InvalidArgumentException("Column '$column' is not a valid column for this model.");
+        $model = new $type();
+
+        if (!property_exists($model, 'columns') || !in_array($column, $model->getColumns())) {
+            throw new \InvalidArgumentException("Column '$column' is not valid for this model.");
         }
 
         $models = $model->fetchAll();
 
         foreach ($models as $instance) {
             $key = strtolower(str_replace(' ', '_', $instance->{$column}));
-            self::$stash[$key] = $instance;
+            self::$stash[$type][$key] = $instance;
         }
     }
 
-    public static function getFromStashByKey(string $key): ?static
+    /**
+     * Retrieve stashed objects of a specific type.
+     *
+     * @param string $type The class name of the stashed objects.
+     * @return static|null
+     */
+    public static function getStashFrom(string $type): ?array
     {
-        return self::$stash[$key] ?? null;
+        return self::$stash[$type] ?? null;
     }
 }

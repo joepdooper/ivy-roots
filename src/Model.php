@@ -27,6 +27,11 @@ abstract class Model
         return $this->path;
     }
 
+    public function getColumns(): array
+    {
+        return $this->columns;
+    }
+
     public function setId(int $id): static
     {
         $this->id = $id;
