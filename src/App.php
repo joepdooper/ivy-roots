@@ -9,6 +9,7 @@ class App
     use Stash;
 
     private static \Bramus\Router\Router $router;
+    
     private string $templateRoutesAssets = 'template.php';
     private string $pluginRoutesAssets = 'plugin.php';
     private string $coreRoutesAssets = 'routes.php';
