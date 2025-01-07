@@ -27,7 +27,7 @@ class App
 
     private function setLanguage(): void
     {
-        self::stashByColumnKey(Setting::class, 'name');
+        self::stash(Setting::class)->keyByColumn('name');
         Language::setDefaultLang(substr(self::getStashFrom(Setting::class)['language']->value, 0, 2));
     }
 
