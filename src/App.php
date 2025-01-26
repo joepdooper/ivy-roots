@@ -9,7 +9,7 @@ class App
     use Stash;
 
     private static \Bramus\Router\Router $router;
-    
+
     private string $templateRoutesAssets = 'template.php';
     private string $pluginRoutesAssets = 'plugin.php';
     private string $coreRoutesAssets = 'routes.php';
@@ -80,7 +80,6 @@ class App
 
     private function bootstrap(): void
     {
-        (\Dotenv\Dotenv::createImmutable(_PUBLIC_PATH))->load();
         new DB();
         User::auth();
         $this->setTemplate();

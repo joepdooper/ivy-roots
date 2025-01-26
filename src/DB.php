@@ -13,7 +13,6 @@ class DB
 
     public function __construct()
     {
-
         if (isset(self::$connection)) {
             return;
         }
