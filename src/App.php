@@ -2,28 +2,21 @@
 
 namespace Ivy;
 
+use Bramus\Router\Router;
+
 class App
 {
     use Stash;
 
     private static \Bramus\Router\Router $router;
 
-    private function includeGlobalFunctions(): void
-    {
-        require_once _PUBLIC_PATH . 'core/include/functions.php';
-    }
+    private string $templateRoutesAssets = 'template.php';
+    private string $pluginRoutesAssets = 'plugin.php';
+    private string $coreRoutesAssets = 'routes.php';
 
-    private function initialize(): void
+    public static function router(): Router
     {
-        $dotenv = \Dotenv\Dotenv::createImmutable(_PUBLIC_PATH);
-        $dotenv->load();
-        new DB();
-        User::auth();
-    }
-
-    private function stashSettings(): void
-    {
-        Setting::stashByColumnKey('name');
+        return self::$router;
     }
 
     private function setTemplate(): void
@@ -31,8 +24,12 @@ class App
         $sql = "SELECT `value` FROM `template` WHERE `type` = :type";
         define('_TEMPLATE_BASE', _TEMPLATES_PATH . DB::$connection->selectValue($sql, ['base']) . DIRECTORY_SEPARATOR);
         define('_TEMPLATE_SUB', _TEMPLATES_PATH . DB::$connection->selectValue($sql, ['sub']) . DIRECTORY_SEPARATOR);
+    }
 
-        Template::addJS("core/js/helper.js");
+    private function setLanguage(): void
+    {
+        self::stash(Setting::class)->keyByColumn('name');
+        Language::setDefaultLang(substr(self::getStashFrom(Setting::class)['language']->value, 0, 2));
     }
 
     private function loadPlugins(): void
@@ -41,7 +38,7 @@ class App
         if (!empty($plugins)) {
             $_SESSION['plugin_actives'] = array_column($plugins, 'name');
             foreach ($plugins as $plugin) {
-                $pluginPath = _PUBLIC_PATH . _PLUGIN_PATH . $plugin->getUrl() . DIRECTORY_SEPARATOR . 'plugin.php';
+                $pluginPath = _PUBLIC_PATH . _PLUGIN_PATH . $plugin->getUrl() . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets;
                 if (file_exists($pluginPath)) {
                     include $pluginPath;
                 }
@@ -49,33 +46,53 @@ class App
         }
     }
 
+    private function loadTemplate(): void
+    {
+        include Template::file($this->templateRoutesAssets);
+    }
+
+    private function loadCore(): void
+    {
+        include _PUBLIC_PATH . $this->coreRoutesAssets;
+    }
+
     private function loadRoutes(): void
     {
-        include Template::file('template.php');
-
-        Language::setDefaultLang(substr(Setting::getFromStashByKey('language')->value, 0, 2));
-
+        $this->loadTemplate();
         $this->loadPlugins();
-
-        include _PUBLIC_PATH . 'core/include/routes.php';
+        $this->loadCore();
     }
 
-    public function run() {
-        $this->includeGlobalFunctions();
-        $this->initialize();
-        $this->stashSettings();
+    public function setCoreRoutesAssets(string $routes): void
+    {
+        $this->coreRoutesAssets = $routes;
+    }
+
+    public function setPluginRoutesAssets(string $routes): void
+    {
+        $this->pluginRoutesAssets = $routes;
+    }
+
+    public function setTemplateRoutesAssets(string $routes): void
+    {
+        $this->templateRoutesAssets = $routes;
+    }
+
+    private function bootstrap(): void
+    {
+        new DB();
+        User::auth();
         $this->setTemplate();
-        // start router
+        $this->setLanguage();
+    }
+
+    public function run(): void
+    {
+        $this->bootstrap();
         self::$router = new \Bramus\Router\Router();
         self::$router->setBasePath(_SUBFOLDER);
-        // template, plugin and core assets and routes
         $this->loadRoutes();
-        // run router
         self::$router->run();
-    }
-
-    public static function router() {
-        return self::$router;
     }
 
 }
