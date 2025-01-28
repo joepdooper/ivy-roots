@@ -29,7 +29,29 @@ class User extends Model
 
     protected string $table = 'users';
     protected string $path = _BASE_PATH . 'admin/user';
+    protected array $columns = [
+        'email',
+        'username',
+        'users_image',
+        'status',
+        'verified',
+        'resettable',
+        'roles_mask',
+        'registered',
+        'last_login'
+    ];
+
     private static Auth $auth;
+
+    public string $email;
+    public string $username;
+    public string $users_image;
+    public int $status;
+    public int $verified;
+    public int $resettable;
+    public int $roles_mask;
+    public int $registered;
+    public int $last_login;
 
     // Register
 
