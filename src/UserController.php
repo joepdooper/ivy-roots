@@ -6,7 +6,7 @@ use Delight\Auth\AuthError;
 use Delight\Auth\Role;
 use Delight\Auth\UnknownIdException;
 
-class UserController extends Model
+class UserController extends Controller
 {
     protected User $user;
 
