@@ -184,7 +184,7 @@ abstract class Model
         return DB::$connection->getLastInsertId();
     }
 
-    public function delete(): int
+    public function delete(): bool|int|string
     {
         try {
             DB::$connection->delete($this->table, $this->bindings);
@@ -193,6 +193,22 @@ abstract class Model
         }
 
         return DB::$connection->getLastInsertId();
+    }
+
+    public function save(array $data): bool|int|string
+    {
+        if (!empty($data['id'])) {
+            $this->where('id', $data['id'])->fetchOne();
+            if (isset($data['delete'])) {
+                return $this->delete();
+            } else {
+                return $this->populate($data)->update();
+            }
+        } else {
+            if (!empty($data['name'])) {
+                return $this->populate($data)->insert();
+            }
+        }
     }
 
     protected function getPurifier(): HTMLPurifier
