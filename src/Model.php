@@ -144,7 +144,7 @@ abstract class Model
         $assocArray = [];
 
         foreach ($this->columns as $column) {
-            if (property_exists($this, $column)) {
+            if (property_exists($this, $column) && isset($this->{$column})) {
                 $assocArray[$column] = $this->{$column};
             }
         }
@@ -152,9 +152,13 @@ abstract class Model
         return $assocArray;
     }
 
-    public function insert(): bool|int|string
+    public function insert(): bool|int
     {
         $set = $this->toAssocArray();
+
+        if(empty($set)){
+            return false;
+        }
 
         if (!empty($this->columns)) {
             $set = array_intersect_key($set, array_flip($this->columns));
@@ -170,11 +174,16 @@ abstract class Model
         return DB::$connection->getLastInsertId();
     }
 
-    public function update(): bool|int|string
+    public function update(): bool|int
     {
         $set = $this->toAssocArray();
 
+        if(empty($set)){
+            return false;
+        }
+
         $set = $this->sanitize($set);
+
         try {
             DB::$connection->update($this->table, $set, $this->bindings);
         } catch (IntegrityConstraintViolationException $e) {
@@ -195,20 +204,20 @@ abstract class Model
         return DB::$connection->getLastInsertId();
     }
 
-    public function save(array $data): bool|int|string
+    public function save(array $data): bool|int
     {
         if (!empty($data['id'])) {
-            $this->where('id', $data['id'])->fetchOne();
             if (isset($data['delete'])) {
-                return $this->delete();
+                return $this->where('id', $data['id'])->delete();
             } else {
-                return $this->populate($data)->update();
+                return $this->populate($data)->where('id', $data['id'])->update();
             }
         } else {
             if (!empty($data['name'])) {
                 return $this->populate($data)->insert();
             }
         }
+        return false;
     }
 
     protected function getPurifier(): HTMLPurifier
@@ -231,7 +240,7 @@ abstract class Model
     public function populate(array $data): static
     {
         foreach ($data as $key => $value) {
-            if (in_array($key, $this->columns) || $key === 'id') {
+            if (in_array($key, $this->columns) && isset($value) || $key === 'id') {
                 $this->{$key} = $value;
             }
         }

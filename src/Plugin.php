@@ -54,7 +54,7 @@ class Plugin extends Model
     {
         $this->info = new PluginInfo($this->url);
         foreach (get_object_vars($this->info) as $property => $value) {
-            if (property_exists($this, $property) && !$this->{$property}) {
+            if (property_exists($this, $property) && !isset($this->{$property})) {
                 $this->{$property} = $value;
             }
         }

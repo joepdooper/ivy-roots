@@ -26,6 +26,7 @@ trait Stash
         }
 
         self::$currentData = $model->fetchAll();
+
         return new static();
     }
 
