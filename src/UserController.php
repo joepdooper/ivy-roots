@@ -10,15 +10,15 @@ class UserController extends Controller
 {
     protected User $user;
 
-    public function post(Request $request = null): void
+    public function post(): void
     {
-        $request = $request ?? new Request();
+        $this->requirePost();
+        $this->requireLogin();
 
-        if ($request->isMethod('POST') && User::isLoggedIn()) {
-            $users = $request->input('user') ?? '';
+        $users_data = $this->request->input('user') ?? '';
 
-            foreach ($users as $key => $user_data) {
-                $this->user = new User;
+        foreach ($users_data as $key => $user_data) {
+            $this->user = new User;
 
                 if (isset($user_data['delete'])) {
                     try {
@@ -50,6 +50,5 @@ class UserController extends Controller
             }
 
             Message::add('Update successfully', _BASE_PATH . 'admin/user');
-        }
     }
 }

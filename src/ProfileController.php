@@ -15,11 +15,10 @@ class ProfileController extends Controller
 {
     protected Profile $profile;
 
-    public function post(Request $request = null): void
+    public function post(): void
     {
-        $request = $request ?? new Request();
-
-        if ($request->isMethod('POST') && User::isLoggedIn()) {
+        $this->requirePost();
+        $this->requireLogin();
 
             $config = HTMLPurifier_Config::createDefault();
             $purifier = new HTMLPurifier($config);
@@ -27,9 +26,8 @@ class ProfileController extends Controller
             $message = 'post profile';
 
             try {
-
-                $name = $purifier->purify($request->input('users')['username']);
-                $email = $purifier->purify($request->input('users')['email']);
+                $name = $purifier->purify($this->request->input('users')['username']);
+                $email = $purifier->purify($this->request->input('users')['email']);
                 if (!empty($name) && !empty($email)) {
 
                     if (User::getUsername() != $name) {
@@ -43,12 +41,12 @@ class ProfileController extends Controller
 
                     if (User::getEmail() != $email) {
                         try {
-                            User::changeEmail($purifier->purify($request->input('users')['email']), function ($selector, $token) use ($purifier, $request) {
+                            User::changeEmail($purifier->purify($this->request->input('users')['email']), function ($selector, $token) use ($purifier) {
                                 $url = _BASE_PATH . 'admin/profile/' . urlencode($selector) . '/' . urlencode($token);
                                 // send email
                                 $mail = new Mail();
-                                $mail->Address = $purifier->purify($request->input('users')['email']);
-                                $mail->Name = $purifier->purify($request->input('users')['username']);
+                                $mail->Address = $purifier->purify($this->request->input('users')['email']);
+                                $mail->Name = $purifier->purify($this->request->input('users')['username']);
                                 $mail->Subject = 'Reset email address';
                                 $mail->Body = 'Reset your email address with this link: ' . $url;
                                 $mail->AltBody = 'Reset your email address with this link: ' . $url;
@@ -68,7 +66,7 @@ class ProfileController extends Controller
                         }
                     }
 
-                    if ($request->input('users_image') !== null && $request->input('users_image') === 'delete') {
+                    if ($this->request->input('users_image') !== null && $this->request->input('users_image') === 'delete') {
                         $this->table = 'profiles';
                         $this->where('user_id', User::getUserId())->getRow();
                         $this->save([
@@ -83,7 +81,7 @@ class ProfileController extends Controller
                         $this->where('user_id', User::getUserId())->getRow();
                         $this->save([
                             'id' => $this->single()->id,
-                            'users_image' => (new Image)->upload($request->input('users_image'))
+                            'users_image' => (new Image)->upload($this->request->input('users_image'))
                         ]);
                     }
 
@@ -101,7 +99,5 @@ class ProfileController extends Controller
             }
 
             Message::add($message, $this->path);
-
-        }
     }
 }

@@ -6,7 +6,7 @@ use stdClass;
 
 class Message
 {
-    public static string $template;
+    private static string $template;
 
     function __construct()
     {

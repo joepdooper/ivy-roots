@@ -25,6 +25,7 @@ class Plugin extends Model
     public ?int $active;
     public ?int $settings;
     public ?int $parent_id;
+
     public ?bool $collection = false;
     private PluginInfo $info;
 

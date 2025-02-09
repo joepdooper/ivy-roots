@@ -9,6 +9,10 @@ class Template extends Model
 {
     protected string $table = 'template';
     protected string $path = _BASE_PATH . 'admin/template';
+    protected array $columns = [
+        'type',
+        'value',
+    ];
 
     public static array $css = array();
     public static array $js = array();
