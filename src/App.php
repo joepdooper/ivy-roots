@@ -22,8 +22,8 @@ class App
     private function setTemplate(): void
     {
         $sql = "SELECT `value` FROM `template` WHERE `type` = :type";
-        define('_TEMPLATE_BASE', _TEMPLATES_PATH . DB::$connection->selectValue($sql, ['base']) . DIRECTORY_SEPARATOR);
-        define('_TEMPLATE_SUB', _TEMPLATES_PATH . DB::$connection->selectValue($sql, ['sub']) . DIRECTORY_SEPARATOR);
+        define('_TEMPLATE_BASE', _TEMPLATES_PATH . DB::getConnection()->selectValue($sql, ['base']) . DIRECTORY_SEPARATOR);
+        define('_TEMPLATE_SUB', _TEMPLATES_PATH . DB::getConnection()->selectValue($sql, ['sub']) . DIRECTORY_SEPARATOR);
     }
 
     private function setLanguage(): void
@@ -32,7 +32,7 @@ class App
         Language::setDefaultLang(substr(self::getStashFrom(Setting::class)['language']->value, 0, 2));
     }
 
-    private function loadPlugins(): void
+    private function loadPluginRoutes(): void
     {
         $plugins = (new Plugin)->where('active', 1)->fetchAll();
         if (!empty($plugins)) {
@@ -46,21 +46,24 @@ class App
         }
     }
 
-    private function loadTemplate(): void
+    private function loadTemplateRoutes(): void
     {
         include Template::file($this->templateRoutesAssets);
     }
 
-    private function loadCore(): void
+    private function loadCoreRoutes(): void
     {
         include _PUBLIC_PATH . $this->coreRoutesAssets;
     }
 
     private function loadRoutes(): void
     {
-        $this->loadTemplate();
-        $this->loadPlugins();
-        $this->loadCore();
+        self::$router = new \Bramus\Router\Router();
+        self::$router->setBasePath(_SUBFOLDER);
+        $this->loadTemplateRoutes();
+        $this->loadPluginRoutes();
+        $this->loadCoreRoutes();
+        self::$router->run();
     }
 
     public function setCoreRoutesAssets(string $routes): void
@@ -80,7 +83,7 @@ class App
 
     private function bootstrap(): void
     {
-        new DB();
+        DB::init();
         User::auth();
         $this->setTemplate();
         $this->setLanguage();
@@ -89,10 +92,7 @@ class App
     public function run(): void
     {
         $this->bootstrap();
-        self::$router = new \Bramus\Router\Router();
-        self::$router->setBasePath(_SUBFOLDER);
         $this->loadRoutes();
-        self::$router->run();
     }
 
 }

@@ -113,8 +113,8 @@ abstract class Model
     public function fetchAll(): array
     {
         $rows = !empty($this->bindings)
-            ? DB::$connection->select($this->query, $this->bindings)
-            : DB::$connection->select($this->query);
+            ? DB::getConnection()->select($this->query, $this->bindings)
+            : DB::getConnection()->select($this->query);
 
         return array_map(fn($row) => static::createInstance()->populate($row), $rows ?? []);
     }
@@ -122,8 +122,8 @@ abstract class Model
     public function fetchOne(): ?static
     {
         $data = !empty($this->bindings)
-            ? DB::$connection->selectRow($this->query, $this->bindings)
-            : DB::$connection->selectRow($this->query);
+            ? DB::getConnection()->selectRow($this->query, $this->bindings)
+            : DB::getConnection()->selectRow($this->query);
 
         return $data ? $this->createInstance()->populate($data) : null;
     }
@@ -166,12 +166,12 @@ abstract class Model
 
         $set = $this->sanitize($set);
         try {
-            DB::$connection->insert($this->table, $set);
+            DB::getConnection()->insert($this->table, $set);
         } catch (IntegrityConstraintViolationException $e) {
             Message::add($e->getMessage());
         }
 
-        return DB::$connection->getLastInsertId();
+        return DB::getConnection()->getLastInsertId();
     }
 
     public function update(): bool|int
@@ -185,23 +185,23 @@ abstract class Model
         $set = $this->sanitize($set);
 
         try {
-            DB::$connection->update($this->table, $set, $this->bindings);
+            DB::getConnection()->update($this->table, $set, $this->bindings);
         } catch (IntegrityConstraintViolationException $e) {
             Message::add($e->getMessage());
         }
 
-        return DB::$connection->getLastInsertId();
+        return DB::getConnection()->getLastInsertId();
     }
 
     public function delete(): bool|int|string
     {
         try {
-            DB::$connection->delete($this->table, $this->bindings);
+            DB::getConnection()->delete($this->table, $this->bindings);
         } catch (EmptyWhereClauseError $e) {
             Message::add($e->getMessage());
         }
 
-        return DB::$connection->getLastInsertId();
+        return DB::getConnection()->getLastInsertId();
     }
 
     public function save(array $data): bool|int

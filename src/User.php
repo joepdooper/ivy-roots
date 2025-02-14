@@ -80,7 +80,7 @@ class User extends Model
                     $mail->AltBody = 'Activate your account with this link: ' . $url;
                     $mail->send();
                 });
-                DB::$connection->insert('profiles', ['user_id' => $userId]);
+                DB::getConnection()->insert('profiles', ['user_id' => $userId]);
                 // Set role to registered user
                 if (Setting::$stash['registration_role']->bool && Setting::$stash['registration_role']->value) {
                     $role = strtoupper(Setting::$stash['registration_role']->value);
@@ -287,7 +287,7 @@ class User extends Model
 
     static function auth(): void
     {
-        self::$auth = new Auth(DB::$connection, true);
+        self::$auth = new Auth(DB::getConnection(), true);
     }
 
     public static function getUsername(): ?string
