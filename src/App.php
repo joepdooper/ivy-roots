@@ -10,7 +10,9 @@ class App
 
     private string $templateRoutesAssets = 'template.php';
     private string $pluginRoutesAssets = 'plugin.php';
-    private string $coreRoutesAssets = 'routes.php';
+    private string $coreMiddlewareRoutesAssets = 'routes/middleware.php';
+    private string $coreAdminRoutesAssets = 'routes/admin.php';
+    private string $coreErrorRoutesAssets = 'routes/error.php';
 
     public static function router(): Router
     {
@@ -34,7 +36,7 @@ class App
     {
         $plugins = (new Plugin)->where('active', 1)->fetchAll();
         if (!empty($plugins)) {
-            $_SESSION['plugin_actives'] = array_column($plugins, 'name');
+            $_SESSION['plugin_actives'] = array_map(fn($plugin) => $plugin->getName(), $plugins);
             foreach ($plugins as $plugin) {
                 $pluginPath = _PUBLIC_PATH . _PLUGIN_PATH . $plugin->getUrl() . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets;
                 if (file_exists($pluginPath)) {
@@ -49,34 +51,16 @@ class App
         include Template::file($this->templateRoutesAssets);
     }
 
-    private function loadCoreRoutes(): void
-    {
-        include _PUBLIC_PATH . $this->coreRoutesAssets;
-    }
-
     private function loadRoutes(): void
     {
         self::$router = new \Bramus\Router\Router();
         self::$router->setBasePath(_SUBFOLDER);
+        include _PUBLIC_PATH . $this->coreMiddlewareRoutesAssets;
         $this->loadTemplateRoutes();
         $this->loadPluginRoutes();
-        $this->loadCoreRoutes();
+        include _PUBLIC_PATH . $this->coreAdminRoutesAssets;
+        include _PUBLIC_PATH . $this->coreErrorRoutesAssets;
         self::$router->run();
-    }
-
-    public function setCoreRoutesAssets(string $routes): void
-    {
-        $this->coreRoutesAssets = $routes;
-    }
-
-    public function setPluginRoutesAssets(string $routes): void
-    {
-        $this->pluginRoutesAssets = $routes;
-    }
-
-    public function setTemplateRoutesAssets(string $routes): void
-    {
-        $this->templateRoutesAssets = $routes;
     }
 
     private function bootstrap(): void
