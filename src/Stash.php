@@ -8,24 +8,20 @@ trait Stash
     private static ?array $currentData = null;
 
     /**
-     * Initialize stashing for a specific type and fetch all records.
+     * Initialize stashing for the calling class and fetch all records.
      *
-     * @param string $type The class name of the objects to stash.
      * @return static
      * @throws \InvalidArgumentException
      */
-    public static function stash(string $type): static
+    public static function stash(): static
     {
-        if (!class_exists($type)) {
-            throw new \InvalidArgumentException("Class '$type' does not exist.");
-        }
+        $type = static::class;
 
-        $model = new $type();
-        if (!method_exists($model, 'fetchAll')) {
+        if (!method_exists($type, 'fetchAll')) {
             throw new \InvalidArgumentException("Class '$type' does not have a fetchAll method.");
         }
 
-        self::$currentData = $model->fetchAll();
+        self::$currentData = (new $type())->fetchAll();
 
         return new static();
     }
@@ -43,27 +39,41 @@ trait Stash
             throw new \RuntimeException("No data available to stash. Call stash() first.");
         }
 
+        $getter = 'get' . str_replace('_', '', ucwords($column, '_'));
+
         foreach (self::$currentData as $instance) {
-            if (!property_exists($instance, $column)) {
+            if (method_exists($instance, $getter)) {
+                $key = strtolower(str_replace(' ', '_', $instance->$getter()));
+            } elseif (property_exists($instance, $column)) {
+                $key = strtolower(str_replace(' ', '_', $instance->$column));
+            } else {
                 throw new \InvalidArgumentException("Column '$column' is not valid for this model.");
             }
 
-            $key = strtolower(str_replace(' ', '_', $instance->{$column}));
-            $type = get_class($instance);
-            self::$stash[$type][$key] = $instance;
+            self::$stash[static::class][$key] = $instance;
         }
 
-        self::$currentData = null; // Reset after stashing
+        self::$currentData = null;
     }
 
     /**
-     * Retrieve stashed objects of a specific type.
+     * Retrieve stashed objects for the calling class.
      *
-     * @param string $type The class name of the stashed objects.
      * @return array|null
      */
-    public static function getStashFrom(string $type): ?array
+    public static function getStash(): ?array
     {
-        return self::$stash[$type] ?? null;
+        return self::$stash[static::class] ?? null;
+    }
+
+    /**
+     * Retrieve a specific item from the stash.
+     *
+     * @param string $key
+     * @return mixed|null
+     */
+    public static function getStashItem(string $key)
+    {
+        return self::$stash[static::class][$key] ?? null;
     }
 }

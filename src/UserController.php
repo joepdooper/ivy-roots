@@ -8,7 +8,7 @@ use Delight\Auth\UnknownIdException;
 
 class UserController extends Controller
 {
-    protected User $user;
+    private User $user;
 
     public function post(): void
     {

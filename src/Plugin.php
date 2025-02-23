@@ -17,40 +17,92 @@ class Plugin extends Model
         'parent_id'
     ];
 
-    public string $name;
+    protected string $name;
     protected string $url;
-    public string $version;
-    public ?string $description;
-    public ?string $type;
-    public ?int $active;
-    public ?int $settings;
-    public ?int $parent_id;
+    protected string $version;
+    protected ?string $description;
+    protected ?string $type;
+    protected ?int $active;
+    protected ?int $settings;
+    protected ?int $parent_id;
+    protected ?bool $collection = false;
+    protected PluginInfo $info;
 
-    public ?bool $collection = false;
-    private PluginInfo $info;
-
-    public function setUrl(string $url): Plugin
+    /**
+     * @return string
+     */
+    public function getName(): string
     {
-        $this->url = $url;
-        return $this;
+        return $this->name;
     }
 
-    public function getUrl(): ?string
+    /**
+     * @return string
+     */
+    public function getUrl(): string
     {
         return $this->url;
     }
 
-    public function setParentId(int $id): Plugin
+    /**
+     * @return string
+     */
+    public function getVersion(): string
     {
-        $this->parent_id = $id;
-        return $this;
+        return $this->version;
     }
 
-    public function getParentId(): int
+    /**
+     * @return string|null
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getActive(): ?int
+    {
+        return $this->active;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getSettings(): ?int
+    {
+        return $this->settings;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getParentId(): ?int
     {
         return $this->parent_id;
     }
 
+    /**
+     * @return bool|null
+     */
+    public function getCollection(): ?bool
+    {
+        return $this->collection;
+    }
+
+    /**
+     * @return Plugin
+     */
     public function setInfo(): Plugin
     {
         $this->info = new PluginInfo($this->url);
@@ -63,6 +115,9 @@ class Plugin extends Model
         return $this;
     }
 
+    /**
+     * @return PluginInfo
+     */
     public function getInfo(): PluginInfo
     {
         return $this->info;

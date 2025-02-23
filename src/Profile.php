@@ -22,13 +22,13 @@ class Profile extends Model
         'user_id',
         'username',
         'email',
-        'users_image'
+        'user_image'
     ];
 
-    public int $user_id;
-    public string $username;
-    public string $email;
-    public ?string $users_image;
+    protected int $user_id;
+    protected string $username;
+    protected string $email;
+    protected ?string $user_image;
 
     private static ?Profile $currentProfile = null;
 
@@ -36,7 +36,7 @@ class Profile extends Model
     {
         parent::__construct();
         $this->query = "
-    SELECT `profiles`.`id`, `profiles`.`user_id`, `profiles`.`users_image`, `users`.`email`, `users`.`username`, `users`.`status`, `users`.`roles_mask`, `users`.`last_login` FROM `profiles`
+    SELECT `profiles`.`id`, `profiles`.`user_id`, `profiles`.`user_image`, `users`.`email`, `users`.`username`, `users`.`status`, `users`.`roles_mask`, `users`.`last_login` FROM `profiles`
     INNER JOIN `users` ON `users`.`id` = `profiles`.`user_id`
     ";
     }
@@ -49,17 +49,54 @@ class Profile extends Model
         return self::$currentProfile;
     }
 
-    public static function getUserImage(): ?string
+    /**
+     * @return int
+     */
+    public function getUserId(): int
     {
-        return self::getCurrentUserProfile()?->users_image;
+        return $this->user_id;
     }
 
-    public static function getUserName(): ?string
+    /**
+     * @return string|null
+     */
+    public function getUserImage(): ?string
+    {
+        return $this->user_image;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUsername(): string
+    {
+        return $this->username;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    public static function getCurrentUserId(): ?string
+    {
+        return self::getCurrentUserProfile()?->user_id;
+    }
+
+    public static function getCurrentUserImage(): ?string
+    {
+        return self::getCurrentUserProfile()?->user_image;
+    }
+
+    public static function getCurrentUsername(): ?string
     {
         return self::getCurrentUserProfile()?->username;
     }
 
-    public static function getEmail(): ?string
+    public static function getCurrentEmail(): ?string
     {
         return self::getCurrentUserProfile()?->email;
     }

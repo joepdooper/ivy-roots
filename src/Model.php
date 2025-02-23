@@ -22,6 +22,26 @@ abstract class Model
         $this->query = "SELECT * FROM `$this->table`";
     }
 
+    public function __get($property)
+    {
+        $getter = 'get' . ucfirst($property);
+        if (method_exists($this, $getter)) {
+            return $this->$getter();
+        }
+
+        throw new \Exception("Property '$property' does not exist.");
+    }
+
+    public function __set($property, $value)
+    {
+        $setter = 'set' . ucfirst($property);
+        if (method_exists($this, $setter)) {
+            $this->$setter($value);
+        } else {
+            throw new \Exception("Property '$property' is not writable.");
+        }
+    }
+
     public function getPath(): string
     {
         return $this->path;

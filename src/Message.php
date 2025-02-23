@@ -2,11 +2,9 @@
 
 namespace Ivy;
 
-use stdClass;
-
 class Message
 {
-    private static string $template;
+    protected static string $template;
 
     function __construct()
     {
@@ -44,10 +42,9 @@ class Message
         }
         if (!empty($_SESSION["flash_messages"]) && !empty(self::$template)) {
             foreach ($_SESSION["flash_messages"] as $key => $value) {
-                $message = new stdClass;
-                $message->id = $key;
-                $message->text = $value;
-                Template::render(self::$template, ['message' => $message]);
+                $message['id'] = $key;
+                $messags['text'] = $value;
+                Template::render(self::$template, ['message' => (object) $message]);
             }
         }
         self::remove();

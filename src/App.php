@@ -6,8 +6,6 @@ use Bramus\Router\Router;
 
 class App
 {
-    use Stash;
-
     private static \Bramus\Router\Router $router;
 
     private string $templateRoutesAssets = 'template.php';
@@ -28,8 +26,8 @@ class App
 
     private function setLanguage(): void
     {
-        self::stash(Setting::class)->keyByColumn('name');
-        Language::setDefaultLang(substr(self::getStashFrom(Setting::class)['language']->value, 0, 2));
+        Setting::stash()->keyByColumn('name');
+        Language::setDefaultLang(substr(Setting::getStashItem('language')->getValue(), 0, 2));
     }
 
     private function loadPluginRoutes(): void

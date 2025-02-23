@@ -14,21 +14,21 @@ class Template extends Model
         'value',
     ];
 
-    public static array $css = array();
-    public static array $js = array();
-    public static array $esm = array();
+    protected static array $css = array();
+    protected static array $js = array();
+    protected static array $esm = array();
 
-    public static bool|string $file;
+    private static bool|string $file;
 
     public static string $identifier;
     public static string $route;
     public static string $url = "";
 
-    private static ?Engine $latte = null;
-    private static bool|string $name = '';
-    private static array $params = [];
-    private static ?string $block;
-    private static ?Hooks $hooks = null;
+    protected static ?Engine $latte = null;
+    protected static bool|string $name = '';
+    protected static array $params = [];
+    protected static ?string $block;
+    protected static ?Hooks $hooks = null;
 
     // -- file
 
@@ -121,6 +121,30 @@ class Template extends Model
             self::$hooks = new Hooks();
         }
         return self::$hooks;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getCss(): array
+    {
+        return self::$css;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getJs(): array
+    {
+        return self::$js;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getEsm(): array
+    {
+        return self::$esm;
     }
 
 }

@@ -6,7 +6,7 @@ use GUMP;
 
 class SettingController extends Controller
 {
-    protected Setting $setting;
+    private Setting $setting;
 
     public function post(): void
     {

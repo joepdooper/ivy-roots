@@ -7,15 +7,15 @@ use HTMLPurifier_Config;
 
 class PluginInfo
 {
-    public ?string $name;
-    public ?string $version;
-    public ?string $description;
-    public ?string $url;
-    public ?string $type;
-    public ?int $settings;
-    public ?bool $collection;
-    public ?array $database;
-    public ?array $dependencies;
+    private ?string $name;
+    private ?string $version;
+    private ?string $description;
+    private ?string $url;
+    private ?string $type;
+    private ?int $settings;
+    private ?bool $collection;
+    private ?array $database;
+    private ?array $dependencies;
 
     public function __construct(string $url)
     {
@@ -40,5 +40,37 @@ class PluginInfo
                 $this->collection = $data['collection'] ?? null;
             }
         }
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getCollection(): ?bool
+    {
+        return $this->collection;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getDatabase(): ?array
+    {
+        return $this->database;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getDependencies(): ?array
+    {
+        return $this->dependencies;
     }
 }

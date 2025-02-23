@@ -43,15 +43,15 @@ class User extends Model
 
     private static Auth $auth;
 
-    public string $email;
-    public string $username;
-    public string $users_image;
-    public int $status;
-    public int $verified;
-    public int $resettable;
-    public int $roles_mask;
-    public int $registered;
-    public int $last_login;
+    protected string $email;
+    protected string $username;
+    protected string $users_image;
+    protected int $status;
+    protected int $verified;
+    protected int $resettable;
+    protected int $roles_mask;
+    protected int $registered;
+    protected int $last_login;
 
     // Register
 

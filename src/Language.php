@@ -17,7 +17,7 @@ class Language
         self::$defaultLang = $lang;
     }
 
-    public static function get($key)
+    public static function translate($key)
     {
         $keys = explode('.', $key);
         $fileKey = array_shift($keys);

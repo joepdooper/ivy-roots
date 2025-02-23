@@ -4,8 +4,8 @@ namespace Ivy;
 
 class PluginController extends Controller
 {
-    protected Plugin $plugin;
-    protected PluginService $pluginService;
+    private Plugin $plugin;
+    private PluginService $pluginService;
 
     public function post(): void
     {

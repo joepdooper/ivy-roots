@@ -6,23 +6,25 @@ use Exception;
 
 class PluginService
 {
+    private PluginInfo $pluginInfo;
+
     public function install(Plugin $plugin): void
     {
         try {
-            $plugin->setInfo();
-            if (!empty($missing = PluginDependencyChecker::getMissingDependencies($plugin->getInfo()->dependencies))) {
+            $this->pluginInfo = $plugin->setInfo()->getInfo();
+            if (!empty($missing = PluginDependencyChecker::getMissingDependencies($this->pluginInfo->getDependencies()))) {
                 $count = count($missing);
                 $message = "This plugin has " . ($count > 1 ? "dependencies" : "dependency") . ". Please install the " . ($count > 1 ? "plugins" : "plugin") . " " . implode(", ", $missing);
                 Message::add($message, _BASE_PATH . 'admin/plugin');
             }
-            if (isset($plugin->getInfo()->database['install']) && !empty($plugin->getInfo()->database['install']) && !empty($plugin->getInfo()->url)) {
-                if (file_exists(_PUBLIC_PATH . _PLUGIN_PATH . $plugin->getInfo()->url . DIRECTORY_SEPARATOR . $plugin->getInfo()->database['install'])) {
-                    require_once _PUBLIC_PATH . _PLUGIN_PATH . $plugin->getInfo()->url . DIRECTORY_SEPARATOR . $plugin->getInfo()->database['install'];
+            if (isset($this->pluginInfo->getDatabase()['install']) && !empty($this->pluginInfo->getDatabase()['install']) && !empty($this->pluginInfo->getUrl())) {
+                if (file_exists(_PUBLIC_PATH . _PLUGIN_PATH . $this->pluginInfo->getUrl() . DIRECTORY_SEPARATOR . $this->pluginInfo->getDatabase()['install'])) {
+                    require_once _PUBLIC_PATH . _PLUGIN_PATH . $this->pluginInfo->getUrl() . DIRECTORY_SEPARATOR . $plugin->getInfo()->getDatabase()['install'];
                 }
             }
             $plugin->setId($plugin->insert());
 
-            if (!empty($plugin->getInfo()->collection)) {
+            if (!empty($this->pluginInfo->getCollection())) {
                 (new PluginCollectionHandler($plugin))->install();
             }
         } catch (Exception $e) {
@@ -33,13 +35,13 @@ class PluginService
     public function uninstall(Plugin $plugin): void
     {
         try {
-            $plugin->setInfo();
-            if (!empty($plugin->getInfo()->collection)) {
+            $this->pluginInfo = $plugin->setInfo()->getInfo();
+            if (!empty($this->pluginInfo->getCollection())) {
                 (new PluginCollectionHandler($plugin))->uninstall();
             }
-            if (isset($plugin->getInfo()->database['uninstall']) && !empty($plugin->getInfo()->database['uninstall'])) {
-                if (file_exists(_PUBLIC_PATH . _PLUGIN_PATH . $plugin->getInfo()->url . DIRECTORY_SEPARATOR . $plugin->getInfo()->database['uninstall'])) {
-                    require_once _PUBLIC_PATH . _PLUGIN_PATH . $plugin->getInfo()->url . DIRECTORY_SEPARATOR . $plugin->getInfo()->database['uninstall'];
+            if (isset($this->pluginInfo->getDatabase()['uninstall']) && !empty($this->pluginInfo->getDatabase()['uninstall'])) {
+                if (file_exists(_PUBLIC_PATH . _PLUGIN_PATH . $this->pluginInfo->getUrl() . DIRECTORY_SEPARATOR . $this->pluginInfo->getDatabase()['uninstall'])) {
+                    require_once _PUBLIC_PATH . _PLUGIN_PATH . $this->pluginInfo->getUrl() . DIRECTORY_SEPARATOR . $this->pluginInfo->getDatabase()['uninstall'];
                 }
             }
             $plugin->delete();
