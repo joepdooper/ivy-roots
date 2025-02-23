@@ -33,6 +33,6 @@ class SettingController extends Controller
             }
         }
 
-        Message::add('Update successfully', _BASE_PATH . 'admin/setting');
+        Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/setting');
     }
 }
