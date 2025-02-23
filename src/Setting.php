@@ -7,7 +7,7 @@ class Setting extends Model
     use Stash;
 
     protected string $table = 'setting';
-    protected string $path = _BASE_PATH . 'admin/setting';
+    protected string $path = 'admin/setting';
     protected array $columns = [
         'name',
         'bool',

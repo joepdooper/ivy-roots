@@ -44,7 +44,7 @@ abstract class Model
 
     public function getPath(): string
     {
-        return $this->path;
+        return Path::get('BASE_PATH') . $this->path;
     }
 
     public function getColumns(): array

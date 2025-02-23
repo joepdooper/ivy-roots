@@ -41,7 +41,7 @@ class Language
 
     protected static function loadFile($fileKey): void
     {
-        $langPath = _ROOT . _SUBFOLDER . 'language/' . self::$defaultLang . '/' . $fileKey . '.php';
+        $langPath = Path::get('ROOT') . Path::get('SUBFOLDER') . 'language/' . self::$defaultLang . '/' . $fileKey . '.php';
 
         if (file_exists($langPath)) {
             self::$translations[$fileKey] = include $langPath;

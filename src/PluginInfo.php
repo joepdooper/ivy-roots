@@ -24,7 +24,7 @@ class PluginInfo
         $config = HTMLPurifier_Config::createDefault();
         $purifier = new HTMLPurifier($config);
 
-        $dir = _PUBLIC_PATH . _PLUGIN_PATH . $purifier->purify($url) . DIRECTORY_SEPARATOR;
+        $dir = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $purifier->purify($url) . DIRECTORY_SEPARATOR;
         $info_path = realpath($dir . 'info.json');
 
         if ($info_path) {

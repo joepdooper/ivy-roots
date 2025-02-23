@@ -34,21 +34,21 @@ abstract class Controller
     protected function requireLogin(): void
     {
         if (!User::isLoggedIn()) {
-            Message::add('You must be logged in.', _BASE_PATH . 'login');
+            Message::add('You must be logged in.', Path::get('BASE_PATH') . 'login');
         }
     }
 
     protected function requirePost(): void
     {
         if (!$this->request->isMethod('POST')) {
-            Message::add('Invalid request method.', _BASE_PATH);
+            Message::add('Invalid request method.', Path::get('BASE_PATH'));
         }
     }
 
     protected function requireGet(): void
     {
         if (!$this->request->isMethod('GET')) {
-            Message::add('Invalid request method.', _BASE_PATH);
+            Message::add('Invalid request method.', Path::get('BASE_PATH'));
         }
     }
 }

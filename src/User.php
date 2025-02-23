@@ -28,7 +28,7 @@ class User extends Model
 {
 
     protected string $table = 'users';
-    protected string $path = _BASE_PATH . 'admin/user';
+    protected string $path = 'admin/user';
     protected array $columns = [
         'email',
         'username',
@@ -70,7 +70,7 @@ class User extends Model
 
             try {
                 $userId = self::$auth->register($purifier->purify($_POST['email']), $purifier->purify($_POST['password']), $purifier->purify($_POST['username']), function ($selector, $token) use ($purifier) {
-                    $url = _BASE_PATH . 'admin/login/' . urlencode($selector) . '/' . urlencode($token);
+                    $url = Path::get('BASE_PATH') . 'admin/login/' . urlencode($selector) . '/' . urlencode($token);
                     // send email
                     $mail = new Mail();
                     $mail->Address = $purifier->purify($_POST['email']);
@@ -82,22 +82,22 @@ class User extends Model
                 });
                 DB::getConnection()->insert('profiles', ['user_id' => $userId]);
                 // Set role to registered user
-                if (Setting::$stash['registration_role']->bool && Setting::$stash['registration_role']->value) {
-                    $role = strtoupper(Setting::$stash['registration_role']->value);
+                if (Setting::getStash()['registration_role']->bool && Setting::getStash()['registration_role']->value) {
+                    $role = strtoupper(Setting::getStash()['registration_role']->value);
                     $roleConstant = "\Delight\Auth\Role::$role";
                     self::$auth->admin()->addRoleForUserById($userId, constant($roleConstant));
                 }
             } catch (InvalidEmailException) {
-                Message::add('Invalid email address', _BASE_PATH . 'admin/register');
+                Message::add('Invalid email address', Path::get('BASE_PATH') . 'admin/register');
             } catch (InvalidPasswordException) {
-                Message::add('Invalid password', _BASE_PATH . 'admin/register');
+                Message::add('Invalid password', Path::get('BASE_PATH') . 'admin/register');
             } catch (UserAlreadyExistsException) {
-                Message::add('User already exists', _BASE_PATH . 'admin/register');
+                Message::add('User already exists', Path::get('BASE_PATH') . 'admin/register');
             } catch (TooManyRequestsException) {
-                Message::add('Too many requests', _BASE_PATH . 'admin/register');
+                Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/register');
             }
 
-            Message::add('An email has been sent to ' . $_POST['email'] . ' with a link to activate your account', _BASE_PATH . 'admin/login');
+            Message::add('An email has been sent to ' . $_POST['email'] . ' with a link to activate your account', Path::get('BASE_PATH') . 'admin/login');
 
         }
 
@@ -119,15 +119,15 @@ class User extends Model
 
             try {
                 self::$auth->login($purifier->purify($_POST['email']), $purifier->purify($_POST['password']));
-                Message::add('Welcome ' . self::$auth->getUsername(), _BASE_PATH . 'admin/profile');
+                Message::add('Welcome ' . self::$auth->getUsername(), Path::get('BASE_PATH') . 'admin/profile');
             } catch (InvalidEmailException) {
-                Message::add('Wrong email address', _BASE_PATH . 'admin/login');
+                Message::add('Wrong email address', Path::get('BASE_PATH') . 'admin/login');
             } catch (InvalidPasswordException) {
-                Message::add('Wrong password', _BASE_PATH . 'admin/login');
+                Message::add('Wrong password', Path::get('BASE_PATH') . 'admin/login');
             } catch (EmailNotVerifiedException) {
-                Message::add('Email not verified', _BASE_PATH . 'admin/login');
+                Message::add('Email not verified', Path::get('BASE_PATH') . 'admin/login');
             } catch (TooManyRequestsException) {
-                Message::add('Too many requests', _BASE_PATH . 'admin/login');
+                Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/login');
             }
 
         }
@@ -151,7 +151,7 @@ class User extends Model
 
             Template::hooks()->do_action('end_logout_action');
 
-            Message::add('Logout successfully', _BASE_PATH);
+            Message::add('Logout successfully', Path::get('BASE_PATH'));
 
         }
 
@@ -174,7 +174,7 @@ class User extends Model
 
                 try {
                     self::$auth->forgotPassword($purifier->purify($_POST['email']), function ($selector, $token) use ($purifier) {
-                        $url = _BASE_PATH . 'admin/reset/' . urlencode($selector) . '/' . urlencode($token);
+                        $url = Path::get('BASE_PATH') . 'admin/reset/' . urlencode($selector) . '/' . urlencode($token);
                         // send email
                         $mail = new Mail();
                         $mail->Address = $purifier->purify($_POST['email']);
@@ -185,33 +185,33 @@ class User extends Model
                         $mail->send();
                     });
                 } catch (InvalidEmailException) {
-                    Message::add('Invalid email address', _BASE_PATH . 'admin/reset');
+                    Message::add('Invalid email address', Path::get('BASE_PATH') . 'admin/reset');
                 } catch (EmailNotVerifiedException) {
-                    Message::add('Email not verified', _BASE_PATH . 'admin/reset');
+                    Message::add('Email not verified', Path::get('BASE_PATH') . 'admin/reset');
                 } catch (ResetDisabledException) {
-                    Message::add('Password reset is disabled', _BASE_PATH . 'admin/reset');
+                    Message::add('Password reset is disabled', Path::get('BASE_PATH') . 'admin/reset');
                 } catch (TooManyRequestsException) {
-                    Message::add('Too many requests', _BASE_PATH . 'admin/reset');
+                    Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/reset');
                 }
 
-                Message::add('An email has been sent to ' . $_POST['email'] . ' with a link to reset your password', _BASE_PATH . 'admin/reset');
+                Message::add('An email has been sent to ' . $_POST['email'] . ' with a link to reset your password', Path::get('BASE_PATH') . 'admin/reset');
 
             }
 
             if (isset($_POST['password'])) {
                 try {
                     self::$auth->resetPassword($_POST['selector'], $_POST['token'], $_POST['password']);
-                    Message::add('Password has been reset', _BASE_PATH . 'admin/login');
+                    Message::add('Password has been reset', Path::get('BASE_PATH') . 'admin/login');
                 } catch (InvalidSelectorTokenPairException) {
-                    Message::add('Invalid token', _BASE_PATH . 'admin/reset');
+                    Message::add('Invalid token', Path::get('BASE_PATH') . 'admin/reset');
                 } catch (TokenExpiredException) {
-                    Message::add('Token expired', _BASE_PATH . 'admin/reset');
+                    Message::add('Token expired', Path::get('BASE_PATH') . 'admin/reset');
                 } catch (ResetDisabledException) {
-                    Message::add('Password reset is disabled', _BASE_PATH . 'admin/reset');
+                    Message::add('Password reset is disabled', Path::get('BASE_PATH') . 'admin/reset');
                 } catch (InvalidPasswordException) {
-                    Message::add('Invalid password', _BASE_PATH . 'admin/reset');
+                    Message::add('Invalid password', Path::get('BASE_PATH') . 'admin/reset');
                 } catch (TooManyRequestsException) {
-                    Message::add('Too many requests', _BASE_PATH . 'admin/reset');
+                    Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/reset');
                 }
             }
 

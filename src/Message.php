@@ -43,7 +43,7 @@ class Message
         if (!empty($_SESSION["flash_messages"]) && !empty(self::$template)) {
             foreach ($_SESSION["flash_messages"] as $key => $value) {
                 $message['id'] = $key;
-                $messags['text'] = $value;
+                $message['text'] = $value;
                 Template::render(self::$template, ['message' => (object) $message]);
             }
         }

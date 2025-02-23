@@ -17,7 +17,7 @@ class Profile extends Model
 {
 
     protected string $table = 'profiles';
-    protected string $path = _BASE_PATH . 'admin/profile';
+    protected string $path = 'admin/profile';
     protected array $columns = [
         'user_id',
         'username',

@@ -22,8 +22,8 @@ class App
     private function setTemplate(): void
     {
         $sql = "SELECT `value` FROM `template` WHERE `type` = :type";
-        define('_TEMPLATE_BASE', _TEMPLATES_PATH . DB::getConnection()->selectValue($sql, ['base']) . DIRECTORY_SEPARATOR);
-        define('_TEMPLATE_SUB', _TEMPLATES_PATH . DB::getConnection()->selectValue($sql, ['sub']) . DIRECTORY_SEPARATOR);
+        define('_TEMPLATE_BASE', Path::get('TEMPLATES_PATH') . DB::getConnection()->selectValue($sql, ['base']) . DIRECTORY_SEPARATOR);
+        define('_TEMPLATE_SUB', Path::get('TEMPLATES_PATH') . DB::getConnection()->selectValue($sql, ['sub']) . DIRECTORY_SEPARATOR);
     }
 
     private function setLanguage(): void
@@ -38,7 +38,7 @@ class App
         if (!empty($plugins)) {
             $_SESSION['plugin_actives'] = array_map(fn($plugin) => $plugin->getName(), $plugins);
             foreach ($plugins as $plugin) {
-                $pluginPath = _PUBLIC_PATH . _PLUGIN_PATH . $plugin->getUrl() . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets;
+                $pluginPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $plugin->getUrl() . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets;
                 if (file_exists($pluginPath)) {
                     include $pluginPath;
                 }
@@ -54,12 +54,12 @@ class App
     private function loadRoutes(): void
     {
         self::$router = new \Bramus\Router\Router();
-        self::$router->setBasePath(_SUBFOLDER);
-        include _PUBLIC_PATH . $this->coreMiddlewareRoutesAssets;
+        self::$router->setBasePath(Path::get('SUBFOLDER'));
+        include Path::get('PUBLIC_PATH') . $this->coreMiddlewareRoutesAssets;
         $this->loadTemplateRoutes();
         $this->loadPluginRoutes();
-        include _PUBLIC_PATH . $this->coreAdminRoutesAssets;
-        include _PUBLIC_PATH . $this->coreErrorRoutesAssets;
+        include Path::get('PUBLIC_PATH') . $this->coreAdminRoutesAssets;
+        include Path::get('PUBLIC_PATH') . $this->coreErrorRoutesAssets;
         self::$router->run();
     }
 
@@ -73,6 +73,7 @@ class App
 
     public function run(): void
     {
+        (\Dotenv\Dotenv::createImmutable(Path::get('PUBLIC_PATH')))->load();
         $this->bootstrap();
         $this->loadRoutes();
     }

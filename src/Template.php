@@ -8,7 +8,7 @@ use Latte\Engine;
 class Template extends Model
 {
     protected string $table = 'template';
-    protected string $path = _BASE_PATH . 'admin/template';
+    protected string $path = 'admin/template';
     protected array $columns = [
         'type',
         'value',
@@ -53,9 +53,9 @@ class Template extends Model
         if (self::$latte === null) {
             self::$latte = new Engine();
             self::$latte->addFunction('icon', function ($icon) {
-                return file_get_contents(_PUBLIC_PATH . "/media/icon/" . $icon);
+                return file_get_contents(Path::get('PUBLIC_PATH') . "/media/icon/" . $icon);
             });
-            self::$latte->setTempDirectory(_PUBLIC_PATH . 'cache/templates');
+            self::$latte->setTempDirectory(Path::get('PUBLIC_PATH') . 'cache/templates');
         }
         self::$latte->render($name, $params, $block);
     }

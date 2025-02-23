@@ -5,7 +5,7 @@ namespace Ivy;
 class Plugin extends Model
 {
     protected string $table = 'plugin';
-    protected string $path = _BASE_PATH . 'admin/plugin';
+    protected string $path = 'admin/plugin';
     protected array $columns = [
         'name',
         'url',
