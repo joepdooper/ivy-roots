@@ -44,41 +44,9 @@ class Profile extends Model
     private static function getCurrentUserProfile(): ?self
     {
         if (self::$currentProfile === null) {
-            self::$currentProfile = (new self())->where('user_id', User::getUserId())->fetchOne();
+            self::$currentProfile = (new self())->where('user_id', User::getAuth()->getUserId())->fetchOne();
         }
         return self::$currentProfile;
-    }
-
-    /**
-     * @return int
-     */
-    public function getUserId(): int
-    {
-        return $this->user_id;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getUserImage(): ?string
-    {
-        return $this->user_image;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUsername(): string
-    {
-        return $this->username;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEmail(): string
-    {
-        return $this->email;
     }
 
     public static function getCurrentUserId(): ?string
@@ -89,6 +57,11 @@ class Profile extends Model
     public static function getCurrentUserImage(): ?string
     {
         return self::getCurrentUserProfile()?->user_image;
+    }
+
+    public static function hasCurrentUserImage(): bool
+    {
+        return !empty(self::getCurrentUserProfile()?->user_image);
     }
 
     public static function getCurrentUsername(): ?string

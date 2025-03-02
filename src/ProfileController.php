@@ -10,81 +10,126 @@ use Delight\Auth\Role;
 use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
+use GUMP;
 
 class ProfileController extends Controller
 {
     private Profile $profile;
+    private File $file;
 
     public function post(): void
     {
         $this->requirePost();
         $this->requireLogin();
 
-            $config = HTMLPurifier_Config::createDefault();
-            $purifier = new HTMLPurifier($config);
+        $data = [
+            'user_id' => $this->request->input('user_id'),
+            'username' => $this->request->input('username'),
+            'email' => $this->request->input('email'),
+            'avatar' => $this->request->input('avatar') ?? $this->request->file('avatar')
+        ];
 
-            try {
-                $username = $purifier->purify($this->request->input('users')['username']);
-                $email = $purifier->purify($this->request->input('users')['email']);
-                if (!empty($username) && !empty($email)) {
+        if ((int) $this->request->input('user_id') !== (int) $_SESSION['auth_user_id']) {
+            Message::add('Invalid user ID');
+            return;
+        }
 
-                    if (User::getUsername() != $username) {
-                        (new User)->where('id', User::getUserId())->update([
-                            'username' => $username
-                        ]);
-                    }
+        GUMP::add_validator("image_or_delete", function($field, $input, $param = null) {
+            if (!isset($input[$field])) {
+                return false;
+            }
+            if ($input[$field] === "delete") {
+                return true;
+            }
+            if (isset($_FILES[$field]) && is_uploaded_file($_FILES[$field]['tmp_name'])) {
+                $allowedExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
+                $fileExtension = pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION);
 
-                    if (User::getEmail() != $email) {
-                        try {
-                            User::changeEmail($purifier->purify($this->request->input('users')['email']), function ($selector, $token) use ($purifier) {
-                                $url = _BASE_PATH . 'admin/profile/' . urlencode($selector) . '/' . urlencode($token);
-                                // send email
-                                $mail = new Mail();
-                                $mail->addAddress($purifier->purify($this->request->input('users')['email']), $purifier->purify($this->request->input('users')['username']));
-                                $mail->setSubject('Reset email address');
-                                $mail->setBody('Reset your email address with this link: ' . $url);
-                                $mail->setAltBody('Reset your email address with this link: ' . $url);
-                                $mail->send();
-                            });
-                            Message::add('An email has been sent to ' . $email . ' with a link to confirm the email address');
-                        } catch (InvalidEmailException) {
-                            Message::add('Invalid email address');
-                        } catch (UserAlreadyExistsException) {
-                            Message::add('Email address already exists');
-                        } catch (EmailNotVerifiedException) {
-                            Message::add('Account not verified');
-                        } catch (NotLoggedInException) {
-                            Message::add('Not logged in');
-                        } catch (TooManyRequestsException) {
-                            Message::add('Too many requests');
-                        }
-                    }
+                return in_array(strtolower($fileExtension), $allowedExtensions, true);
+            }
+            return false;
+        }, "The {field} must be an image.");
 
-                    if ($this->request->input('users_image') !== null && $this->request->input('users_image') === 'delete') {
-                        $profile = (new Profile)->where('user_id', User::getUserId())->fetchOne();
-                        $profile->update(['users_image' => '']);
-                        (new Image)->deleteSet($profile->users_image);
-                    }
+        $validated = GUMP::is_valid($data, [
+            'username' => 'required|alpha_numeric_dash',
+            'email' => 'required|valid_email',
+            'avatar' => 'image_or_delete'
+        ]);
 
-                    if ($request->input('users_image')['tmp_name']) {
-                        (new Profile)->where('user_id', User::getUserId())->update([
-                            'users_image' => (new Image)->upload($this->request->input('users_image'))
-                        ]);
-                    }
+        if ($validated === true) {
 
-                    $message = 'Update successfully';
-                } else {
-                    if (empty($email)) {
-                        $message = 'Please enter email';
-                    }
-                    if (empty($username)) {
-                        $message = 'Please enter name';
-                    }
+            $this->profile = (new Profile)->where('user_id', $this->request->input('user_id'))->fetchOne();
+
+            if(User::getAuth()->getUsername() !== $data['username']) {
+                (new User)->where('id', $this->request->input('user_id'))->populate(
+                    [
+                        'username' => $data['username']
+                    ]
+                )->update();
+            }
+            if (User::getAuth()->getEmail() !== $data['email']) {
+                try {
+                    User::getAuth()->changeEmail($data['email'], function ($selector, $token) {
+                        $url = _BASE_PATH . 'admin/profile/' . urlencode($selector) . '/' . urlencode($token);
+                        // send email
+                        $mail = new Mail();
+                        $mail->addAddress($data['email'], $data['username']);
+                        $mail->setSubject('Reset email address');
+                        $mail->setBody('Reset your email address with this link: ' . $url);
+                        $mail->setAltBody('Reset your email address with this link: ' . $url);
+                        $mail->send();
+                    });
+                    Message::add('An email has been sent to ' . $email . ' with a link to confirm the email address');
+                } catch (InvalidEmailException) {
+                    Message::add('Invalid email address');
+                } catch (UserAlreadyExistsException) {
+                    Message::add('Email address already exists');
+                } catch (EmailNotVerifiedException) {
+                    Message::add('Account not verified');
+                } catch (NotLoggedInException) {
+                    Message::add('Not logged in');
+                } catch (TooManyRequestsException) {
+                    Message::add('Too many requests');
                 }
-            } catch (Exception) {
-                $message = 'Something went wrong';
             }
 
-            Message::add($message, $this->path);
+            if($this->request->input('avatar') === 'delete') {
+                $this->profile->populate(['user_image' => ''])->update();
+            }
+
+            if (!empty($this->request->file('avatar')['name'])) {
+                $this->profile->populate(['user_image' => $this->saveAvatar()])->update();
+            }
+
+        } else {
+            foreach ($validated as $string) {
+                Message::add($string);
+            }
+        }
+
+        Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/profile');
+    }
+
+    private function saveAvatar(): string
+    {
+        $this->file = new File;
+        $this->file->setName(bin2hex(random_bytes(16)));
+        $this->file->setAllowed(array('image/*'));
+        $this->file->setDirectory(Path::get('PUBLIC_PATH') . Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
+        $this->file->setWidth('120');
+        $avatar = $this->file->upload($this->request->file('avatar'));
+        $this->file->setImageConvert( 'webp');
+        $this->file->upload($this->request->file('avatar'));
+
+        return $avatar;
+    }
+
+    private function deleteAvatar(): null
+    {
+        $this->file = new File;
+        $this->file->setDirectory(Path::get('PUBLIC_PATH') . Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
+        $this->file->delete($this->profile->getUserImage());
+
+        return null;
     }
 }

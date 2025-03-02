@@ -14,6 +14,9 @@ class Template extends Model
         'value',
     ];
 
+    protected string $type;
+    protected string $value;
+
     protected static array $css = array();
     protected static array $js = array();
     protected static array $esm = array();
@@ -54,6 +57,21 @@ class Template extends Model
             self::$latte = new Engine();
             self::$latte->addFunction('icon', function ($icon) {
                 return file_get_contents(Path::get('PUBLIC_PATH') . "/media/icon/" . $icon);
+            });
+            self::$latte->addFunction('text', function ($language_key) {
+                return Language::translate($language_key) ?? $language_key;
+            });
+            self::$latte->addFunction('path', function ($path_key) {
+                return Path::get($path_key);
+            });
+            self::$latte->addFunction('isLoggedIn', function () {
+                return User::getAuth()->isLoggedIn();
+            });
+            self::$latte->addFunction('setting', function ($settings_key) {
+                return isset(Setting::getStash()[$settings_key]) ? Setting::getStash()[$settings_key]?->value : '';
+            });
+            self::$latte->addFunction('csrf', function () {
+                return new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . Request::generateCsrfToken() . '">');
             });
             self::$latte->setTempDirectory(Path::get('PUBLIC_PATH') . 'cache/templates');
         }

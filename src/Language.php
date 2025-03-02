@@ -26,7 +26,7 @@ class Language
             self::loadFile($fileKey);
         }
 
-        $translation = self::$translations[$fileKey] ?? null;
+        $translation = self::$translations[$fileKey] ?? $key;
 
         foreach ($keys as $k) {
             if (is_array($translation) && isset($translation[$k])) {
@@ -39,7 +39,7 @@ class Language
         return $translation;
     }
 
-    protected static function loadFile($fileKey): void
+    private static function loadFile($fileKey): void
     {
         $langPath = Path::get('ROOT') . Path::get('SUBFOLDER') . 'language/' . self::$defaultLang . '/' . $fileKey . '.php';
 

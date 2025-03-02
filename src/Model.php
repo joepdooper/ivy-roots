@@ -4,8 +4,6 @@ namespace Ivy;
 
 use Delight\Db\Throwable\EmptyWhereClauseError;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
-use HTMLPurifier_Config;
-use HTMLPurifier;
 
 abstract class Model
 {
@@ -14,7 +12,6 @@ abstract class Model
     protected array $columns = [];
     protected string $query = '';
     protected array $bindings = [];
-    protected ?HTMLPurifier $purifier = null;
     protected int $id;
 
     public function __construct()
@@ -29,6 +26,10 @@ abstract class Model
             return $this->$getter();
         }
 
+        if (in_array($property, $this->columns) && property_exists($this, $property)) {
+            return $this->$property;
+        }
+
         throw new \Exception("Property '$property' does not exist.");
     }
 
@@ -37,9 +38,15 @@ abstract class Model
         $setter = 'set' . ucfirst($property);
         if (method_exists($this, $setter)) {
             $this->$setter($value);
-        } else {
-            throw new \Exception("Property '$property' is not writable.");
+            return;
         }
+
+        if (in_array($property, $this->columns)) {
+            $this->$property = $value;
+            return;
+        }
+
+        throw new \Exception("Property '$property' is not writable.");
     }
 
     public function getPath(): string
@@ -66,6 +73,11 @@ abstract class Model
     public function hasId(): bool
     {
         return isset($this->id) && $this->id > 0;
+    }
+
+    protected function resetQuery(): void {
+        $this->query = "SELECT * FROM `$this->table`";
+        $this->bindings = [];
     }
 
     public function where(string $column, $value = null, string $operator = '='): static
@@ -135,6 +147,7 @@ abstract class Model
         $rows = !empty($this->bindings)
             ? DB::getConnection()->select($this->query, $this->bindings)
             : DB::getConnection()->select($this->query);
+        $this->resetQuery();
 
         return array_map(fn($row) => static::createInstance()->populate($row), $rows ?? []);
     }
@@ -144,6 +157,7 @@ abstract class Model
         $data = !empty($this->bindings)
             ? DB::getConnection()->selectRow($this->query, $this->bindings)
             : DB::getConnection()->selectRow($this->query);
+        $this->resetQuery();
 
         return $data ? $this->createInstance()->populate($data) : null;
     }
@@ -184,12 +198,13 @@ abstract class Model
             $set = array_intersect_key($set, array_flip($this->columns));
         }
 
-        $set = $this->sanitize($set);
         try {
             DB::getConnection()->insert($this->table, $set);
         } catch (IntegrityConstraintViolationException $e) {
             Message::add($e->getMessage());
         }
+
+        $this->resetQuery();
 
         return DB::getConnection()->getLastInsertId();
     }
@@ -202,13 +217,17 @@ abstract class Model
             return false;
         }
 
-        $set = $this->sanitize($set);
+        if (!empty($this->columns)) {
+            $set = array_intersect_key($set, array_flip($this->columns));
+        }
 
         try {
             DB::getConnection()->update($this->table, $set, $this->bindings);
         } catch (IntegrityConstraintViolationException $e) {
             Message::add($e->getMessage());
         }
+
+        $this->resetQuery();
 
         return DB::getConnection()->getLastInsertId();
     }
@@ -221,40 +240,27 @@ abstract class Model
             Message::add($e->getMessage());
         }
 
+        $this->resetQuery();
+
         return DB::getConnection()->getLastInsertId();
     }
 
     public function save(array $data): bool|int
     {
+        $id = false;
         if (!empty($data['id'])) {
             if (isset($data['delete'])) {
-                return $this->where('id', $data['id'])->delete();
+                $id = $this->where('id', $data['id'])->delete();
             } else {
-                return $this->populate($data)->where('id', $data['id'])->update();
+                $id = $this->populate($data)->where('id', $data['id'])->update();
             }
         } else {
-            if (!empty($data['name'])) {
-                return $this->populate($data)->insert();
+            if (array_filter(array_intersect_key($data, array_flip($this->columns)))) {
+                $id = $this->populate($data)->insert();
             }
         }
-        return false;
-    }
-
-    protected function getPurifier(): HTMLPurifier
-    {
-        if ($this->purifier === null) {
-            $config = HTMLPurifier_Config::createDefault();
-            $this->purifier = new HTMLPurifier($config);
-        }
-
-        return $this->purifier;
-    }
-
-    public function sanitize(array $array): array
-    {
-        $purifier = $this->getPurifier();
-
-        return array_map(fn($value) => $purifier->purify($value), $array);
+        $this->resetQuery();
+        return $id;
     }
 
     public function populate(array $data): static
@@ -271,5 +277,15 @@ abstract class Model
     protected static function createInstance(): static
     {
         return new static();
+    }
+
+    public function count(): int {
+        $countQuery = preg_replace('/SELECT.*?FROM/', 'SELECT COUNT(*) FROM', $this->query);
+        return (int) DB::getConnection()->selectValue($countQuery, $this->bindings);
+    }
+
+    public function limit(int $limit, int $offset = 0): static {
+        $this->query .= " LIMIT $limit OFFSET $offset";
+        return $this;
     }
 }

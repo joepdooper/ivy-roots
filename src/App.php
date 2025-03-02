@@ -29,16 +29,16 @@ class App
     private function setLanguage(): void
     {
         Setting::stash()->keyByColumn('name');
-        Language::setDefaultLang(substr(Setting::getStashItem('language')->getValue(), 0, 2));
+        Language::setDefaultLang(substr(Setting::getStashItem('language')->value, 0, 2));
     }
 
     private function loadPluginRoutes(): void
     {
         $plugins = (new Plugin)->where('active', 1)->fetchAll();
         if (!empty($plugins)) {
-            $_SESSION['plugin_actives'] = array_map(fn($plugin) => $plugin->getName(), $plugins);
+            $_SESSION['plugin_actives'] = array_map(fn($plugin) => $plugin->name, $plugins);
             foreach ($plugins as $plugin) {
-                $pluginPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $plugin->getUrl() . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets;
+                $pluginPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $plugin->url . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets;
                 if (file_exists($pluginPath)) {
                     include $pluginPath;
                 }
@@ -66,7 +66,7 @@ class App
     private function bootstrap(): void
     {
         DB::init();
-        User::auth();
+        User::setAuth();
         $this->setTemplate();
         $this->setLanguage();
     }

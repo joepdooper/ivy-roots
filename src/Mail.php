@@ -3,6 +3,7 @@
 namespace Ivy;
 
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 class Mail
@@ -13,63 +14,53 @@ class Mail
     {
         $this->mailer = new PHPMailer(true);
 
-        $this->mailer->SMTPDebug = false; //Enable verbose debug output SMTP::DEBUG_SERVER
-        $this->mailer->isSMTP(); //Send using SMTP
-        $this->mailer->Host = $_ENV['MAIL_HOST']; //Set the SMTP server to send through
-        $this->mailer->SMTPAuth = true; //Enable SMTP authentication
-        $this->mailer->Username = $_ENV['MAIL_USERNAME']; //SMTP username
-        $this->mailer->Password = $_ENV['MAIL_PASSWORD']; //SMTP password
-        $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; //`PHPMailer::ENCRYPTION_STARTTLS` Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+        $this->mailer->isSMTP();
+        $this->mailer->Host = $_ENV['MAIL_HOST'];
         $this->mailer->Port = $_ENV['MAIL_PORT'];
+        $this->mailer->SMTPAuth = $_ENV['MAIL_SMTP_AUTH'] === "false" ? false : true;
+        if($_ENV['MAIL_SMTP_SECURE'] === 'ssl') {
+            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } elseif($_ENV['MAIL_SMTP_SECURE'] === 'tls') {
+            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        } else {
+            $this->mailer->SMTPSecure = false;
+        }
+        $this->mailer->SMTPDebug = (int) $_ENV['MAIL_DEBUG'];
+        $this->mailer->Username = $_ENV['MAIL_USERNAME'];
+        $this->mailer->Password = $_ENV['MAIL_PASSWORD'];
 
         $this->mailer->setFrom($_ENV['MAIL_SENDER_ADDRESS'], $_ENV['MAIL_SENDER_NAME']);
         $this->mailer->addReplyTo($_ENV['MAIL_SENDER_ADDRESS'], $_ENV['MAIL_SENDER_NAME']);
     }
 
-    function send(): string
+    function send()
     {
-        try {
-            $this->mailer->send();
-            return Language::get('mail.send.succesfully');
-        } catch (Exception) {
-            return Language::get('mail.send.unsuccesfully') . $this->mailer->ErrorInfo;
-        }
-
+        $this->mailer->send();
     }
 
-    public function addAddress(string $address, string $name): Mail
+    public function addAddress(string $address, string $name = '')
     {
-        $this->mailer->addAddress($this->address, $this->name);
-
-        return $this;
+        $this->mailer->addAddress($address, $name);
     }
 
-    public function setSubject(string $subject): Mail
+    public function setSubject(string $subject)
     {
         $this->mailer->Subject = $subject;
-
-        return $this;
     }
 
-    public function setBody(string $body): Mail
+    public function setBody(string $body)
     {
         $this->mailer->Body = $body;
-
-        return $this;
-
+        $this->mailer->AltBody = $body;
     }
 
-    public function setAltBody(string $altBody): Mail
+    public function setAltBody(string $altBody)
     {
         $this->mailer->AltBody = $altBody;
-
-        return $this;
     }
 
-    public function isHTML(?bool $bool = null): Mail
+    public function isHTML(?bool $bool = null)
     {
         $this->mailer->isHTML($bool);
-
-        return $this;
     }
 }

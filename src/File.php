@@ -8,13 +8,13 @@ class File
 {
     protected string $directory;
     protected string $name;
-    protected string $file_name;
+    protected ?string $file_name;
     protected string $format;
     protected array $allowed;
-    protected ?string $image_convert;
-    protected ?int $width;
+    protected ?string $image_convert = null;
+    protected ?int $width = null;
 
-    function upload($file): string
+    public function upload($file): string
     {
         $handle = new Upload($file);
         $handle->allowed = $this->allowed;
@@ -35,6 +35,11 @@ class File
             Message::add('error : ' . $handle->error);
         }
         return $this->file_name;
+    }
+
+    public function delete($file): void
+    {
+        unlink($this->directory . $file);
     }
 
     /**
@@ -128,7 +133,7 @@ class File
     /**
      * @param string|null $image_convert
      */
-    public function setImageConvert(?string $image_convert): void
+    public function setImageConvert(string $image_convert): void
     {
         $this->image_convert = $image_convert;
     }
@@ -144,7 +149,7 @@ class File
     /**
      * @param int|null $width
      */
-    public function setWidth(?int $width): void
+    public function setWidth(int $width): void
     {
         $this->width = $width;
     }
