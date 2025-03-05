@@ -2,18 +2,22 @@
 
 namespace Ivy;
 
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 abstract class Controller
 {
     protected Request $request;
 
     public function __construct()
     {
-        $this->request = new Request();
+        $this->request = Request::createFromGlobals();
     }
 
     protected function beforeAction(): void
     {
-        $method = $this->request->method();
+        $method = $this->request->getMethod();
 
         switch ($method) {
             case 'POST':
@@ -28,31 +32,19 @@ abstract class Controller
         }
     }
 
-    protected function requireCsrf(): void
-    {
-        try {
-            $this->request->requireCsrf();
-        } catch (\Exception $e) {
-            Message::add('Invalid security token.', Path::get('BASE_PATH'));
-        }
-    }
-
     public function post(): void
     {
         $this->requirePost();
-        // This method can be overridden in child controllers
     }
 
     public function patch(): void
     {
         $this->requirePatch();
-        // This method can be overridden in child controllers
     }
 
     public function get(): void
     {
         $this->requireGet();
-        // This method can be overridden in child controllers
     }
 
     protected function requirePost(): void
@@ -83,5 +75,40 @@ abstract class Controller
         if (!User::getAuth()->isLoggedIn()) {
             Message::add('You must be logged in.', Path::get('BASE_PATH') . 'login');
         }
+    }
+
+    protected function requireCsrf(): void
+    {
+        if (!isset($_SESSION['csrf_token']) ||
+            !hash_equals(
+                $_SESSION['csrf_token'],
+                $this->request->get('csrf_token', '')
+            )) {
+            Message::add('Invalid security token.', Path::get('BASE_PATH'));
+        }
+    }
+
+    protected function validate(array $rules): array
+    {
+        return $this->request->validate($rules);
+    }
+
+    protected function json(array $data, int $status = 200): JsonResponse
+    {
+        return new JsonResponse($data, $status);
+    }
+
+    protected function wantsJson(): bool
+    {
+        return $this->request->headers->get('Accept') === 'application/json';
+    }
+
+    protected function handleUploadedFile(string $field): ?string
+    {
+        $file = $this->request->files->get($field);
+        if ($file) {
+            return $file->store('uploads');
+        }
+        return null;
     }
 }

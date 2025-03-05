@@ -14,7 +14,7 @@ class PluginController extends Controller
 
         $this->pluginService = new PluginService();
 
-        $plugins_data = $this->request->input('plugin') ?? '';
+        $plugins_data = $this->request->get('plugin') ?? '';
 
         foreach ($plugins_data as $plugin_data) {
 

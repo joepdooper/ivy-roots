@@ -23,13 +23,13 @@ class ProfileController extends Controller
         $this->requireLogin();
 
         $data = [
-            'user_id' => $this->request->input('user_id'),
-            'username' => $this->request->input('username'),
-            'email' => $this->request->input('email'),
-            'avatar' => $this->request->input('avatar') ?? $this->request->file('avatar')
+            'user_id' => $this->request->get('user_id'),
+            'username' => $this->request->get('username'),
+            'email' => $this->request->get('email'),
+            'avatar' => $this->request->get('avatar') ?? $this->request->files->get('avatar')
         ];
 
-        if ((int) $this->request->input('user_id') !== (int) $_SESSION['auth_user_id']) {
+        if ((int) $this->request->get('user_id') !== (int) $_SESSION['auth_user_id']) {
             Message::add('Invalid user ID');
             return;
         }
@@ -58,10 +58,10 @@ class ProfileController extends Controller
 
         if ($validated === true) {
 
-            $this->profile = (new Profile)->where('user_id', $this->request->input('user_id'))->fetchOne();
+            $this->profile = (new Profile)->where('user_id', $this->request->get('user_id'))->fetchOne();
 
             if(User::getAuth()->getUsername() !== $data['username']) {
-                (new User)->where('id', $this->request->input('user_id'))->populate(
+                (new User)->where('id', $this->request->get('user_id'))->populate(
                     [
                         'username' => $data['username']
                     ]
@@ -93,11 +93,11 @@ class ProfileController extends Controller
                 }
             }
 
-            if($this->request->input('avatar') === 'delete') {
+            if($this->request->get('avatar') === 'delete') {
                 $this->profile->populate(['user_image' => ''])->update();
             }
 
-            if (!empty($this->request->file('avatar')['name'])) {
+            if (!empty($this->request->files->get('avatar')['name'])) {
                 $this->profile->populate(['user_image' => $this->saveAvatar()])->update();
             }
 
@@ -117,9 +117,9 @@ class ProfileController extends Controller
         $this->file->setAllowed(array('image/*'));
         $this->file->setDirectory(Path::get('PUBLIC_PATH') . Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
         $this->file->setWidth('120');
-        $avatar = $this->file->upload($this->request->file('avatar'));
+        $avatar = $this->file->upload($this->request->files->get('avatar'));
         $this->file->setImageConvert( 'webp');
-        $this->file->upload($this->request->file('avatar'));
+        $this->file->upload($this->request->files->get('avatar'));
 
         return $avatar;
     }

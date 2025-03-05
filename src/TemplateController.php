@@ -13,7 +13,7 @@ class TemplateController extends Controller
         $this->requirePost();
         $this->requireLogin();
 
-        $templates_data = $this->request->input('template') ?? '';
+        $templates_data = $this->request->get('template') ?? '';
 
         foreach ($templates_data as $template_data) {
             try {

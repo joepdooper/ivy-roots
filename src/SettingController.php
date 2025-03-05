@@ -13,7 +13,7 @@ class SettingController extends Controller
         $this->requirePost();
         $this->requireLogin();
 
-        $settings_data = $this->request->input('setting') ?? '';
+        $settings_data = $this->request->get('setting');
 
         foreach ($settings_data as $setting_data) {
             try {

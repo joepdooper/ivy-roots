@@ -71,7 +71,7 @@ class Template extends Model
                 return isset(Setting::getStash()[$settings_key]) ? Setting::getStash()[$settings_key]?->value : '';
             });
             self::$latte->addFunction('csrf', function () {
-                return new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . Request::generateCsrfToken() . '">');
+                return new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">');
             });
             self::$latte->setTempDirectory(Path::get('PUBLIC_PATH') . 'cache/templates');
         }
@@ -163,6 +163,14 @@ class Template extends Model
     public static function getEsm(): array
     {
         return self::$esm;
+    }
+
+    public static function generateCsrfToken(): string
+    {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
     }
 
 }

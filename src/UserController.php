@@ -28,7 +28,7 @@ class UserController extends Controller
         $this->requirePost();
         $this->requireLogin();
 
-        $users_data = $this->request->input('user') ?? '';
+        $users_data = $this->request->get('user');
 
         foreach ($users_data as $key => $user_data) {
             $this->user = new User;
@@ -75,11 +75,11 @@ class UserController extends Controller
         $this->requirePost();
 
         try {
-            $userId = User::getAuth()->register($this->request->input('email'), $this->request->input('password'), $this->request->input('username'), function ($selector, $token) {
+            $userId = User::getAuth()->register($this->request->get('email'), $this->request->get('password'), $this->request->get('username'), function ($selector, $token) {
                 $url = Path::get('BASE_PATH') . 'admin/login/' . urlencode($selector) . '/' . urlencode($token);
                 // send email
                 $mail = new Mail();
-                $mail->addAddress($this->request->input('email'), $this->request->input('username'));
+                $mail->addAddress($this->request->get('email'), $this->request->get('username'));
                 $mail->setSubject('Activate account');
                 $mail->setBody('Activate your account with this link: ' . $url);
                 $mail->send();
@@ -101,7 +101,7 @@ class UserController extends Controller
             Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/register');
         }
 
-        Message::add('An email has been sent to ' . $this->request->input('email') . ' with a link to activate your account', Path::get('BASE_PATH') . 'admin/login');
+        Message::add('An email has been sent to ' . $this->request->get('email') . ' with a link to activate your account', Path::get('BASE_PATH') . 'admin/login');
     }
 
 
@@ -114,7 +114,7 @@ class UserController extends Controller
         $this->requirePost();
 
         try {
-            User::getAuth()->login($this->request->input('email'), $this->request->input('password'));
+            User::getAuth()->login($this->request->get('email'), $this->request->get('password'));
             Message::add('Welcome ' . User::getAuth()->getUsername(), Path::get('BASE_PATH') . 'admin/profile');
         } catch (InvalidEmailException) {
             Message::add('Wrong email address', Path::get('BASE_PATH') . 'admin/login');
@@ -151,13 +151,13 @@ class UserController extends Controller
     {
         $this->requirePost();
 
-        if ($this->request->input('email')) {
+        if ($this->request->get('email')) {
             try {
-                User::getAuth()->forgotPassword($this->request->input('email'), function ($selector, $token) {
+                User::getAuth()->forgotPassword($this->request->get('email'), function ($selector, $token) {
                     $url = Path::get('BASE_PATH') . 'admin/reset/' . urlencode($selector) . '/' . urlencode($token);
                     // send email
                     $mail = new Mail();
-                    $mail->addAddress($this->request->input('email'));
+                    $mail->addAddress($this->request->get('email'));
                     $mail->setSubject('Reset password');
                     $mail->setBody('Reset password with this link: ' . $url);
                     $mail->send();
@@ -171,12 +171,12 @@ class UserController extends Controller
             } catch (TooManyRequestsException) {
                 Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/reset');
             }
-            Message::add('An email has been sent to ' . $this->request->input('email') . ' with a link to reset your password', Path::get('BASE_PATH') . 'admin/reset');
+            Message::add('An email has been sent to ' . $this->request->get('email') . ' with a link to reset your password', Path::get('BASE_PATH') . 'admin/reset');
         }
 
-        if ($this->request->input('password')) {
+        if ($this->request->get('password')) {
             try {
-                User::getAuth()->resetPassword($this->request->input('selector'), $this->request->input('token'), $this->request->input('password'));
+                User::getAuth()->resetPassword($this->request->get('selector'), $this->request->get('token'), $this->request->get('password'));
                 Message::add('Password has been reset', Path::get('BASE_PATH') . 'admin/login');
             } catch (InvalidSelectorTokenPairException) {
                 Message::add('Invalid token', Path::get('BASE_PATH') . 'admin/reset');
