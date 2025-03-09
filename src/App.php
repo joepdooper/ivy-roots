@@ -10,9 +10,10 @@ class App
 
     private string $templateRoutesAssets = 'template.php';
     private string $pluginRoutesAssets = 'plugin.php';
-    private string $coreMiddlewareRoutesAssets = 'routes/middleware.php';
-    private string $coreAdminRoutesAssets = 'routes/admin.php';
-    private string $coreErrorRoutesAssets = 'routes/error.php';
+    private string $coreMiddlewareRoutes = 'routes/middleware.php';
+    private string $coreAdminRoutes = 'routes/admin.php';
+    private string $coreErrorRoutes = 'routes/error.php';
+    private string $coreWebRoutes = 'routes/web.php';
 
     public static function router(): Router
     {
@@ -32,7 +33,7 @@ class App
         Language::setDefaultLang(substr(Setting::getStashItem('language')->value, 0, 2));
     }
 
-    private function loadPluginRoutes(): void
+    private function loadPluginRoutesAssets(): void
     {
         $plugins = (new Plugin)->where('active', 1)->fetchAll();
         if (!empty($plugins)) {
@@ -46,7 +47,7 @@ class App
         }
     }
 
-    private function loadTemplateRoutes(): void
+    private function loadTemplateRoutesAssets(): void
     {
         include Template::file($this->templateRoutesAssets);
     }
@@ -55,11 +56,12 @@ class App
     {
         self::$router = new \Bramus\Router\Router();
         self::$router->setBasePath(Path::get('SUBFOLDER'));
-        include Path::get('PUBLIC_PATH') . $this->coreMiddlewareRoutesAssets;
-        $this->loadTemplateRoutes();
-        $this->loadPluginRoutes();
-        include Path::get('PUBLIC_PATH') . $this->coreAdminRoutesAssets;
-        include Path::get('PUBLIC_PATH') . $this->coreErrorRoutesAssets;
+        include Path::get('PUBLIC_PATH') . $this->coreMiddlewareRoutes;
+        $this->loadTemplateRoutesAssets();
+        $this->loadPluginRoutesAssets();
+        include Path::get('PUBLIC_PATH') . $this->coreWebRoutes;
+        include Path::get('PUBLIC_PATH') . $this->coreAdminRoutes;
+        include Path::get('PUBLIC_PATH') . $this->coreErrorRoutes;
         self::$router->run();
     }
 

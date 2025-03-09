@@ -17,6 +17,6 @@ class Setting extends Model
 
     protected string $name;
     protected int $bool;
-    protected string $value = '';
-    protected string $info;
+    protected ?string $value = null;
+    protected ?string $info = null;
 }

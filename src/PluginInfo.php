@@ -45,6 +45,46 @@ class PluginInfo
     /**
      * @return string|null
      */
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getVersion(): ?string
+    {
+        return $this->version;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getSettings(): ?int
+    {
+        return $this->settings;
+    }
+
+    /**
+     * @return string|null
+     */
     public function getUrl(): ?string
     {
         return $this->url;

@@ -23,10 +23,10 @@ class PluginCollectionHandler
 
     private function processCollection(string $action): void
     {
-        $collectionPath = _PUBLIC_PATH . _PLUGIN_PATH . $this->plugin->getUrl() . DIRECTORY_SEPARATOR . 'collection';
+        $collectionPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $this->plugin->url . DIRECTORY_SEPARATOR . 'collection';
         $realCollectionPath = realpath($collectionPath);
 
-        if (!$realCollectionPath || !str_starts_with($realCollectionPath, _PUBLIC_PATH . _PLUGIN_PATH)) {
+        if (!$realCollectionPath || !str_starts_with($realCollectionPath, Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH'))) {
             return;
         }
 
@@ -62,16 +62,17 @@ class PluginCollectionHandler
                 Message::add('Invalid script path or filename: ' . $scriptPath);
             }
 
-            $url = $this->plugin->getUrl() . DIRECTORY_SEPARATOR . 'collection' . DIRECTORY_SEPARATOR . basename($subfolder);
+            $url = $this->plugin->url . DIRECTORY_SEPARATOR . 'collection' . DIRECTORY_SEPARATOR . basename($subfolder);
             $plugin = new Plugin();
-            $plugin->setUrl($url)->setInfo();
-            $plugin->setParentId($this->plugin->getId());
+            $plugin->url = $url;
+            $plugin->setInfo();
+            $plugin->parent_id = $this->plugin->id;
 
             if ($action === 'install') {
                 $plugin->insert();
             }
             if ($action === 'uninstall') {
-                $plugin->where('url', $url)->where('parent_id', $this->plugin->getId())->delete();
+                $plugin->where('url', $url)->where('parent_id', $this->plugin->id)->delete();
             }
         }
     }

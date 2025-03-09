@@ -12,21 +12,21 @@ class PluginController extends Controller
         $this->requirePost();
         $this->requireLogin();
 
-        $this->pluginService = new PluginService();
-
         $plugins_data = $this->request->get('plugin') ?? '';
+
 
         foreach ($plugins_data as $plugin_data) {
 
-            $this->plugin = new Plugin();
-            $this->plugin->populate($plugin_data);
+            $this->plugin = (new Plugin)->populate($plugin_data);
 
             if (!$this->plugin->hasId()) {
-                $this->pluginService->install($this->plugin);
+                $this->pluginService = new PluginService($this->plugin);
+                $this->pluginService->install();
             } else {
-                $this->plugin->where('id', $this->plugin->getId())->fetchOne();
+                $this->plugin->where('id', $plugin_data['id'])->fetchOne()->populate($plugin_data);
                 if (isset($plugin_data['delete'])) {
-                    $this->pluginService->uninstall($this->plugin);
+                    $this->pluginService = new PluginService($this->plugin);
+                    $this->pluginService->uninstall();
                 } else {
                     $this->plugin->update();
                 }
@@ -34,7 +34,7 @@ class PluginController extends Controller
 
         }
 
-        Message::add('Update successfully', _BASE_PATH . 'admin/plugin');
+        Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/plugin');
     }
 
 }

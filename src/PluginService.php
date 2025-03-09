@@ -6,47 +6,61 @@ use Exception;
 
 class PluginService
 {
-    private PluginInfo $pluginInfo;
+    private Plugin $plugin;
 
-    public function install(Plugin $plugin): void
+    public function __construct(Plugin $plugin)
     {
+        $this->plugin = $plugin;
+    }
+
+    public function install(): void
+    {
+        $this->plugin->setInfo();
+
         try {
-            $this->pluginInfo = $plugin->setInfo()->getInfo();
-            if (!empty($missing = PluginDependencyChecker::getMissingDependencies($this->pluginInfo->getDependencies()))) {
+            if (!empty($missing = PluginDependencyChecker::getMissingDependencies($this->plugin->getInfo()->getDependencies()))) {
                 $count = count($missing);
                 $message = "This plugin has " . ($count > 1 ? "dependencies" : "dependency") . ". Please install the " . ($count > 1 ? "plugins" : "plugin") . " " . implode(", ", $missing);
-                Message::add($message, _BASE_PATH . 'admin/plugin');
+                Message::add($message, Path::get('BASE_PATH') . 'admin/plugin');
             }
-            if (isset($this->pluginInfo->getDatabase()['install']) && !empty($this->pluginInfo->getDatabase()['install']) && !empty($this->pluginInfo->getUrl())) {
-                if (file_exists(_PUBLIC_PATH . _PLUGIN_PATH . $this->pluginInfo->getUrl() . DIRECTORY_SEPARATOR . $this->pluginInfo->getDatabase()['install'])) {
-                    require_once _PUBLIC_PATH . _PLUGIN_PATH . $this->pluginInfo->getUrl() . DIRECTORY_SEPARATOR . $plugin->getInfo()->getDatabase()['install'];
+
+            if (isset($this->plugin->getInfo()->getDatabase()['install']) && !empty($this->plugin->getInfo()->getDatabase()['install']) && !empty($this->plugin->getInfo()->getUrl())) {
+                $installPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $this->plugin->getInfo()->getUrl() . DIRECTORY_SEPARATOR . $this->plugin->getInfo()->getDatabase()['install'];
+                if (file_exists($installPath)) {
+                    require_once $installPath;
                 }
             }
-            $plugin->setId($plugin->insert());
 
-            if (!empty($this->pluginInfo->getCollection())) {
-                (new PluginCollectionHandler($plugin))->install();
+            $this->plugin->setId($this->plugin->insert());
+
+            if (!empty($this->plugin->getInfo()->getCollection())) {
+                (new PluginCollectionHandler($this->plugin))->install();
             }
         } catch (Exception $e) {
             Message::add("Error installing plugin: " . $e->getMessage(), _BASE_PATH . 'admin/plugin');
         }
     }
 
-    public function uninstall(Plugin $plugin): void
+    public function uninstall(): void
     {
+        $this->plugin->setInfo();
+
         try {
-            $this->pluginInfo = $plugin->setInfo()->getInfo();
-            if (!empty($this->pluginInfo->getCollection())) {
-                (new PluginCollectionHandler($plugin))->uninstall();
+            if (!empty($this->plugin->getInfo()->getCollection())) {
+                (new PluginCollectionHandler($this->plugin))->uninstall();
             }
-            if (isset($this->pluginInfo->getDatabase()['uninstall']) && !empty($this->pluginInfo->getDatabase()['uninstall'])) {
-                if (file_exists(_PUBLIC_PATH . _PLUGIN_PATH . $this->pluginInfo->getUrl() . DIRECTORY_SEPARATOR . $this->pluginInfo->getDatabase()['uninstall'])) {
-                    require_once _PUBLIC_PATH . _PLUGIN_PATH . $this->pluginInfo->getUrl() . DIRECTORY_SEPARATOR . $this->pluginInfo->getDatabase()['uninstall'];
+
+            if (isset($this->plugin->getInfo()->getDatabase()['uninstall']) && !empty($this->plugin->getInfo()->getDatabase()['uninstall'])) {
+                $uninstallPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $this->plugin->getInfo()->getUrl() . DIRECTORY_SEPARATOR . $this->plugin->getInfo()->getDatabase()['uninstall'];
+                if (file_exists($uninstallPath)) {
+                    require_once $uninstallPath;
                 }
             }
-            $plugin->delete();
+
+            $this->plugin->delete();
         } catch (Exception $e) {
-            Message::add("Error uninstalling plugin: " . $e->getMessage(), _BASE_PATH . 'admin/plugin');
+            Message::add("Error uninstalling plugin: " . $e->getMessage(), Path::get('BASE_PATH') . 'admin/plugin');
         }
     }
 }
+

@@ -32,7 +32,6 @@ class User extends Model
     protected array $columns = [
         'email',
         'username',
-        'users_image',
         'status',
         'verified',
         'resettable',
@@ -45,7 +44,6 @@ class User extends Model
 
     protected string $email;
     protected string $username;
-    protected string $users_image;
     protected int $status;
     protected int $verified;
     protected int $resettable;

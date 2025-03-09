@@ -30,31 +30,33 @@ class UserController extends Controller
 
         $users_data = $this->request->get('user');
 
-        foreach ($users_data as $key => $user_data) {
-            $this->user = new User;
+        foreach ($users_data as $user_data) {
+            $this->user = (new User)->where('id', $user_data['id'])->fetchOne();
 
             if (isset($user_data['delete'])) {
                 try {
-                    $this->user::getAuth()->admin()->deleteUserById($key);
+                    $this->user::getAuth()->admin()->deleteUserById($this->user->id);
                 } catch (UnknownIdException|AuthError $e) {
                     Message::add('Something went wrong: ' . $e);
                 }
             } else {
                 try {
-                    if ($user_data['editor']) {
-                        $this->user::getAuth()->admin()->addRoleForUserById($key, Role::EDITOR);
-                    } else {
-                        $this->user::getAuth()->admin()->removeRoleForUserById($key, Role::EDITOR);
-                    }
-                    if ($user_data['admin']) {
-                        $this->user::getAuth()->admin()->addRoleForUserById($key, Role::ADMIN);
-                    } else {
-                        $this->user::getAuth()->admin()->removeRoleForUserById($key, Role::ADMIN);
-                    }
-                    if ($user_data['super_admin']) {
-                        $this->user::getAuth()->admin()->addRoleForUserById($key, Role::SUPER_ADMIN);
-                    } else {
-                        $this->user::getAuth()->admin()->removeRoleForUserById($key, Role::SUPER_ADMIN);
+                    if($this->user->id){
+                        if ($user_data['editor']) {
+                            $this->user::getAuth()->admin()->addRoleForUserById($this->user->id, Role::EDITOR);
+                        } else {
+                            $this->user::getAuth()->admin()->removeRoleForUserById($this->user->id, Role::EDITOR);
+                        }
+                        if ($user_data['admin']) {
+                            $this->user::getAuth()->admin()->addRoleForUserById($this->user->id, Role::ADMIN);
+                        } else {
+                            $this->user::getAuth()->admin()->removeRoleForUserById($this->user->id, Role::ADMIN);
+                        }
+                        if ($user_data['super_admin']) {
+                            $this->user::getAuth()->admin()->addRoleForUserById($this->user->id, Role::SUPER_ADMIN);
+                        } else {
+                            $this->user::getAuth()->admin()->removeRoleForUserById($this->user->id, Role::SUPER_ADMIN);
+                        }
                     }
                 } catch (UnknownIdException) {
                     Message::add('Unknown ID');
@@ -62,7 +64,7 @@ class UserController extends Controller
             }
         }
 
-        Message::add('Update successfully', _BASE_PATH . 'admin/user');
+        Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/user');
     }
 
     /**

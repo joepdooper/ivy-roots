@@ -20,10 +20,10 @@ class Plugin extends Model
     protected string $name;
     protected string $url;
     protected string $version;
-    protected ?string $description;
-    protected ?string $type;
+    protected ?string $description = null;
+    protected ?string $type = null;
     protected ?int $active;
-    protected ?int $settings;
+    protected ?int $settings = null;
     protected ?int $parent_id;
     protected ?bool $collection = false;
     protected PluginInfo $info;
@@ -41,13 +41,35 @@ class Plugin extends Model
      */
     public function setInfo(): Plugin
     {
+        if (!isset($this->url) && $this->id) {
+            $plugin = $this->select(['url'])->where('id', $this->id)->fetchOne();
+            if ($plugin) {
+                $this->url = $plugin->url;
+            }
+        }
+
+        if (empty($this->url)) {
+            throw new \Exception("Plugin URL is missing, cannot initialize PluginInfo.");
+        }
+
         $this->info = new PluginInfo($this->url);
-        foreach (get_object_vars($this->info) as $property => $value) {
-            if (property_exists($this, $property) && !isset($this->{$property})) {
-                $this->{$property} = $value;
+
+        foreach ($this->columns as $property) {
+            $getter = 'get' . ucfirst($property);
+            if (method_exists($this->info, $getter)) {
+                $value = $this->info->$getter();
+                if ($value !== null) {
+                    $this->$property = $value;
+                }
             }
         }
 
         return $this;
+    }
+
+
+    public function getInfo(): PluginInfo
+    {
+        return $this->info;
     }
 }

@@ -74,6 +74,16 @@ class Template extends Model
                 return new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">');
             });
             self::$latte->setTempDirectory(Path::get('PUBLIC_PATH') . 'cache/templates');
+            self::$latte->setAutoRefresh($_ENV['APP_ENV'] === 'development');
+            self::$latte->addExtension(new \Ivy\Tags\ButtonTag());
+            self::$latte->addProvider('customButtonRender', function ($args) {
+                $name = self::file('buttons/button.'.$args['type'].'.latte');
+                if ($name) {
+                    self::$latte->render($name, $args);
+                } else {
+                    throw new \Exception("Button template for type '{$args['type']}' not found.");
+                }
+            });
         }
         self::$latte->render($name, $params, $block);
     }

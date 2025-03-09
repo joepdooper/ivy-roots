@@ -80,6 +80,18 @@ abstract class Model
         $this->bindings = [];
     }
 
+    public function select(array $columns): static
+    {
+        $validColumns = array_intersect($columns, $this->columns);
+        if (empty($validColumns)) {
+            throw new \Exception("Invalid column selection: None of the specified columns exist in the model.");
+        }
+        $columnString = implode(', ', array_map(fn($col) => "`$this->table`.`$col`", $validColumns));
+        $this->query = "SELECT $columnString FROM `$this->table`";
+
+        return $this;
+    }
+
     public function where(string $column, $value = null, string $operator = '='): static
     {
         if (is_null($value)) {
@@ -221,6 +233,10 @@ abstract class Model
             $set = array_intersect_key($set, array_flip($this->columns));
         }
 
+        if (empty($this->bindings) && isset($this->id)) {
+            $this->bindings['id'] = $this->id;
+        }
+
         try {
             DB::getConnection()->update($this->table, $set, $this->bindings);
         } catch (IntegrityConstraintViolationException $e) {
@@ -234,6 +250,10 @@ abstract class Model
 
     public function delete(): bool|int|string
     {
+        if (empty($this->bindings) && isset($this->id)) {
+            $this->bindings['id'] = $this->id;
+        }
+
         try {
             DB::getConnection()->delete($this->table, $this->bindings);
         } catch (EmptyWhereClauseError $e) {
