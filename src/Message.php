@@ -29,9 +29,15 @@ class Message
         $session->getFlashBag()->add($key, $message);
 
         if ($redirect) {
-            $response = new RedirectResponse($redirect);
-            $response->send();
-            exit;
+            if (self::isValidRedirectUrl($redirect)) {
+                $response = new RedirectResponse($redirect);
+                $response->send();
+                exit;
+            } else {
+                $response = new RedirectResponse(Path::get('BASE_URL'));
+                $response->send();
+                exit;
+            }
         }
     }
 
