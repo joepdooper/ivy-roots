@@ -34,7 +34,7 @@ class Message
                 $response->send();
                 exit;
             } else {
-                $response = new RedirectResponse(Path::get('BASE_URL'));
+                $response = new RedirectResponse(Path::get('BASE_PATH'));
                 $response->send();
                 exit;
             }
@@ -53,5 +53,18 @@ class Message
                 }
             }
         }
+    }
+
+    private static function isValidRedirectUrl(string $url): bool
+    {
+        if (strpos($url, Path::get('BASE_PATH')) === 0) {
+            return true;
+        }
+
+        if (strpos($url, '/') === 0) {
+            return true;
+        }
+
+        return false;
     }
 }
