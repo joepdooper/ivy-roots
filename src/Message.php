@@ -2,56 +2,50 @@
 
 namespace Ivy;
 
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
 class Message
 {
-    protected static string $template;
+    private static ?Session $session = null;
 
-    function __construct()
+    private static function getSession(): Session
     {
-        if (!isset($_SESSION["flash_messages"])) {
-            $_SESSION["flash_messages"] = array();
+        if (self::$session === null) {
+            self::$session = new Session();
+
+            // Check if session is already started
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                self::$session->start();
+            }
         }
+        return self::$session;
     }
 
-    public static function template($template): Message
+    public static function add(string $message, ?string $redirect = null, string $key = 'success'): void
     {
-        self::$template = $template;
-        return new self;
-    }
+        $session = self::getSession();
+        $session->getFlashBag()->add($key, $message);
 
-    public static function add($value, $redirect = null): Message
-    {
-        if (isset($_SESSION["flash_messages"]) && !in_array($value, $_SESSION["flash_messages"])) {
-            $_SESSION["flash_messages"][] = $value;
-        }
         if ($redirect) {
-            if (headers_sent()) {
-                print '<script> location.replace("' . $redirect . '"); </script>';
-            } else {
-                header('location:' . $redirect, true, 302);
-                exit;
-            }
+            $response = new RedirectResponse($redirect);
+            $response->send();
+            exit;
         }
-        return new self;
     }
 
-    public static function render($template = null): void
+    public static function render(string $template): void
     {
-        if ($template) {
-            self::$template = $template;
-        }
-        if (!empty($_SESSION["flash_messages"]) && !empty(self::$template)) {
-            foreach ($_SESSION["flash_messages"] as $key => $value) {
-                $message['id'] = $key;
-                $message['text'] = $value;
-                Template::render(self::$template, ['message' => (object) $message]);
+        $session = self::getSession();
+        $messages = $session->getFlashBag()->all();
+
+        if (!empty($messages)) {
+            foreach ($messages as $key => $texts) {
+                foreach ($texts as $text) {
+                    Template::render($template, ['message' => (object) ['id' => $key, 'text' => $text]]);
+                }
             }
         }
-        self::remove();
-    }
-
-    private static function remove(): void
-    {
-        $_SESSION["flash_messages"] = array();
     }
 }
