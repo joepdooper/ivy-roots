@@ -49,7 +49,7 @@ class Plugin extends Model
         }
 
         if (empty($this->url)) {
-            throw new \Exception("Plugin URL is missing, cannot initialize PluginInfo.");
+            Message::add('Plugin URL is missing, cannot initialize PluginInfo.');
         }
 
         $this->info = new PluginInfo($this->url);

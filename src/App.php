@@ -39,29 +39,21 @@ class App
         if (!empty($plugins)) {
             $_SESSION['plugin_actives'] = array_map(fn($plugin) => $plugin->name, $plugins);
             foreach ($plugins as $plugin) {
-                $pluginPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $plugin->url . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets;
-                if (file_exists($pluginPath)) {
-                    include $pluginPath;
-                }
+                self::include(Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $plugin->url . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets);
             }
         }
-    }
-
-    private function loadTemplateRoutesAssets(): void
-    {
-        include Template::file($this->templateRoutesAssets);
     }
 
     private function loadRoutes(): void
     {
         self::$router = new \Bramus\Router\Router();
         self::$router->setBasePath(Path::get('SUBFOLDER'));
-        include Path::get('PUBLIC_PATH') . $this->coreMiddlewareRoutes;
-        $this->loadTemplateRoutesAssets();
+        self::include(Path::get('PUBLIC_PATH') . $this->coreMiddlewareRoutes);
+        self::include(Template::file($this->templateRoutesAssets));
         $this->loadPluginRoutesAssets();
-        include Path::get('PUBLIC_PATH') . $this->coreWebRoutes;
-        include Path::get('PUBLIC_PATH') . $this->coreAdminRoutes;
-        include Path::get('PUBLIC_PATH') . $this->coreErrorRoutes;
+        self::include(Path::get('PUBLIC_PATH') . $this->coreWebRoutes);
+        self::include(Path::get('PUBLIC_PATH') . $this->coreAdminRoutes);
+        self::include(Path::get('PUBLIC_PATH') . $this->coreErrorRoutes);
         self::$router->run();
     }
 
@@ -78,6 +70,23 @@ class App
         (\Dotenv\Dotenv::createImmutable(Path::get('PUBLIC_PATH')))->load();
         $this->bootstrap();
         $this->loadRoutes();
+    }
+
+    private static function include(string $filePath): void
+    {
+        try {
+            $file = new \Symfony\Component\HttpFoundation\File\File($filePath, false);
+            $realPath = $file->getRealPath();
+
+            if ($realPath === false || !str_starts_with($realPath, Path::get('PUBLIC_PATH'))) {
+                Message::add('Unauthorized file access');
+                return;
+            }
+
+            include $realPath;
+        } catch (\Exception $e) {
+            Message::add('Error: ' . $e->getMessage(), Path::get('BASE_PATH'));
+        }
     }
 
 }
