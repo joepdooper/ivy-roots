@@ -33,23 +33,8 @@ class PluginCollectionHandler
         $subfolders = array_filter(glob($realCollectionPath . DIRECTORY_SEPARATOR . '[a-zA-Z0-9_-]*'), 'is_dir');
 
         foreach ($subfolders as $subfolder) {
-
             $infoJsonPath = $subfolder . DIRECTORY_SEPARATOR . 'info.json';
-            $infoJsonFile = new \Symfony\Component\HttpFoundation\File\File($infoJsonPath);
-            $infoJsonFile = $infoJsonFile->getRealPath();
-
-            if ($infoJsonFile === false || !str_starts_with($infoJsonFile, Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH'))) {
-                Message::add('Invalid file path: ' . $infoJsonPath);
-                return;
-            }
-
-            $infoJsonContent = JsonHelper::parse($infoJsonFile);
-
-            if (!$infoJsonContent || !isset($infoJsonContent['name'])) {
-                Message::add('Invalid JSON: ' . $infoJsonPath);
-                return;
-            }
-
+            $infoJsonContent = JsonHelper::parse($infoJsonPath);
             $this->processScript($subfolder, $infoJsonContent, $action);
         }
     }

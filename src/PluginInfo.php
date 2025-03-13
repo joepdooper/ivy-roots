@@ -18,21 +18,8 @@ class PluginInfo
     {
         $this->url = $url;
 
-        $infoJsonPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $url . DIRECTORY_SEPARATOR;
-        $infoJsonFile = new \Symfony\Component\HttpFoundation\File\File($infoJsonPath . 'info.json');
-        $infoJsonFile = $infoJsonFile->getRealPath();
-
-        if ($infoJsonFile === false || !str_starts_with($infoJsonFile, Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH'))) {
-            Message::add('Invalid file path: ' . $infoJsonPath);
-            return;
-        }
-
-        $infoJsonContent = JsonHelper::parse($infoJsonFile);
-
-        if (!$infoJsonContent || !isset($infoJsonContent['name'])) {
-            Message::add('Invalid JSON: ' . $infoJsonPath);
-            return;
-        }
+        $infoJsonPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $url . DIRECTORY_SEPARATOR . 'info.json';
+        $infoJsonContent = JsonHelper::parse($infoJsonPath);
 
         $this->name = $infoJsonContent['name'] ?? null;
         $this->version = $infoJsonContent['version'] ?? null;
