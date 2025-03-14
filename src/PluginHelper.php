@@ -32,6 +32,11 @@ class PluginHelper
         return $file;
     }
 
+    public static function getRelativePath(string $path): ?string
+    {
+        return str_replace(Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH'),'', $path);
+    }
+
     public static function getCollectionDirectory(string $pluginUrl): ?string
     {
         if(!is_dir(Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . basename($pluginUrl) . DIRECTORY_SEPARATOR . 'collection')){

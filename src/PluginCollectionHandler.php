@@ -26,7 +26,7 @@ class PluginCollectionHandler
         $subfolders = array_filter(glob(PluginHelper::getCollectionDirectory($this->plugin->url) . '[a-zA-Z0-9_-]*'), 'is_dir');
 
         foreach ($subfolders as $subfolder) {
-            $relativePath = str_replace(Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH'), '', $subfolder);
+            $relativePath = PluginHelper::getRelativePath($subfolder);
             $infoJsonContent = PluginHelper::parseJson($relativePath . DIRECTORY_SEPARATOR . 'info.json');
             $this->processScript($relativePath, $infoJsonContent, $action);
         }
@@ -35,12 +35,13 @@ class PluginCollectionHandler
     private function processScript(string $subfolder, array $infoJsonContent, string $action): void
     {
         if (isset($infoJsonContent['database'][$action])) {
+            $pluginUrl = PluginHelper::getCollectionDirectory($this->plugin->url) . basename($subfolder);
             if (preg_match('#^[a-zA-Z0-9_/.\-]+\.php$#', basename($infoJsonContent['database'][$action]))) {
-                require_once PluginHelper::getRealPath(PluginHelper::getCollectionDirectory($this->plugin->url) . basename($subfolder) . DIRECTORY_SEPARATOR . $infoJsonContent['database'][$action]);
+                require_once PluginHelper::getRealPath($pluginUrl . DIRECTORY_SEPARATOR . $infoJsonContent['database'][$action]);
             }
 
             $plugin = new Plugin();
-            $plugin->url = str_replace(Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH'),'', PluginHelper::getCollectionDirectory($this->plugin->url) . basename($subfolder));
+            $plugin->url = PluginHelper::getRelativePath($pluginUrl);
             $plugin->setInfo();
             $plugin->parent_id = $this->plugin->id;
 
