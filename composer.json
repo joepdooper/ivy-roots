@@ -24,6 +24,7 @@
         "bramus/router": "^1.6",
         "vlucas/phpdotenv": "^5.5",
         "wixel/gump": "^2.2",
-        "latte/latte": "^3.0"
+        "latte/latte": "^3.0",
+        "symfony/http-foundation": "^7.3"
     }
 }
