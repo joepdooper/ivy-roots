@@ -20,8 +20,6 @@ use Delight\Auth\UserAlreadyExistsException;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
 use Exception;
 use Hooks;
-use HTMLPurifier_Config;
-use HTMLPurifier;
 use function urlencode;
 
 class User extends Model

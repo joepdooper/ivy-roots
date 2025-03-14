@@ -9,8 +9,8 @@ class PluginInfo
     private ?string $description;
     private ?string $url;
     private ?string $type;
-    private ?int $settings;
     private ?bool $collection;
+    private array $actions = [];
     private ?array $database;
     private ?array $dependencies;
 
@@ -24,10 +24,10 @@ class PluginInfo
         $this->version = $infoJsonContent['version'] ?? null;
         $this->description = $infoJsonContent['description'] ?? null;
         $this->type = $infoJsonContent['type'] ?? null;
-        $this->settings = isset($infoJsonContent['settings']) ? (int)$infoJsonContent['settings'] : 0;
+        $this->collection = $infoJsonContent['collection'] ?? null;
+        $this->actions = $infoJsonContent['actions'] ?? [];
         $this->database = $infoJsonContent['database'] ?? null;
         $this->dependencies = $infoJsonContent['dependencies'] ?? null;
-        $this->collection = $infoJsonContent['collection'] ?? null;
     }
 
     /**
@@ -100,5 +100,13 @@ class PluginInfo
     public function getDependencies(): ?array
     {
         return $this->dependencies;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getActions(): ?array
+    {
+        return $this->actions;
     }
 }

@@ -20,36 +20,64 @@ class Language
     public static function translate($key)
     {
         $keys = explode('.', $key);
-        $fileKey = array_shift($keys);
+        $firstKey = array_shift($keys);
 
-        if (!isset(self::$loadedFiles[$fileKey])) {
-            self::loadFile($fileKey);
+        if (!isset(self::$loadedFiles[$firstKey])) {
+            self::loadFile($firstKey);
         }
 
-        $translation = self::$translations[$fileKey] ?? $key;
+        if(self::$translations[$firstKey]){
+            $translation = self::getNestedTranslation(self::$translations[$firstKey], $keys);
+        } else {
+            $secondKey = array_shift($keys);
 
-        foreach ($keys as $k) {
-            if (is_array($translation) && isset($translation[$k])) {
-                $translation = $translation[$k];
-            } else {
-                return $key;
+            if (!isset(self::$loadedFiles[$firstKey.'_'.$secondKey])) {
+                self::loadPluginFile($firstKey, $secondKey);
+            }
+
+            if(self::$translations[$firstKey.'_'.$secondKey]){
+                $translation = self::getNestedTranslation(self::$translations[$firstKey.'_'.$secondKey], $keys);
             }
         }
 
-        return $translation;
+        return $translation ?? ($key ?? '…');
     }
 
-    private static function loadFile($fileKey): void
+    private static function loadFile($firstKey): void
     {
-        $langPath = Path::get('ROOT') . Path::get('SUBFOLDER') . 'language/' . self::$defaultLang . '/' . $fileKey . '.php';
+        $langPath = Path::get('PUBLIC_PATH') . 'language' . DIRECTORY_SEPARATOR . self::$defaultLang . DIRECTORY_SEPARATOR . $firstKey . '.php';
 
         if (file_exists($langPath)) {
-            self::$translations[$fileKey] = include $langPath;
-            self::$loadedFiles[$fileKey] = true;
+            self::$translations[$firstKey] = include $langPath;
+            self::$loadedFiles[$firstKey] = true;
         } else {
-            self::$translations[$fileKey] = [];
-            self::$loadedFiles[$fileKey] = false;
+            self::$translations[$firstKey] = [];
+            self::$loadedFiles[$firstKey] = false;
         }
+    }
+
+    private static function loadPluginFile($firstKey, $secondKey): void
+    {
+        $langPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $firstKey . DIRECTORY_SEPARATOR . 'language' . DIRECTORY_SEPARATOR . self::$defaultLang . DIRECTORY_SEPARATOR . $secondKey . '.php';
+
+        if (file_exists($langPath)) {
+            self::$translations[$firstKey.'_'.$secondKey] = include $langPath;
+            self::$loadedFiles[$firstKey.'_'.$secondKey] = true;
+        } else {
+            self::$translations[$firstKey.'_'.$secondKey] = [];
+            self::$loadedFiles[$firstKey.'_'.$secondKey] = false;
+        }
+    }
+
+    private static function getNestedTranslation(array $translations, array $keys)
+    {
+        foreach ($keys as $k) {
+            if (!is_array($translations) || !isset($translations[$k])) {
+                return null;
+            }
+            $translations = $translations[$k];
+        }
+        return $translations;
     }
 
     public static function setDefaultLang($lang): void

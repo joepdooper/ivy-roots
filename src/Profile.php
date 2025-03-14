@@ -8,8 +8,6 @@ use Delight\Auth\NotLoggedInException;
 use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UserAlreadyExistsException;
 use Exception;
-use HTMLPurifier;
-use HTMLPurifier_Config;
 use Image\Image;
 use function urlencode;
 

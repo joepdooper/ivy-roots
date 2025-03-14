@@ -13,7 +13,6 @@ class Plugin extends Model
         'description',
         'type',
         'active',
-        'settings',
         'parent_id'
     ];
 
@@ -23,18 +22,8 @@ class Plugin extends Model
     protected ?string $description = null;
     protected ?string $type = null;
     protected ?int $active;
-    protected ?int $settings = null;
     protected ?int $parent_id;
-    protected ?bool $collection = false;
     protected PluginInfo $info;
-
-    /**
-     * @return bool|null
-     */
-    public function getCollection(): ?bool
-    {
-        return $this->collection;
-    }
 
     /**
      * @return Plugin
