@@ -38,6 +38,6 @@ class PluginHelper
             throw new \Exception('Invalid collection directory');
         }
 
-        return Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . basename($pluginUrl) . DIRECTORY_SEPARATOR . 'collection';
+        return Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . basename($pluginUrl) . DIRECTORY_SEPARATOR . 'collection' . DIRECTORY_SEPARATOR;
     }
 }
