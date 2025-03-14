@@ -9,6 +9,14 @@ final class Path
     private static array $paths = [];
     private static bool $initialized = false;
 
+    private function __construct() {}
+
+    public static function get(string $key): mixed
+    {
+        self::initialize();
+        return self::$paths[$key] ?? null;
+    }
+
     private static function initialize(): void
     {
         if (self::$initialized) {
@@ -45,13 +53,5 @@ final class Path
         self::$paths['BASE_PATH'] = rtrim(self::$paths['DOMAIN'] . $serverPort . '/' . self::$paths['SUBFOLDER'], '/') . '/';
 
         self::$initialized = true;
-    }
-
-    private function __construct() {} // Prevent instantiation
-
-    public static function get(string $key): mixed
-    {
-        self::initialize();
-        return self::$paths[$key] ?? null;
     }
 }

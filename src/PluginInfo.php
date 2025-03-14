@@ -18,8 +18,7 @@ class PluginInfo
     {
         $this->url = $url;
 
-        $infoJsonPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $url . DIRECTORY_SEPARATOR . 'info.json';
-        $infoJsonContent = JsonHelper::parse($infoJsonPath);
+        $infoJsonContent = PluginHelper::parseJson($url . DIRECTORY_SEPARATOR . 'info.json');
 
         $this->name = $infoJsonContent['name'] ?? null;
         $this->version = $infoJsonContent['version'] ?? null;

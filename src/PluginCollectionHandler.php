@@ -23,18 +23,12 @@ class PluginCollectionHandler
 
     private function processCollection(string $action): void
     {
-        $collectionPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $this->plugin->url . DIRECTORY_SEPARATOR . 'collection';
-        $realCollectionPath = realpath($collectionPath);
-
-        if (!$realCollectionPath || !str_starts_with($realCollectionPath, Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH'))) {
-            return;
-        }
-
-        $subfolders = array_filter(glob($realCollectionPath . DIRECTORY_SEPARATOR . '[a-zA-Z0-9_-]*'), 'is_dir');
+        $collectionPath = PluginHelper::getCollectionDirectory($this->plugin->url);
+        $subfolders = array_filter(glob($collectionPath . DIRECTORY_SEPARATOR . '[a-zA-Z0-9_-]*'), 'is_dir');
 
         foreach ($subfolders as $subfolder) {
-            $infoJsonPath = $subfolder . DIRECTORY_SEPARATOR . 'info.json';
-            $infoJsonContent = JsonHelper::parse($infoJsonPath);
+            $relativePath = str_replace(Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH'), '', $subfolder);
+            $infoJsonContent = PluginHelper::parseJson($relativePath . DIRECTORY_SEPARATOR . 'info.json');
             $this->processScript($subfolder, $infoJsonContent, $action);
         }
     }
