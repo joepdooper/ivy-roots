@@ -39,8 +39,10 @@ class App
         if (!empty($plugins)) {
             $_SESSION['plugin_actives'] = array_map(fn($plugin) => $plugin->name, $plugins);
             foreach ($plugins as $plugin) {
-                self::include(Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $plugin->url . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets);
+                include PluginHelper::getRealPath(Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $plugin->url . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets);
             }
+        } else {
+            $_SESSION['plugin_actives'] = [];
         }
     }
 
