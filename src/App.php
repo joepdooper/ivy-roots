@@ -50,12 +50,12 @@ class App
     {
         self::$router = new \Bramus\Router\Router();
         self::$router->setBasePath(Path::get('SUBFOLDER'));
-        self::include(Path::get('PUBLIC_PATH') . $this->coreMiddlewareRoutes);
-        self::include(Template::file($this->templateRoutesAssets));
+        include Path::get('PUBLIC_PATH') . $this->coreMiddlewareRoutes;
+        include Template::file($this->templateRoutesAssets);
         $this->loadPluginRoutesAssets();
-        self::include(Path::get('PUBLIC_PATH') . $this->coreWebRoutes);
-        self::include(Path::get('PUBLIC_PATH') . $this->coreAdminRoutes);
-        self::include(Path::get('PUBLIC_PATH') . $this->coreErrorRoutes);
+        include Path::get('PUBLIC_PATH') . $this->coreWebRoutes;
+        include Path::get('PUBLIC_PATH') . $this->coreAdminRoutes;
+        include Path::get('PUBLIC_PATH') . $this->coreErrorRoutes;
         self::$router->run();
     }
 
@@ -72,23 +72,6 @@ class App
         (\Dotenv\Dotenv::createImmutable(Path::get('PUBLIC_PATH')))->load();
         $this->bootstrap();
         $this->loadRoutes();
-    }
-
-    private static function include(string $filePath): void
-    {
-        try {
-            $file = new \Symfony\Component\HttpFoundation\File\File($filePath, false);
-            $realPath = $file->getRealPath();
-
-            if ($realPath === false || !str_starts_with($realPath, Path::get('PUBLIC_PATH'))) {
-                Message::add('Unauthorized file access');
-                return;
-            }
-
-            include $realPath;
-        } catch (\Exception $e) {
-            Message::add('Error: ' . $e->getMessage(), Path::get('BASE_PATH'));
-        }
     }
 
 }
