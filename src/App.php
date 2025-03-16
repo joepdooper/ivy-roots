@@ -8,13 +8,6 @@ class App
 {
     private static \Bramus\Router\Router $router;
 
-    private string $templateRoutesAssets = 'template.php';
-    private string $pluginRoutesAssets = 'plugin.php';
-    private string $coreMiddlewareRoutes = 'routes/middleware.php';
-    private string $coreAdminRoutes = 'routes/admin.php';
-    private string $coreErrorRoutes = 'routes/error.php';
-    private string $coreWebRoutes = 'routes/web.php';
-
     public static function router(): Router
     {
         return self::$router;
@@ -39,7 +32,7 @@ class App
         if (!empty($plugins)) {
             $_SESSION['plugin_actives'] = array_map(fn($plugin) => $plugin->name, $plugins);
             foreach ($plugins as $plugin) {
-                include PluginHelper::getRealPath($this->pluginPath($plugin->url . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets));
+                require $this->pluginPath($plugin->url . DIRECTORY_SEPARATOR . 'plugin.php');
             }
         } else {
             $_SESSION['plugin_actives'] = [];
@@ -50,12 +43,12 @@ class App
     {
         self::$router = new \Bramus\Router\Router();
         self::$router->setBasePath(Path::get('SUBFOLDER'));
-        require $this->publicPath($this->coreMiddlewareRoutes);
-        require Template::file($this->templateRoutesAssets);
+        require $this->publicPath('routes/middleware.php');
+        require Template::file('template.php');
         $this->loadPluginRoutesAssets();
-        require $this->publicPath($this->coreWebRoutes);
-        require $this->publicPath($this->coreAdminRoutes);
-        require $this->publicPath($this->coreErrorRoutes);
+        require $this->publicPath('routes/web.php');
+        require $this->publicPath('routes/admin.php');
+        require $this->publicPath('routes/error.php');
         self::$router->run();
     }
 
