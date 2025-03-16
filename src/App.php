@@ -69,12 +69,12 @@ class App
 
     public function basePath($path = ''): string
     {
-        return $this->realPath(Path::get('BASE_PATH') . $path);
+        return Path::get('BASE_PATH') . $path;
     }
 
     public function publicPath($path = ''): string
     {
-        return $this->realPath(Path::get('PUBLIC_PATH') . $path);
+        return Path::get('PUBLIC_PATH') . $path;
     }
 
     public function pluginPath($path = ''): string
