@@ -69,17 +69,31 @@ class App
 
     public function basePath($path = ''): string
     {
-        return Path::get('BASE_PATH') . $path;
+        return $this->realPath(Path::get('BASE_PATH') . $path);
     }
 
     public function publicPath($path = ''): string
     {
-        return Path::get('PUBLIC_PATH') . $path;
+        return $this->realPath(Path::get('PUBLIC_PATH') . $path);
     }
 
     public function pluginPath($path = ''): string
     {
         return $this->publicPath(Path::get('PLUGIN_PATH') . $path);
+    }
+
+    private function realPath(string $path): string
+    {
+        $file = new \Symfony\Component\HttpFoundation\File\File($path);
+        $file = $file->getRealPath();
+
+        if ($file === false ||
+            (!str_starts_with($file, Path::get('BASE_PATH')) && !str_starts_with($file, Path::get('PUBLIC_PATH')))
+        ) {
+            throw new \Exception('Invalid file path: ' . $path);
+        }
+
+        return $file;
     }
 
 }
