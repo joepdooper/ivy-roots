@@ -110,6 +110,18 @@ class ProfileController extends Controller
         Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/profile');
     }
 
+    public function user(): void
+    {
+        $profile = (new Profile)->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
+        Template::view('admin/profile.latte', ['profile' => $profile]);
+    }
+
+    public function public($id): void
+    {
+        $profile = (new Profile)->where('id', $id)->fetchOne();
+        Template::view('include/profile.latte', ['profile' => $profile]);
+    }
+
     private function saveAvatar(): string
     {
         $this->file = new File;

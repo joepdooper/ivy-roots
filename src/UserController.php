@@ -27,6 +27,7 @@ class UserController extends Controller
     {
         $this->requirePost();
         $this->requireLogin();
+        $this->requireAdmin();
 
         $users_data = $this->request->get('user');
 
@@ -65,6 +66,16 @@ class UserController extends Controller
         }
 
         Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/user');
+    }
+
+    public function index(): void
+    {
+        $this->requireGet();
+        $this->requireLogin();
+        $this->requireAdmin();
+
+        $users = (new User)->fetchAll();
+        Template::view('admin/user.latte', ['users' => $users]);
     }
 
     /**
@@ -106,6 +117,11 @@ class UserController extends Controller
         Message::add('An email has been sent to ' . $this->request->get('email') . ' with a link to activate your account', Path::get('BASE_PATH') . 'admin/login');
     }
 
+    public function viewRegister(): void
+    {
+        Template::view('admin/register.latte');
+    }
+
 
     /**
      * @throws AuthError
@@ -129,6 +145,34 @@ class UserController extends Controller
         }
     }
 
+    public function viewLogin($selector = null, $token = null): void
+    {
+        if (isset($selector) && isset($token)) {
+            try {
+                if (User::getAuth()->isLoggedIn()) {
+                    try {
+                        User::getAuth()->logOutEverywhere();
+                    } catch (NotLoggedInException) {
+                        Message::add('Not logged in');
+                    }
+                }
+                User::getAuth()->confirmEmail($selector, $token);
+                Message::add('Email address has been verified', Path::get('BASE_PATH') . 'admin/login');
+            } catch (InvalidSelectorTokenPairException) {
+                Message::add('Invalid token');
+            } catch (TokenExpiredException) {
+                Message::add('Token expired');
+            } catch (UserAlreadyExistsException) {
+                Message::add('Email address already exists');
+            } catch (TooManyRequestsException) {
+                Message::add('Too many requests');
+            } catch (AuthError) {
+                Message::add('Auth error');
+            }
+        }
+        Template::view('admin/login.latte');
+    }
+
     /**
      * @throws AuthError
      */
@@ -144,6 +188,11 @@ class UserController extends Controller
         Template::hooks()->do_action('end_logout_action');
 
         Message::add('Logout successfully', Path::get('BASE_PATH'));
+    }
+
+    public function viewLogout(): void
+    {
+        Template::view('admin/logout.latte');
     }
 
     /**
@@ -192,6 +241,27 @@ class UserController extends Controller
                 Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/reset');
             }
         }
+    }
+
+    public function viewReset($selector = null, $token = null): void
+    {
+        if (isset($selector) && isset($token)) {
+            try {
+                User::getAuth()->canResetPasswordOrThrow($selector, $token);
+                Message::add('Create a new secure password');
+            } catch (InvalidSelectorTokenPairException $e) {
+                Message::add('Invalid token', Path::get('BASE_PATH') . 'admin/reset');
+            } catch (TokenExpiredException $e) {
+                Message::add('Token expired', Path::get('BASE_PATH') . 'admin/reset');
+            } catch (ResetDisabledException $e) {
+                Message::add('Password reset is disabled', Path::get('BASE_PATH') . 'admin/reset');
+            } catch (TooManyRequestsException $e) {
+                Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/reset');
+            } catch (AuthError) {
+                Message::add('Auth error', Path::get('BASE_PATH') . 'admin/reset');
+            }
+        }
+        Template::view('admin/reset.latte', ['selector' => $selector, 'token' => $token]);
     }
 
 }

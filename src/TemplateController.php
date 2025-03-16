@@ -12,6 +12,7 @@ class TemplateController extends Controller
     {
         $this->requirePost();
         $this->requireLogin();
+        $thid->requireAdmin();
 
         $templates_data = $this->request->get('template') ?? '';
 
@@ -34,7 +35,15 @@ class TemplateController extends Controller
         }
 
         Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/template');
+    }
 
+    public function index(): void
+    {
+        $this->requireGet();
+        $this->requireLogin();
+        $thid->requireAdmin();
+
+        Template::view('admin/template.latte');
     }
 
 }

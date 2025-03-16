@@ -77,6 +77,20 @@ abstract class Controller
         }
     }
 
+    protected function requireAdmin(): void
+    {
+        if (!User::canEditAsAdmin()) {
+            Message::add('You must have an admin role.', Path::get('BASE_PATH') . 'login');
+        }
+    }
+
+    protected function requireSuperAdmin(): void
+    {
+        if (!User::canEditAsSuperAdmin()) {
+            Message::add('You must have an super admin role.', Path::get('BASE_PATH') . 'login');
+        }
+    }
+
     protected function requireCsrf(): void
     {
         if (!isset($_SESSION['csrf_token']) ||

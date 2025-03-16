@@ -12,6 +12,7 @@ class SettingController extends Controller
     {
         $this->requirePost();
         $this->requireLogin();
+        $this->requireAdmin();
 
         $settings_data = $this->request->get('setting');
 
@@ -34,5 +35,14 @@ class SettingController extends Controller
         }
 
         Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/setting');
+    }
+    public function index(): void
+    {
+        $this->requireGet();
+        $this->requireLogin();
+        $this->requireAdmin();
+
+        $settings = (new Setting)->fetchAll();
+        Template::view('admin/setting.latte', ['settings' => $settings]);
     }
 }
