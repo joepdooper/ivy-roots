@@ -39,7 +39,7 @@ class App
         if (!empty($plugins)) {
             $_SESSION['plugin_actives'] = array_map(fn($plugin) => $plugin->name, $plugins);
             foreach ($plugins as $plugin) {
-                include PluginHelper::getRealPath(Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $plugin->url . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets);
+                include PluginHelper::getRealPath($this->pluginPath($plugin->url . DIRECTORY_SEPARATOR . $this->pluginRoutesAssets));
             }
         } else {
             $_SESSION['plugin_actives'] = [];
@@ -50,12 +50,12 @@ class App
     {
         self::$router = new \Bramus\Router\Router();
         self::$router->setBasePath(Path::get('SUBFOLDER'));
-        include Path::get('PUBLIC_PATH') . $this->coreMiddlewareRoutes;
-        include Template::file($this->templateRoutesAssets);
+        require $this->publicPath($this->coreMiddlewareRoutes);
+        require Template::file($this->templateRoutesAssets);
         $this->loadPluginRoutesAssets();
-        include Path::get('PUBLIC_PATH') . $this->coreWebRoutes;
-        include Path::get('PUBLIC_PATH') . $this->coreAdminRoutes;
-        include Path::get('PUBLIC_PATH') . $this->coreErrorRoutes;
+        require $this->publicPath($this->coreWebRoutes);
+        require $this->publicPath($this->coreAdminRoutes);
+        require $this->publicPath($this->coreErrorRoutes);
         self::$router->run();
     }
 
@@ -72,6 +72,21 @@ class App
         (\Dotenv\Dotenv::createImmutable(Path::get('PUBLIC_PATH')))->load();
         $this->bootstrap();
         $this->loadRoutes();
+    }
+
+    public function basePath($path = ''): string
+    {
+        return Path::get('BASE_PATH') . $path;
+    }
+
+    public function publicPath($path = ''): string
+    {
+        return Path::get('PUBLIC_PATH') . $path;
+    }
+
+    public function pluginPath($path = ''): string
+    {
+        return $this->publicPath(Path::get('PLUGIN_PATH') . $path);
     }
 
 }
