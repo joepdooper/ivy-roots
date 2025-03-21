@@ -5,14 +5,19 @@ namespace Ivy;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 
 abstract class Controller
 {
     protected Request $request;
+    protected FlashBag $flashBag;
 
     public function __construct()
     {
         $this->request = Request::createFromGlobals();
+        $this->flashBag = App::session()->getFlashBag();
     }
 
     protected function beforeAction(): void
@@ -47,18 +52,20 @@ abstract class Controller
         $this->requireGet();
     }
 
-    protected function requirePost(): void
+    protected function requirePost()
     {
         if (!$this->request->isMethod('POST')) {
-            Message::add('Invalid request method.', Path::get('BASE_PATH'));
+            $this->flashBag->add('error', 'Invalid request method.');
+            $this->redirect();
         }
         $this->requireCsrf();
     }
 
-    protected function requirePatch(): void
+    protected function requirePatch()
     {
         if (!$this->request->isMethod('PATCH')) {
-            Message::add('Invalid request method.', Path::get('BASE_PATH'));
+            $this->flashBag->add('error', 'Invalid request method.');
+            $this->redirect();
         }
         $this->requireCsrf();
     }
@@ -66,39 +73,42 @@ abstract class Controller
     protected function requireGet(): void
     {
         if (!$this->request->isMethod('GET')) {
-            Message::add('Invalid request method.', Path::get('BASE_PATH'));
+            $this->flashBag->add('error', 'Invalid request method.');
+            $this->redirect();
         }
     }
 
     protected function requireLogin(): void
     {
         if (!User::getAuth()->isLoggedIn()) {
-            Message::add('You must be logged in.', Path::get('BASE_PATH') . 'login');
+            $this->flashBag->add('error', 'You must be logged in.');
+            $this->redirect('login');
         }
     }
 
     protected function requireAdmin(): void
     {
         if (!User::canEditAsAdmin()) {
-            Message::add('You must have an admin role.', Path::get('BASE_PATH') . 'login');
+            $this->flashBag->add('error', 'You must have an admin role.');
+            $this->redirect('login');
         }
     }
 
     protected function requireSuperAdmin(): void
     {
         if (!User::canEditAsSuperAdmin()) {
-            Message::add('You must have an super admin role.', Path::get('BASE_PATH') . 'login');
+            $this->flashBag->add('error', 'You must have an super admin role.');
+            $this->redirect('login');
         }
     }
 
     protected function requireCsrf(): void
     {
-        if (!isset($_SESSION['csrf_token']) ||
-            !hash_equals(
-                $_SESSION['csrf_token'],
-                $this->request->get('csrf_token', '')
-            )) {
-            Message::add('Invalid security token.', Path::get('BASE_PATH'));
+        $csrfToken = App::session()->get('csrf_token');
+
+        if (!$csrfToken || !hash_equals($csrfToken, $this->request->get('csrf_token', ''))) {
+            $this->flashBag->add('error', 'Invalid security token.');
+            $this->redirect();
         }
     }
 
@@ -124,5 +134,10 @@ abstract class Controller
             return $file->store('uploads');
         }
         return null;
+    }
+
+    protected function redirect(string $url = '', int $statusCode = 302): void
+    {
+        (new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode))->send();
     }
 }

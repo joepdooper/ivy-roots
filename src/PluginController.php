@@ -14,7 +14,7 @@ class PluginController extends Controller
         $this->requireAdmin();
 
         $plugins_data = $this->request->get('plugin') ?? '';
-
+        $responses = [];
 
         foreach ($plugins_data as $plugin_data) {
 
@@ -22,12 +22,12 @@ class PluginController extends Controller
 
             if (!$this->plugin->hasId()) {
                 $this->pluginService = new PluginService($this->plugin);
-                $this->pluginService->install();
+                $responses[] = $this->pluginService->install();
             } else {
                 $this->plugin->where('id', $plugin_data['id'])->fetchOne()->populate($plugin_data);
                 if (isset($plugin_data['delete'])) {
                     $this->pluginService = new PluginService($this->plugin);
-                    $this->pluginService->uninstall();
+                    $responses[] = $this->pluginService->uninstall();
                 } else {
                     $this->plugin->update();
                 }
@@ -35,7 +35,12 @@ class PluginController extends Controller
 
         }
 
-        Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/plugin');
+        foreach ($responses as $response){
+            $this->flashBag->add($response['status'], $response['message']);
+        }
+
+        $this->flashBag->add('success', 'Update successfully');
+        $this->redirect('admin/plugin');
     }
 
     public function index($id = null): void

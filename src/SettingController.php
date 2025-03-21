@@ -26,15 +26,16 @@ class SettingController extends Controller
                     $this->setting->save($setting_data);
                 } else {
                     foreach ($validated as $string) {
-                        Message::add($string);
+                        $this->flashBag->add('error', $string);
                     }
                 }
             } catch (\Exception $e) {
-                Message::add($e->getMessage());
+                $this->flashBag->add('error', $e->getMessage());
             }
         }
 
-        Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/setting');
+        $this->flashBag->add('success', 'Update successfully');
+        $this->redirect('admin/setting');
     }
     public function index(): void
     {

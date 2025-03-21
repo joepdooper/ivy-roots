@@ -30,7 +30,7 @@ class ProfileController extends Controller
         ];
 
         if ((int) $this->request->get('user_id') !== (int) $_SESSION['auth_user_id']) {
-            Message::add('Invalid user ID');
+            $this->flashBag->add('error', 'Invalid user ID');
             return;
         }
 
@@ -79,17 +79,17 @@ class ProfileController extends Controller
                         $mail->setAltBody('Reset your email address with this link: ' . $url);
                         $mail->send();
                     });
-                    Message::add('An email has been sent to ' . $email . ' with a link to confirm the email address');
+                    $this->flashBag->add('success', 'An email has been sent to ' . $email . ' with a link to confirm the email address');
                 } catch (InvalidEmailException) {
-                    Message::add('Invalid email address');
+                    $this->flashBag->add('error', 'Invalid email address');
                 } catch (UserAlreadyExistsException) {
-                    Message::add('Email address already exists');
+                    $this->flashBag->add('error', 'Email address already exists');
                 } catch (EmailNotVerifiedException) {
-                    Message::add('Account not verified');
+                    $this->flashBag->add('error', 'Account not verified');
                 } catch (NotLoggedInException) {
-                    Message::add('Not logged in');
+                    $this->flashBag->add('error', 'Not logged in');
                 } catch (TooManyRequestsException) {
-                    Message::add('Too many requests');
+                    $this->flashBag->add('error', 'Too many requests');
                 }
             }
 
@@ -103,11 +103,12 @@ class ProfileController extends Controller
 
         } else {
             foreach ($validated as $string) {
-                Message::add($string);
+                $this->flashBag->add('error', $string);
             }
         }
 
-        Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/profile');
+        $this->flashBag->add('success', 'Update successfully');
+        $this->redirect('admin/profile');
     }
 
     public function user(): void

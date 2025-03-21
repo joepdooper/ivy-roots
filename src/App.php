@@ -3,13 +3,29 @@
 namespace Ivy;
 
 use Bramus\Router\Router;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
+use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;
 
 class App
 {
-    private static \Bramus\Router\Router $router;
+    private static Router $router;
+    private static Session $session;
+
+    public static function session(): Session
+    {
+        if (!isset(self::$session)) {
+            $storage = new NativeSessionStorage([], new NativeFileSessionHandler());
+            self::$session = new Session($storage);
+        }
+        return self::$session;
+    }
 
     public static function router(): Router
     {
+        if (!isset(self::$router)) {
+            self::$router = new Router();
+        }
         return self::$router;
     }
 
@@ -30,26 +46,25 @@ class App
     {
         $plugins = (new Plugin)->where('active', 1)->fetchAll();
         if (!empty($plugins)) {
-            $_SESSION['plugin_actives'] = array_map(fn($plugin) => $plugin->name, $plugins);
+            self::session()->set('plugin_actives', array_map(fn($plugin) => $plugin->name, $plugins));
             foreach ($plugins as $plugin) {
-                require $this->pluginPath($plugin->url . DIRECTORY_SEPARATOR . 'plugin.php');
+                require Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $plugin->url . DIRECTORY_SEPARATOR . 'plugin.php';
             }
         } else {
-            $_SESSION['plugin_actives'] = [];
+            self::session()->set('plugin_actives', []);
         }
     }
 
     private function loadRoutes(): void
     {
-        self::$router = new \Bramus\Router\Router();
-        self::$router->setBasePath(Path::get('SUBFOLDER'));
-        require $this->publicPath('routes/middleware.php');
+        self::router()->setBasePath(Path::get('SUBFOLDER'));
+        require Path::get('PUBLIC_PATH') . 'routes/middleware.php';
         require Template::file('template.php');
         $this->loadPluginRoutesAssets();
-        require $this->publicPath('routes/web.php');
-        require $this->publicPath('routes/admin.php');
-        require $this->publicPath('routes/error.php');
-        self::$router->run();
+        require Path::get('PUBLIC_PATH') . 'routes/web.php';
+        require Path::get('PUBLIC_PATH') . 'routes/admin.php';
+        require Path::get('PUBLIC_PATH') . 'routes/error.php';
+        self::router()->run();
     }
 
     private function bootstrap(): void
@@ -66,34 +81,4 @@ class App
         $this->bootstrap();
         $this->loadRoutes();
     }
-
-    public function basePath($path = ''): string
-    {
-        return Path::get('BASE_PATH') . $path;
-    }
-
-    public function publicPath($path = ''): string
-    {
-        return Path::get('PUBLIC_PATH') . $path;
-    }
-
-    public function pluginPath($path = ''): string
-    {
-        return $this->publicPath(Path::get('PLUGIN_PATH') . $path);
-    }
-
-    private function realPath(string $path): string
-    {
-        $file = new \Symfony\Component\HttpFoundation\File\File($path);
-        $file = $file->getRealPath();
-
-        if ($file === false ||
-            (!str_starts_with($file, Path::get('BASE_PATH')) && !str_starts_with($file, Path::get('PUBLIC_PATH')))
-        ) {
-            throw new \Exception('Invalid file path: ' . $path);
-        }
-
-        return $file;
-    }
-
 }

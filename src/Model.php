@@ -210,11 +210,7 @@ abstract class Model
             $set = array_intersect_key($set, array_flip($this->columns));
         }
 
-        try {
-            DB::getConnection()->insert($this->table, $set);
-        } catch (IntegrityConstraintViolationException $e) {
-            Message::add($e->getMessage());
-        }
+        DB::getConnection()->insert($this->table, $set);
 
         $this->resetQuery();
 
@@ -237,11 +233,7 @@ abstract class Model
             $this->bindings['id'] = $this->id;
         }
 
-        try {
-            DB::getConnection()->update($this->table, $set, $this->bindings);
-        } catch (IntegrityConstraintViolationException $e) {
-            Message::add($e->getMessage());
-        }
+        DB::getConnection()->update($this->table, $set, $this->bindings);
 
         $this->resetQuery();
 
@@ -254,11 +246,7 @@ abstract class Model
             $this->bindings['id'] = $this->id;
         }
 
-        try {
-            DB::getConnection()->delete($this->table, $this->bindings);
-        } catch (EmptyWhereClauseError $e) {
-            Message::add($e->getMessage());
-        }
+        DB::getConnection()->delete($this->table, $this->bindings);
 
         $this->resetQuery();
 

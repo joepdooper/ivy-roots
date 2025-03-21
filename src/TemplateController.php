@@ -12,7 +12,7 @@ class TemplateController extends Controller
     {
         $this->requirePost();
         $this->requireLogin();
-        $thid->requireAdmin();
+        $this->requireAdmin();
 
         $templates_data = $this->request->get('template') ?? '';
 
@@ -26,22 +26,23 @@ class TemplateController extends Controller
                     $this->template->save($template_data);
                 } else {
                     foreach ($validated as $string) {
-                        Message::add($string);
+                        $this->flashBag->add('error', $string);
                     }
                 }
             } catch (\Exception $e) {
-                Message::add($e->getMessage());
+                $this->flashBag->add('error', $e->getMessage());
             }
         }
 
-        Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/template');
+        $this->flashBag->add('success', 'Update successfully');
+        $this->redirect('admin/template');
     }
 
     public function index(): void
     {
         $this->requireGet();
         $this->requireLogin();
-        $thid->requireAdmin();
+        $this->requireAdmin();
 
         Template::view('admin/template.latte');
     }

@@ -50,7 +50,7 @@ final class Path
         $serverPort = $_ENV['SERVER_PORT'] ?? $_SERVER['HTTP_X_FORWARDED_PORT'] ?? $_SERVER['SERVER_PORT'] ?? 80;
         $serverPort = ($serverPort != 80) ? ':' . $serverPort : '';
 
-        self::$paths['BASE_PATH'] = rtrim(self::$paths['DOMAIN'] . $serverPort . '/' . self::$paths['SUBFOLDER'], '/') . '/';
+        self::$paths['BASE_PATH'] = rtrim(self::$paths['DOMAIN'] . $serverPort . DIRECTORY_SEPARATOR . self::$paths['SUBFOLDER'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         self::$initialized = true;
     }

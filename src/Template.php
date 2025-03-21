@@ -4,6 +4,7 @@ namespace Ivy;
 
 use Hooks;
 use Latte\Engine;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class Template extends Model
 {
@@ -32,6 +33,7 @@ class Template extends Model
     protected static array $params = [];
     protected static ?string $block;
     protected static ?Hooks $hooks = null;
+    protected static ?Session $session = null;
 
     // -- file
 
@@ -58,8 +60,8 @@ class Template extends Model
             self::$latte->addFunction('icon', function ($icon) {
                 return file_get_contents(Path::get('PUBLIC_PATH') . "/media/icon/" . $icon);
             });
-            self::$latte->addFunction('text', function ($language_key) {
-                return Language::translate($language_key) ?? $language_key;
+            self::$latte->addFunction('text', function ($language_key, $variables = null) {
+                return Language::translate($language_key, $variables) ?? $language_key;
             });
             self::$latte->addFunction('path', function ($path_key) {
                 return Path::get($path_key);
@@ -74,7 +76,7 @@ class Template extends Model
                 return new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">');
             });
             self::$latte->setTempDirectory(Path::get('PUBLIC_PATH') . 'cache/templates');
-            self::$latte->setAutoRefresh($_ENV['APP_ENV'] === 'development');
+            // self::$latte->setAutoRefresh($_ENV['APP_ENV'] === 'development');
             self::$latte->addExtension(new \Ivy\Tags\ButtonTag());
             self::$latte->addProvider('customButtonRender', function ($args) {
                 $name = self::file('buttons/button.'.$args['type'].'.latte');
@@ -88,7 +90,7 @@ class Template extends Model
         self::$latte->render($name, $params, $block);
     }
 
-    public static function name(string $name, object|array $params = [], ?string $block = null): bool|string
+    public static function name(string $name, array $params = [], ?string $block = null): string
     {
         self::$name = self::file($name);
         self::$params = $params;
@@ -96,25 +98,27 @@ class Template extends Model
         return self::$name;
     }
 
-    public static function view(string $name, object|array $params = [], ?string $block = null): void
+    public static function view(string $name, array $params = [], ?string $block = null): void
     {
+        $params['flashes'] = App::session()->getFlashBag()->all();
         self::name($name, $params, $block);
     }
 
-    public static function render(string $name, object|array $params = [], ?string $block = null): void
+    public static function render(string $name, array $params = [], ?string $block = null): void
     {
         self::latte(self::name($name), $params, $block);
     }
 
-    public static function body(string $name, object|array $params = [], ?string $block = null): void
+    public static function body(string $name, array $params = [], ?string $block = null): void
     {
         if (!self::$name) {
+            $params['flashes'] = isset($params['flashes']) ? $params['flashes'] : [];
             self::name($name, $params, $block);
         }
         self::latte(self::$name, self::$params);
     }
 
-    public static function head(string $name, object|array $params = [], ?string $block = null): void
+    public static function head(string $name, array $params = [], ?string $block = null): void
     {
         if (file_exists(_TEMPLATE_SUB . $name)) {
             $name = _TEMPLATE_SUB . $name;
@@ -177,10 +181,10 @@ class Template extends Model
 
     public static function generateCsrfToken(): string
     {
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        if (!App::session()->has('csrf_token')) {
+            App::session()->set('csrf_token', bin2hex(random_bytes(32)));
         }
-        return $_SESSION['csrf_token'];
+        return App::session()->get('csrf_token');
     }
 
 }

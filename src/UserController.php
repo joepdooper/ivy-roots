@@ -38,7 +38,7 @@ class UserController extends Controller
                 try {
                     $this->user::getAuth()->admin()->deleteUserById($this->user->id);
                 } catch (UnknownIdException|AuthError $e) {
-                    Message::add('Something went wrong: ' . $e);
+                    $this->flashBag->add('error', 'Something went wrong: ' . $e);
                 }
             } else {
                 try {
@@ -60,12 +60,13 @@ class UserController extends Controller
                         }
                     }
                 } catch (UnknownIdException) {
-                    Message::add('Unknown ID');
+                    $this->flashBag->add('error', 'Unknown ID');
                 }
             }
         }
 
-        Message::add('Update successfully', Path::get('BASE_PATH') . 'admin/user');
+        $this->flashBag->add('success', 'Update successfully');
+        $this->redirect('admin/user');
     }
 
     public function index(): void
@@ -105,16 +106,21 @@ class UserController extends Controller
                 self::$auth->admin()->addRoleForUserById($userId, constant($roleConstant));
             }
         } catch (InvalidEmailException) {
-            Message::add('Invalid email address', Path::get('BASE_PATH') . 'admin/register');
+            $this->flashBag->add('error', 'Invalid email address');
+            $this->redirect('admin/register');
         } catch (InvalidPasswordException) {
-            Message::add('Invalid password', Path::get('BASE_PATH') . 'admin/register');
+            $this->flashBag->add('error', 'Invalid password');
+            $this->redirect('admin/register');
         } catch (UserAlreadyExistsException) {
-            Message::add('User already exists', Path::get('BASE_PATH') . 'admin/register');
+            $this->flashBag->add('error', 'User already exists');
+            $this->redirect('admin/register');
         } catch (TooManyRequestsException) {
-            Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/register');
+            $this->flashBag->add('error', 'Too many requests');
+            $this->redirect('admin/register');
         }
 
-        Message::add('An email has been sent to ' . $this->request->get('email') . ' with a link to activate your account', Path::get('BASE_PATH') . 'admin/login');
+        $this->flashBag->add('success', 'An email has been sent to ' . $this->request->get('email') . ' with a link to activate your account');
+        $this->redirect('admin/login');
     }
 
     public function viewRegister(): void
@@ -133,15 +139,20 @@ class UserController extends Controller
 
         try {
             User::getAuth()->login($this->request->get('email'), $this->request->get('password'));
-            Message::add('Welcome ' . User::getAuth()->getUsername(), Path::get('BASE_PATH') . 'admin/profile');
+            $this->flashBag->add('success', 'Welcome ' . User::getAuth()->getUsername());
+            $this->redirect('admin/profile');
         } catch (InvalidEmailException) {
-            Message::add('Wrong email address', Path::get('BASE_PATH') . 'admin/login');
+            $this->flashBag->add('error', 'Wrong email address');
+            $this->redirect('admin/login');
         } catch (InvalidPasswordException) {
-            Message::add('Wrong password', Path::get('BASE_PATH') . 'admin/login');
+            $this->flashBag->add('error', 'Wrong password');
+            $this->redirect('admin/login');
         } catch (EmailNotVerifiedException) {
-            Message::add('Email not verified', Path::get('BASE_PATH') . 'admin/login');
+            $this->flashBag->add('error', 'Email not verified');
+            $this->redirect('admin/login');
         } catch (TooManyRequestsException) {
-            Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/login');
+            $this->flashBag->add('error', 'Too many requests');
+            $this->redirect('admin/login');
         }
     }
 
@@ -153,21 +164,21 @@ class UserController extends Controller
                     try {
                         User::getAuth()->logOutEverywhere();
                     } catch (NotLoggedInException) {
-                        Message::add('Not logged in');
+                        $this->flashBag->add('error', 'Not logged in');
                     }
                 }
                 User::getAuth()->confirmEmail($selector, $token);
-                Message::add('Email address has been verified', Path::get('BASE_PATH') . 'admin/login');
+                $this->flashBag->add('success', 'Email address has been verified');
             } catch (InvalidSelectorTokenPairException) {
-                Message::add('Invalid token');
+                $this->flashBag->add('error', 'Invalid token');
             } catch (TokenExpiredException) {
-                Message::add('Token expired');
+                $this->flashBag->add('error', 'Token expired');
             } catch (UserAlreadyExistsException) {
-                Message::add('Email address already exists');
+                $this->flashBag->add('error', 'Email address already exists');
             } catch (TooManyRequestsException) {
-                Message::add('Too many requests');
+                $this->flashBag->add('error', 'Too many requests');
             } catch (AuthError) {
-                Message::add('Auth error');
+                $this->flashBag->add('error', 'Auth error');
             }
         }
         Template::view('admin/login.latte');
@@ -187,7 +198,8 @@ class UserController extends Controller
 
         Template::hooks()->do_action('end_logout_action');
 
-        Message::add('Logout successfully', Path::get('BASE_PATH'));
+        $this->flashBag->add('success', 'Logout successfully');
+        $this->redirect();
     }
 
     public function viewLogout(): void
@@ -214,31 +226,42 @@ class UserController extends Controller
                     $mail->send();
                 });
             } catch (InvalidEmailException) {
-                Message::add('Invalid email address', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Invalid email address');
+                $this->redirect('admin/reset');
             } catch (EmailNotVerifiedException) {
-                Message::add('Email not verified', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Email not verified');
+                $this->redirect('admin/reset');
             } catch (ResetDisabledException) {
-                Message::add('Password reset is disabled', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Password reset is disabled');
+                $this->redirect('admin/reset');
             } catch (TooManyRequestsException) {
-                Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Too many requests');
+                $this->redirect('admin/reset');
             }
-            Message::add('An email has been sent to ' . $this->request->get('email') . ' with a link to reset your password', Path::get('BASE_PATH') . 'admin/reset');
+            $this->flashBag->add('success', 'An email has been sent to ' . $this->request->get('email') . ' with a link to reset your password');
+            $this->redirect('admin/reset');
         }
 
         if ($this->request->get('password')) {
             try {
                 User::getAuth()->resetPassword($this->request->get('selector'), $this->request->get('token'), $this->request->get('password'));
-                Message::add('Password has been reset', Path::get('BASE_PATH') . 'admin/login');
+                $this->flashBag->add('success', 'Password has been reset');
+                $this->redirect('admin/login');
             } catch (InvalidSelectorTokenPairException) {
-                Message::add('Invalid token', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Invalid token');
+                $this->redirect('admin/reset');
             } catch (TokenExpiredException) {
-                Message::add('Token expired', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Token expired');
+                $this->redirect('admin/reset');
             } catch (ResetDisabledException) {
-                Message::add('Password reset is disabled', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Password reset is disabled');
+                $this->redirect('admin/reset');
             } catch (InvalidPasswordException) {
-                Message::add('Invalid password', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Invalid password');
+                $this->redirect('admin/reset');
             } catch (TooManyRequestsException) {
-                Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Too many requests');
+                $this->redirect('admin/reset');
             }
         }
     }
@@ -248,17 +271,22 @@ class UserController extends Controller
         if (isset($selector) && isset($token)) {
             try {
                 User::getAuth()->canResetPasswordOrThrow($selector, $token);
-                Message::add('Create a new secure password');
+                $this->flashBag->add('success', 'Create a new secure password');
             } catch (InvalidSelectorTokenPairException $e) {
-                Message::add('Invalid token', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Invalid token');
+                $this->redirect('admin/reset');
             } catch (TokenExpiredException $e) {
-                Message::add('Token expired', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Token expired');
+                $this->redirect('admin/reset');
             } catch (ResetDisabledException $e) {
-                Message::add('Password reset is disabled', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Password reset is disabled');
+                $this->redirect('admin/reset');
             } catch (TooManyRequestsException $e) {
-                Message::add('Too many requests', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Too many requests');
+                $this->redirect('admin/reset');
             } catch (AuthError) {
-                Message::add('Auth error', Path::get('BASE_PATH') . 'admin/reset');
+                $this->flashBag->add('error', 'Auth error');
+                $this->redirect('admin/reset');
             }
         }
         Template::view('admin/reset.latte', ['selector' => $selector, 'token' => $token]);

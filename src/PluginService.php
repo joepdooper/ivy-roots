@@ -13,7 +13,7 @@ class PluginService
         $this->plugin = $plugin;
     }
 
-    public function install(): void
+    public function install(): array
     {
         $this->plugin->setInfo();
 
@@ -21,7 +21,7 @@ class PluginService
             if (!empty($missing = PluginDependencyChecker::getMissingDependencies($this->plugin->getInfo()->getDependencies()))) {
                 $count = count($missing);
                 $message = "This plugin has " . ($count > 1 ? "dependencies" : "dependency") . ". Please install the " . ($count > 1 ? "plugins" : "plugin") . " " . implode(", ", $missing);
-                Message::add($message, Path::get('BASE_PATH') . 'admin/plugin');
+                return ['status' => 'error', 'message' => $message];
             }
 
             if (isset($this->plugin->getInfo()->getDatabase()['install']) && !empty($this->plugin->getInfo()->getDatabase()['install']) && !empty($this->plugin->getInfo()->getUrl())) {
@@ -36,12 +36,14 @@ class PluginService
             if (!empty($this->plugin->getInfo()->getCollection())) {
                 (new PluginCollectionHandler($this->plugin))->install();
             }
+
+            return ['status' => 'success', 'message' => Language::translate('plugin.installed_successfully', ['plugin' => $this->plugin->name])];
         } catch (Exception $e) {
-            Message::add("Error installing plugin: " . $e->getMessage(), _BASE_PATH . 'admin/plugin');
+            return ['status' => 'error', 'message' => 'Error installing plugin: ' . $e->getMessage()];
         }
     }
 
-    public function uninstall(): void
+    public function uninstall(): array
     {
         $this->plugin->setInfo();
 
@@ -58,8 +60,9 @@ class PluginService
             }
 
             $this->plugin->delete();
+            return ['status' => 'success', 'message' => Language::translate('plugin.uninstalled_successfully', ['plugin' => $this->plugin->name])];
         } catch (Exception $e) {
-            Message::add("Error uninstalling plugin: " . $e->getMessage(), Path::get('BASE_PATH') . 'admin/plugin');
+            return ['status' => 'error', 'message' => 'Error deleting plugin: ' . $e->getMessage()];
         }
     }
 }

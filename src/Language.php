@@ -17,7 +17,7 @@ class Language
         self::$defaultLang = $lang;
     }
 
-    public static function translate($key)
+    public static function translate($key, $variables)
     {
         $keys = explode('.', $key);
         $firstKey = array_shift($keys);
@@ -37,6 +37,12 @@ class Language
 
             if(self::$translations[$firstKey.'_'.$secondKey]){
                 $translation = self::getNestedTranslation(self::$translations[$firstKey.'_'.$secondKey], $keys);
+            }
+        }
+
+        if (!empty($translation) && is_string($translation) && !empty($variables)) {
+            foreach ($variables as $placeholder => $value) {
+                $translation = str_replace(":{$placeholder}", $value, $translation);
             }
         }
 
