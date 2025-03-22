@@ -17,6 +17,13 @@ class ProfileController extends Controller
     private Profile $profile;
     private File $file;
 
+    public function before(): void
+    {
+        if (!User::getAuth()->isLoggedIn()) {
+            $this->redirect('admin/login');
+        }
+    }
+
     public function post(): void
     {
         $this->requirePost();

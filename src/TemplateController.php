@@ -8,6 +8,22 @@ class TemplateController extends Controller
 {
     protected Template $template;
 
+    public function before(): void
+    {
+        if (!User::getAuth()->isLoggedIn() && Setting::getStash()['private']->bool) {
+            if (Path::get('CURRENT_PAGE') != Path::get('BASE_PATH') . 'admin/login') {
+                $this->redirect('admin/login');
+            }
+        }
+    }
+
+    public function dynamicRoute($route, $identifier): void
+    {
+        Template::$route = htmlentities($route);
+        Template::$identifier = htmlentities($identifier);
+        Template::$url = DIRECTORY_SEPARATOR . Template::$route . DIRECTORY_SEPARATOR . Template::$identifier;
+    }
+
     public function post(): void
     {
         $this->requirePost();

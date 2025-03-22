@@ -23,6 +23,15 @@ class UserController extends Controller
 {
     private User $user;
 
+    public function before(): void
+    {
+        if (User::getAuth()->isLoggedIn()) {
+            $this->redirect('admin/profile');
+        } else {
+            $this->redirect('admin/login');
+        }
+    }
+
     public function post(): void
     {
         $this->requirePost();
@@ -79,6 +88,13 @@ class UserController extends Controller
         Template::view('admin/user.latte', ['users' => $users]);
     }
 
+    public function beforeRegister(): void
+    {
+        if (User::getAuth()->isLoggedIn()) {
+            $this->redirect('admin/profile');
+        }
+    }
+
     /**
      * @throws UnknownIdException
      * @throws AuthError
@@ -128,6 +144,12 @@ class UserController extends Controller
         Template::view('admin/register.latte');
     }
 
+    public function beforeLogin(): void
+    {
+        if (User::getAuth()->isLoggedIn()) {
+            $this->redirect('admin/profile');
+        }
+    }
 
     /**
      * @throws AuthError
@@ -184,6 +206,13 @@ class UserController extends Controller
         Template::view('admin/login.latte');
     }
 
+    public function beforeLogout(): void
+    {
+        if (!User::getAuth()->isLoggedIn()) {
+            $this->redirect('admin/login');
+        }
+    }
+
     /**
      * @throws AuthError
      */
@@ -194,17 +223,22 @@ class UserController extends Controller
         Template::hooks()->do_action('start_logout_action');
 
         User::getAuth()->logOut();
-        User::getAuth()->destroySession();
 
         Template::hooks()->do_action('end_logout_action');
 
-        $this->flashBag->add('success', 'Logout successfully');
         $this->redirect();
     }
 
     public function viewLogout(): void
     {
         Template::view('admin/logout.latte');
+    }
+
+    public function beforeReset(): void
+    {
+        if (User::getAuth()->isLoggedIn()) {
+            $this->redirect('admin/profile');
+        }
     }
 
     /**

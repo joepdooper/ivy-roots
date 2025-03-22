@@ -140,4 +140,26 @@ abstract class Controller
     {
         (new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode))->send();
     }
+
+    public function authorize(string $ability, $model)
+    {
+        $policyClass = $model . 'Policy';
+        if (!class_exists($policyClass)) {
+            $policyClass = class_basename($model) . 'Policy';
+        }
+
+        if (!class_exists($policyClass)) {
+            throw new Exception("Policy [$policyClass] not found.");
+        }
+
+        if (!method_exists($policyClass, $ability)) {
+            throw new Exception("Method [$ability] does not exist in [$policyClass].");
+        }
+
+        if (!call_user_func([$policyClass, $ability], $model)) {
+            throw new Exception("Unauthorized action.");
+        }
+
+        return true;
+    }
 }

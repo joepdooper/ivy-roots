@@ -7,11 +7,24 @@ class PluginController extends Controller
     private Plugin $plugin;
     private PluginService $pluginService;
 
+    public function before(): void
+    {
+        if (User::getAuth()->isLoggedIn()) {
+            if (!User::canEditAsSuperAdmin()) {
+                $this->redirect();
+            }
+        } else {
+            $this->redirect('admin/login');
+        }
+    }
+
     public function post(): void
     {
         $this->requirePost();
         $this->requireLogin();
-        $this->requireAdmin();
+        $this->requireSuperAdmin();
+
+        // $this->authorize('post',Plugin::class);
 
         $plugins_data = $this->request->get('plugin') ?? '';
         $responses = [];

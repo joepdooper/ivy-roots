@@ -23,8 +23,9 @@ class DB
                 $_ENV['DB_PASSWORD']
             );
             self::$connection = PdoDatabase::fromPdo($pdo);
-        } catch (PDOException) {
-            die("ERROR: Could not connect");
+        } catch (PDOException $e) {
+            error_log("Database Connection Error: " . $e->getMessage());
+            throw new RuntimeException("Database connection failed.");
         }
     }
 
