@@ -20,38 +20,6 @@ abstract class Controller
         $this->flashBag = App::session()->getFlashBag();
     }
 
-    protected function beforeAction(): void
-    {
-        $method = $this->request->getMethod();
-
-        switch ($method) {
-            case 'POST':
-                $this->post();
-                break;
-            case 'PATCH':
-                $this->patch();
-                break;
-            case 'GET':
-                $this->get();
-                break;
-        }
-    }
-
-    public function post(): void
-    {
-        $this->requirePost();
-    }
-
-    public function patch(): void
-    {
-        $this->requirePatch();
-    }
-
-    public function get(): void
-    {
-        $this->requireGet();
-    }
-
     protected function requirePost()
     {
         if (!$this->request->isMethod('POST')) {
@@ -82,7 +50,7 @@ abstract class Controller
     {
         if (!User::getAuth()->isLoggedIn()) {
             $this->flashBag->add('error', 'You must be logged in.');
-            $this->redirect('login');
+            $this->redirect('admin/login');
         }
     }
 
@@ -90,15 +58,7 @@ abstract class Controller
     {
         if (!User::canEditAsAdmin()) {
             $this->flashBag->add('error', 'You must have an admin role.');
-            $this->redirect('login');
-        }
-    }
-
-    protected function requireSuperAdmin(): void
-    {
-        if (!User::canEditAsSuperAdmin()) {
-            $this->flashBag->add('error', 'You must have an super admin role.');
-            $this->redirect('login');
+            $this->redirect('admin/login');
         }
     }
 
@@ -141,22 +101,48 @@ abstract class Controller
         (new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode))->send();
     }
 
+    protected function beforeAuthorize(): void
+    {
+        $method = $this->request->getMethod();
+
+        switch ($method) {
+            case 'POST':
+                $this->requirePost();
+                break;
+            case 'PATCH':
+                $this->requirePatch();
+                break;
+            case 'GET':
+                $this->requireGet();
+                break;
+        }
+    }
+
     public function authorize(string $ability, $model)
     {
-        $policyClass = $model . 'Policy';
-        if (!class_exists($policyClass)) {
-            $policyClass = class_basename($model) . 'Policy';
+        $this->beforeAuthorize();
+
+        $modelClass = is_object($model) ? get_class($model) : $model;
+
+        if (!class_exists($modelClass)) {
+            throw new Exception("Model [$modelClass] not found.");
         }
 
-        if (!class_exists($policyClass)) {
-            throw new Exception("Policy [$policyClass] not found.");
+        $shortName = basename(str_replace('\\', '/', $modelClass));
+        $policyClass = "Ivy\\Policies\\{$shortName}Policy";
+        $alternativePolicyClass = "{$modelClass}Policy";
+
+        if (!class_exists($policyClass) && !class_exists($alternativePolicyClass)) {
+            throw new Exception("Policy not found for [$shortName].");
         }
+
+        $policyClass = class_exists($policyClass) ? $policyClass : $alternativePolicyClass;
 
         if (!method_exists($policyClass, $ability)) {
             throw new Exception("Method [$ability] does not exist in [$policyClass].");
         }
 
-        if (!call_user_func([$policyClass, $ability], $model)) {
+        if (!$policyClass::$ability(new $modelClass)) {
             throw new Exception("Unauthorized action.");
         }
 

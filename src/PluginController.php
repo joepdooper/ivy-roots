@@ -20,11 +20,7 @@ class PluginController extends Controller
 
     public function post(): void
     {
-        $this->requirePost();
-        $this->requireLogin();
-        $this->requireSuperAdmin();
-
-        // $this->authorize('post',Plugin::class);
+        $this->authorize('post',Plugin::class);
 
         $plugins_data = $this->request->get('plugin') ?? '';
         $responses = [];
@@ -58,9 +54,7 @@ class PluginController extends Controller
 
     public function index($id = null): void
     {
-        $this->requireGet();
-        $this->requireLogin();
-        $this->requireAdmin();
+        $this->authorize('index',Plugin::class);
 
         if($id) {
             $parent_id = (new Plugin)->where('url', $id)->fetchOne()->getId();
