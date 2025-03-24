@@ -26,9 +26,8 @@ class TemplateController extends Controller
 
     public function post(): void
     {
-        $this->requirePost();
-        $this->requireLogin();
-        $this->requireAdmin();
+        $this->authorize('post', Template::class);
+
 
         $templates_data = $this->request->get('template') ?? '';
 
@@ -56,9 +55,7 @@ class TemplateController extends Controller
 
     public function index(): void
     {
-        $this->requireGet();
-        $this->requireLogin();
-        $this->requireAdmin();
+        $this->authorize('index', Template::class);
 
         Template::view('admin/template.latte');
     }

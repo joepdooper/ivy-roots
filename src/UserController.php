@@ -34,9 +34,7 @@ class UserController extends Controller
 
     public function post(): void
     {
-        $this->requirePost();
-        $this->requireLogin();
-        $this->requireAdmin();
+        $this->authorize('post', User::class);
 
         $users_data = $this->request->get('user');
 
@@ -80,9 +78,7 @@ class UserController extends Controller
 
     public function index(): void
     {
-        $this->requireGet();
-        $this->requireLogin();
-        $this->requireAdmin();
+        $this->authorize('index', User::class);
 
         $users = (new User)->fetchAll();
         Template::view('admin/user.latte', ['users' => $users]);

@@ -2,17 +2,16 @@
 
 namespace Ivy\Policies;
 
-use Ivy\Plugin;
 use Ivy\User;
 
-class PluginPolicy
+class UserPolicy
 {
-    public static function post(Plugin $plugin): bool
+    public static function post(User $user): bool
     {
         return User::canEditAsSuperAdmin();
     }
 
-    public static function index(Plugin $plugin): bool
+    public static function index(User $user): bool
     {
         return User::canEditAsAdmin();
     }

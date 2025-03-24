@@ -26,6 +26,8 @@ class ProfileController extends Controller
 
     public function post(): void
     {
+        $this->authorize('post', Profile::class);
+
         $data = [
             'user_id' => $this->request->get('user_id'),
             'username' => $this->request->get('username'),
@@ -63,7 +65,6 @@ class ProfileController extends Controller
         if ($validated === true) {
 
             $this->profile = (new Profile)->where('user_id', $this->request->get('user_id'))->fetchOne();
-            $this->authorize('post', $this->profile);
 
             if(User::getAuth()->getUsername() !== $data['username']) {
                 (new User)->where('id', $this->request->get('user_id'))->populate(

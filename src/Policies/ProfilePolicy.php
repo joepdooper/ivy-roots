@@ -5,7 +5,7 @@ namespace Ivy\Policies;
 use Ivy\Profile;
 use Ivy\User;
 
-class ProfilePolicy extends Policy
+class ProfilePolicy
 {
     public static function post(Profile $profile): bool
     {

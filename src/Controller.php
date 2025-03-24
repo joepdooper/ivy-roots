@@ -54,14 +54,6 @@ abstract class Controller
         }
     }
 
-    protected function requireAdmin(): void
-    {
-        if (!User::canEditAsAdmin()) {
-            $this->flashBag->add('error', 'You must have an admin role.');
-            $this->redirect('admin/login');
-        }
-    }
-
     protected function requireCsrf(): void
     {
         $csrfToken = App::session()->get('csrf_token');
@@ -125,25 +117,25 @@ abstract class Controller
         $modelClass = is_object($model) ? get_class($model) : $model;
 
         if (!class_exists($modelClass)) {
-            throw new Exception("Model [$modelClass] not found.");
+            throw new \Exception("Model [$modelClass] not found.");
         }
 
         $shortName = basename(str_replace('\\', '/', $modelClass));
         $policyClass = "Ivy\\Policies\\{$shortName}Policy";
         $alternativePolicyClass = "{$modelClass}Policy";
 
-        if (!class_exists($policyClass) && !class_exists($alternativePolicyClass)) {
-            throw new Exception("Policy not found for [$shortName].");
-        }
-
         $policyClass = class_exists($policyClass) ? $policyClass : $alternativePolicyClass;
 
+        if (!class_exists($policyClass)) {
+            throw new \Exception("Policy not found for [$shortName].");
+        }
+
         if (!method_exists($policyClass, $ability)) {
-            throw new Exception("Method [$ability] does not exist in [$policyClass].");
+            throw new \Exception("Method [$ability] does not exist in [$policyClass].");
         }
 
         if (!$policyClass::$ability(new $modelClass)) {
-            throw new Exception("Unauthorized action.");
+            throw new \Exception("Unauthorized action.");
         }
 
         return true;

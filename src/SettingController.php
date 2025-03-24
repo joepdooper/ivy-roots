@@ -10,9 +10,7 @@ class SettingController extends Controller
 
     public function post(): void
     {
-        $this->requirePost();
-        $this->requireLogin();
-        $this->requireAdmin();
+        $this->authorize('post', Setting::class);
 
         $settings_data = $this->request->get('setting');
 
@@ -39,9 +37,7 @@ class SettingController extends Controller
     }
     public function index(): void
     {
-        $this->requireGet();
-        $this->requireLogin();
-        $this->requireAdmin();
+        $this->authorize('index', Setting::class);
 
         $settings = (new Setting)->fetchAll();
         Template::view('admin/setting.latte', ['settings' => $settings]);
