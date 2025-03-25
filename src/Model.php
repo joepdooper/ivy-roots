@@ -157,8 +157,8 @@ abstract class Model
     public function fetchAll(): array
     {
         $rows = !empty($this->bindings)
-            ? DB::getConnection()->select($this->query, $this->bindings)
-            : DB::getConnection()->select($this->query);
+            ? App::db()->select($this->query, $this->bindings)
+            : App::db()->select($this->query);
         $this->resetQuery();
 
         return array_map(fn($row) => static::createInstance()->populate($row), $rows ?? []);
@@ -167,8 +167,8 @@ abstract class Model
     public function fetchOne(): ?static
     {
         $data = !empty($this->bindings)
-            ? DB::getConnection()->selectRow($this->query, $this->bindings)
-            : DB::getConnection()->selectRow($this->query);
+            ? App::db()->selectRow($this->query, $this->bindings)
+            : App::db()->selectRow($this->query);
         $this->resetQuery();
 
         return $data ? $this->createInstance()->populate($data) : null;
@@ -210,11 +210,11 @@ abstract class Model
             $set = array_intersect_key($set, array_flip($this->columns));
         }
 
-        DB::getConnection()->insert($this->table, $set);
+        App::db()->insert($this->table, $set);
 
         $this->resetQuery();
 
-        return DB::getConnection()->getLastInsertId();
+        return App::db()->getLastInsertId();
     }
 
     public function update(): bool|int
@@ -233,11 +233,11 @@ abstract class Model
             $this->bindings['id'] = $this->id;
         }
 
-        DB::getConnection()->update($this->table, $set, $this->bindings);
+        App::db()->update($this->table, $set, $this->bindings);
 
         $this->resetQuery();
 
-        return DB::getConnection()->getLastInsertId();
+        return App::db()->getLastInsertId();
     }
 
     public function delete(): bool|int|string
@@ -246,11 +246,11 @@ abstract class Model
             $this->bindings['id'] = $this->id;
         }
 
-        DB::getConnection()->delete($this->table, $this->bindings);
+        App::db()->delete($this->table, $this->bindings);
 
         $this->resetQuery();
 
-        return DB::getConnection()->getLastInsertId();
+        return App::db()->getLastInsertId();
     }
 
     public function save(array $data): bool|int
@@ -289,7 +289,7 @@ abstract class Model
 
     public function count(): int {
         $countQuery = preg_replace('/SELECT.*?FROM/', 'SELECT COUNT(*) FROM', $this->query);
-        return (int) DB::getConnection()->selectValue($countQuery, $this->bindings);
+        return (int) App::db()->selectValue($countQuery, $this->bindings);
     }
 
     public function limit(int $limit, int $offset = 0): static {

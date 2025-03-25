@@ -102,7 +102,7 @@ class User extends Model
 
     static function setAuth(): void
     {
-        self::$auth = new Auth(DB::getConnection(), true);
+        self::$auth = new Auth(App::db(), true);
     }
 
     public static function getAuth(): ?Auth

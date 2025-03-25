@@ -37,18 +37,16 @@ class Template extends Model
 
     // -- file
 
-    public static function file(string $file): bool|string
+    public static function file(string $filename): ?string
     {
-        if (file_exists(_TEMPLATE_SUB . $file)) {
-            self::$file = _TEMPLATE_SUB . $file;
-        } elseif (file_exists(_TEMPLATE_BASE . $file)) {
-            self::$file = _TEMPLATE_BASE . $file;
-        } elseif (file_exists($file)) {
-            self::$file = $file;
-        } else {
-            self::$file = false;
+        $paths = [_TEMPLATE_SUB, _TEMPLATE_BASE];
+        foreach ($paths as $path) {
+            $fullPath = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $filename;
+            if (file_exists($fullPath)) {
+                return $fullPath;
+            }
         }
-        return self::$file;
+        return $filename;
     }
 
     // -- template rendering
@@ -57,38 +55,29 @@ class Template extends Model
     {
         if (self::$latte === null) {
             self::$latte = new Engine();
-            self::$latte->addFunction('icon', function ($icon) {
-                return file_get_contents(Path::get('PUBLIC_PATH') . "/media/icon/" . $icon);
-            });
-            self::$latte->addFunction('text', function ($language_key, $variables = null) {
-                return Language::translate($language_key, $variables) ?? $language_key;
-            });
-            self::$latte->addFunction('path', function ($path_key) {
-                return Path::get($path_key);
-            });
-            self::$latte->addFunction('isLoggedIn', function () {
-                return User::getAuth()->isLoggedIn();
-            });
-            self::$latte->addFunction('setting', function ($settings_key) {
-                return isset(Setting::getStash()[$settings_key]) ? Setting::getStash()[$settings_key]?->value : '';
-            });
-            self::$latte->addFunction('csrf', function () {
-                return new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">');
-            });
             self::$latte->setTempDirectory(Path::get('PUBLIC_PATH') . 'cache/templates');
-            // self::$latte->setAutoRefresh($_ENV['APP_ENV'] === 'development');
+            self::$latte->setAutoRefresh($_ENV['APP_ENV'] ?? 'production' === 'development');
+
+            self::$latte->addFunction('icon', fn($icon) => file_get_contents(Path::get('PUBLIC_PATH') . "/media/icon/" . $icon));
+            self::$latte->addFunction('text', fn($key, $vars = null) => Language::translate($key, $vars) ?? $key);
+            self::$latte->addFunction('path', fn($key) => Path::get($key));
+            self::$latte->addFunction('isLoggedIn', fn() => User::getAuth()->isLoggedIn());
+            self::$latte->addFunction('setting', fn($key) => Setting::getStash()[$key]->value ?? '');
+            self::$latte->addFunction('csrf', fn() => new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">'));
+
             self::$latte->addExtension(new \Ivy\Tags\ButtonTag());
             self::$latte->addProvider('customButtonRender', function ($args) {
-                $name = self::file('buttons/button.'.$args['type'].'.latte');
-                if ($name) {
-                    self::$latte->render($name, $args);
+                if ($file = self::file('buttons/button.' . $args['type'] . '.latte')) {
+                    self::$latte->render($file, $args);
                 } else {
                     throw new \Exception("Button template for type '{$args['type']}' not found.");
                 }
             });
         }
+
         self::$latte->render($name, $params, $block);
     }
+
 
     public static function name(string $name, array $params = [], ?string $block = null): string
     {
@@ -120,12 +109,11 @@ class Template extends Model
 
     public static function head(string $name, array $params = [], ?string $block = null): void
     {
-        if (file_exists(_TEMPLATE_SUB . $name)) {
-            $name = _TEMPLATE_SUB . $name;
-        } elseif (file_exists(_TEMPLATE_BASE . $name)) {
-            $name = _TEMPLATE_BASE . $name;
+        $file = self::file($name);
+        if ($file === null) {
+            return;
         }
-        self::latte($name, $params, $block);
+        self::latte($file, $params, $block);
     }
 
     // -- assets
@@ -181,10 +169,11 @@ class Template extends Model
 
     public static function generateCsrfToken(): string
     {
-        if (!App::session()->has('csrf_token')) {
-            App::session()->set('csrf_token', bin2hex(random_bytes(32)));
+        $session = App::session();
+        if (!$session->has('csrf_token')) {
+            $session->set('csrf_token', bin2hex(random_bytes(32)));
         }
-        return App::session()->get('csrf_token');
+        return $session->get('csrf_token');
     }
 
 }

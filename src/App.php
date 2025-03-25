@@ -6,11 +6,16 @@ use Bramus\Router\Router;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;
+use Delight\Db\PdoDatabase;
+use PDO;
+use PDOException;
+use RuntimeException;
 
 class App
 {
     private static Router $router;
     private static Session $session;
+    private static PdoDatabase $db;
 
     public static function session(): Session
     {
@@ -29,11 +34,29 @@ class App
         return self::$router;
     }
 
+    public static function db(): PdoDatabase
+    {
+        if (!isset(self::$db)) {
+            try {
+                $pdo = new PDO(
+                    "mysql:host=" . $_ENV['DB_HOST'] . ";port=" . $_ENV['DB_PORT'] . ";dbname=" . $_ENV['DB_DATABASE'] . ";charset=utf8",
+                    $_ENV['DB_USERNAME'],
+                    $_ENV['DB_PASSWORD']
+                );
+                self::$db = PdoDatabase::fromPdo($pdo);
+            } catch (PDOException $e) {
+                error_log("Database Connection Error: " . $e->getMessage());
+                throw new RuntimeException("Database connection failed.");
+            }
+        }
+        return self::$db;
+    }
+
     private function setTemplate(): void
     {
         $sql = "SELECT `value` FROM `template` WHERE `type` = :type";
-        define('_TEMPLATE_BASE', Path::get('TEMPLATES_PATH') . DB::getConnection()->selectValue($sql, ['base']) . DIRECTORY_SEPARATOR);
-        define('_TEMPLATE_SUB', Path::get('TEMPLATES_PATH') . DB::getConnection()->selectValue($sql, ['sub']) . DIRECTORY_SEPARATOR);
+        define('_TEMPLATE_BASE', Path::get('TEMPLATES_PATH') . App::db()->selectValue($sql, ['base']) . DIRECTORY_SEPARATOR);
+        define('_TEMPLATE_SUB', Path::get('TEMPLATES_PATH') . App::db()->selectValue($sql, ['sub']) . DIRECTORY_SEPARATOR);
     }
 
     private function setLanguage(): void
@@ -69,7 +92,6 @@ class App
 
     private function bootstrap(): void
     {
-        DB::init();
         User::setAuth();
         $this->setTemplate();
         $this->setLanguage();

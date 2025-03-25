@@ -110,7 +110,7 @@ class UserController extends Controller
                 $mail->setBody('Activate your account with this link: ' . $url);
                 $mail->send();
             });
-            DB::getConnection()->insert('profiles', ['user_id' => $userId]);
+            App::db()->insert('profiles', ['user_id' => $userId]);
             // Set role to registered user
             if (Setting::getStash()['registration_role']->bool && Setting::getStash()['registration_role']->value) {
                 $role = strtoupper(Setting::getStash()['registration_role']->value);
