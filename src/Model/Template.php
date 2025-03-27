@@ -1,8 +1,11 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Model;
 
-use Hooks;
+use Ivy\Abstract\Model;
+use Ivy\App;
+use Ivy\Language;
+use Ivy\Path;
 use Latte\Engine;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -32,7 +35,6 @@ class Template extends Model
     protected static bool|string $name = '';
     protected static array $params = [];
     protected static ?string $block;
-    protected static ?Hooks $hooks = null;
     protected static ?Session $session = null;
 
     // -- file
@@ -64,7 +66,6 @@ class Template extends Model
             self::$latte->addFunction('isLoggedIn', fn() => User::getAuth()->isLoggedIn());
             self::$latte->addFunction('setting', fn($key) => Setting::getStash()[$key]->value ?? '');
             self::$latte->addFunction('csrf', fn() => new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">'));
-
             self::$latte->addExtension(new \Ivy\Tags\ButtonTag());
             self::$latte->addProvider('customButtonRender', function ($args) {
                 if ($file = self::file('buttons/button.' . $args['type'] . '.latte')) {
@@ -131,16 +132,6 @@ class Template extends Model
     public static function addESM($name): void
     {
         self::$esm[] = self::file($name);
-    }
-
-    // -- hooks
-
-    public static function hooks(): Hooks
-    {
-        if (self::$hooks === null) {
-            self::$hooks = new Hooks();
-        }
-        return self::$hooks;
     }
 
     /**

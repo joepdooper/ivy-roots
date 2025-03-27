@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Controller;
 
 use Delight\Auth\AttemptCancelledException;
 use Delight\Auth\Auth;
@@ -12,12 +12,14 @@ use Delight\Auth\InvalidSelectorTokenPairException;
 use Delight\Auth\ResetDisabledException;
 use Delight\Auth\Role;
 use Delight\Auth\TokenExpiredException;
-use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+use Ivy\Abstract\Controller;
+use Ivy\Mail;
+use Ivy\Model\Template;
+use Ivy\Model\User;
+use Ivy\Path;
 
 class UserController extends Controller
 {

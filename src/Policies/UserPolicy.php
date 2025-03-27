@@ -2,7 +2,7 @@
 
 namespace Ivy\Policies;
 
-use Ivy\User;
+use Ivy\Model\User;
 
 class UserPolicy
 {

@@ -1,16 +1,20 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Controller;
 
-use Delight\Auth\AuthError;
 use Delight\Auth\EmailNotVerifiedException;
 use Delight\Auth\InvalidEmailException;
 use Delight\Auth\NotLoggedInException;
-use Delight\Auth\Role;
 use Delight\Auth\TooManyRequestsException;
-use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use GUMP;
+use Ivy\Abstract\Controller;
+use Ivy\File;
+use Ivy\Mail;
+use Ivy\Model\Profile;
+use Ivy\Model\Template;
+use Ivy\Model\User;
+use Ivy\Path;
 
 class ProfileController extends Controller
 {

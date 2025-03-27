@@ -1,7 +1,9 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Abstract;
 
+use Ivy\App;
+use Ivy\Path;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -135,7 +137,7 @@ abstract class Controller
         }
 
         if (!$policyClass::$ability(new $modelClass)) {
-            throw new \Exception("Unauthorized action.");
+            $this->redirect('admin/login');
         }
 
         return true;

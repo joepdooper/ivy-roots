@@ -1,15 +1,8 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Model;
 
-use Delight\Auth\EmailNotVerifiedException;
-use Delight\Auth\InvalidEmailException;
-use Delight\Auth\NotLoggedInException;
-use Delight\Auth\TooManyRequestsException;
-use Delight\Auth\UserAlreadyExistsException;
-use Exception;
-use Image\Image;
-use function urlencode;
+use Ivy\Abstract\Model;
 
 class Profile extends Model
 {

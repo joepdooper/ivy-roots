@@ -1,8 +1,11 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Controller;
 
 use GUMP;
+use Ivy\Abstract\Controller;
+use Ivy\Model\Setting;
+use Ivy\Model\Template;
 
 class SettingController extends Controller
 {

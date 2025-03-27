@@ -2,8 +2,9 @@
 
 namespace Ivy\Policies;
 
-use Ivy\Plugin;
-use Ivy\User;
+
+use Ivy\Model\Plugin;
+use Ivy\Model\User;
 
 class PluginPolicy
 {

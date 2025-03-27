@@ -2,8 +2,8 @@
 
 namespace Ivy\Policies;
 
-use Ivy\Template;
-use Ivy\User;
+use Ivy\Model\Template;
+use Ivy\Model\User;
 
 class TemplatePolicy
 {

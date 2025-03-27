@@ -2,8 +2,8 @@
 
 namespace Ivy\Policies;
 
-use Ivy\Setting;
-use Ivy\User;
+use Ivy\Model\Setting;
+use Ivy\Model\User;
 
 class SettingPolicy
 {

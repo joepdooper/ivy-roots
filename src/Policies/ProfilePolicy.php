@@ -2,8 +2,8 @@
 
 namespace Ivy\Policies;
 
-use Ivy\Profile;
-use Ivy\User;
+use Ivy\Model\Profile;
+use Ivy\Model\User;
 
 class ProfilePolicy
 {

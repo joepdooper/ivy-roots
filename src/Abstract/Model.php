@@ -1,9 +1,11 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Abstract;
 
 use Delight\Db\Throwable\EmptyWhereClauseError;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
+use Ivy\App;
+use Ivy\Path;
 
 abstract class Model
 {

@@ -1,6 +1,9 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Model;
+
+use Ivy\Abstract\Model;
+use Ivy\Stash;
 
 class Setting extends Model
 {

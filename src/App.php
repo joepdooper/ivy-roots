@@ -3,6 +3,10 @@
 namespace Ivy;
 
 use Bramus\Router\Router;
+use Ivy\Model\Plugin;
+use Ivy\Model\Setting;
+use Ivy\Model\Template;
+use Ivy\Model\User;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;

@@ -1,6 +1,12 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Controller;
+
+use Ivy\Abstract\Controller;
+use Ivy\Model\Plugin;
+use Ivy\Model\Template;
+use Ivy\Model\User;
+use Ivy\Path;
 
 class PluginController extends Controller
 {
