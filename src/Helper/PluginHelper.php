@@ -1,6 +1,9 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Helper;
+
+use Ivy\App;
+use Ivy\Path;
 
 class PluginHelper
 {
@@ -44,5 +47,12 @@ class PluginHelper
         }
 
         return Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . basename($pluginUrl) . DIRECTORY_SEPARATOR . 'collection' . DIRECTORY_SEPARATOR;
+    }
+
+    public static function getMissingDependencies(?array $dependencies = []): array
+    {
+        return array_filter($dependencies ?? [], function ($dependency) {
+            return !App::db()->selectValue('SELECT id FROM plugin WHERE name = :name', ['name' => $dependency]);
+        });
     }
 }

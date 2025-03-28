@@ -1,10 +1,14 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Manager;
 
 use Exception;
+use Ivy\Helper\PluginHelper;
+use Ivy\Language;
+use Ivy\Model\Plugin;
+use Ivy\Path;
 
-class PluginService
+class PluginManager
 {
     private Plugin $plugin;
 
@@ -18,7 +22,7 @@ class PluginService
         $this->plugin->setInfo();
 
         try {
-            if (!empty($missing = PluginDependencyChecker::getMissingDependencies($this->plugin->getInfo()->getDependencies()))) {
+            if (!empty($missing = PluginHelper::getMissingDependencies($this->plugin->getInfo()->getDependencies()))) {
                 $count = count($missing);
                 $message = "This plugin has " . ($count > 1 ? "dependencies" : "dependency") . ". Please install the " . ($count > 1 ? "plugins" : "plugin") . " " . implode(", ", $missing);
                 return ['status' => 'error', 'message' => $message];
@@ -34,7 +38,7 @@ class PluginService
             $this->plugin->setId($this->plugin->insert());
 
             if (!empty($this->plugin->getInfo()->getCollection())) {
-                (new PluginCollectionHandler($this->plugin))->install();
+                (new PluginCollectionManager($this->plugin))->install();
             }
 
             return ['status' => 'success', 'message' => Language::translate('plugin.installed_successfully', ['plugin' => $this->plugin->name])];
@@ -49,7 +53,7 @@ class PluginService
 
         try {
             if (!empty($this->plugin->getInfo()->getCollection())) {
-                (new PluginCollectionHandler($this->plugin))->uninstall();
+                (new PluginCollectionManager($this->plugin))->uninstall();
             }
 
             if (isset($this->plugin->getInfo()->getDatabase()['uninstall']) && !empty($this->plugin->getInfo()->getDatabase()['uninstall'])) {

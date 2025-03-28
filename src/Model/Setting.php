@@ -3,7 +3,7 @@
 namespace Ivy\Model;
 
 use Ivy\Abstract\Model;
-use Ivy\Stash;
+use Ivy\Trait\Stash;
 
 class Setting extends Model
 {

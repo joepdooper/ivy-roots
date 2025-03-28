@@ -3,15 +3,17 @@
 namespace Ivy\Controller;
 
 use Ivy\Abstract\Controller;
+use Ivy\Manager\PluginManager;
 use Ivy\Model\Plugin;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Path;
+use Ivy\View\LatteView;
 
 class PluginController extends Controller
 {
     private Plugin $plugin;
-    private PluginService $pluginService;
+    private PluginManager $pluginManager;
 
     public function before(): void
     {
@@ -36,13 +38,13 @@ class PluginController extends Controller
             $this->plugin = (new Plugin)->populate($plugin_data);
 
             if (!$this->plugin->hasId()) {
-                $this->pluginService = new PluginService($this->plugin);
-                $responses[] = $this->pluginService->install();
+                $this->pluginManager = new PluginManager($this->plugin);
+                $responses[] = $this->pluginManager->install();
             } else {
                 $this->plugin->where('id', $plugin_data['id'])->fetchOne()->populate($plugin_data);
                 if (isset($plugin_data['delete'])) {
-                    $this->pluginService = new PluginService($this->plugin);
-                    $responses[] = $this->pluginService->uninstall();
+                    $this->pluginManager = new PluginManager($this->plugin);
+                    $responses[] = $this->pluginManager->uninstall();
                 } else {
                     $this->plugin->update();
                 }
@@ -87,7 +89,7 @@ class PluginController extends Controller
             }
             $uninstalled_plugins = $uninstalled_plugins_info;
         }
-        Template::view('admin/plugin.latte', ['installed_plugins' => $installed_plugins, 'uninstalled_plugins' => $uninstalled_plugins]);
+        LatteView::set('admin/plugin.latte', ['installed_plugins' => $installed_plugins, 'uninstalled_plugins' => $uninstalled_plugins]);
     }
 
 }

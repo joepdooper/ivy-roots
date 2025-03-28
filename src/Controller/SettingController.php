@@ -6,6 +6,7 @@ use GUMP;
 use Ivy\Abstract\Controller;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
+use Ivy\View\LatteView;
 
 class SettingController extends Controller
 {
@@ -38,11 +39,12 @@ class SettingController extends Controller
         $this->flashBag->add('success', 'Update successfully');
         $this->redirect('admin/setting');
     }
+
     public function index(): void
     {
         $this->authorize('index', Setting::class);
 
         $settings = (new Setting)->fetchAll();
-        Template::view('admin/setting.latte', ['settings' => $settings]);
+        LatteView::set('admin/setting.latte', ['settings' => $settings]);
     }
 }

@@ -3,9 +3,9 @@
 namespace Ivy;
 
 use Bramus\Router\Router;
+use Ivy\Manager\TemplateManager;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
-use Ivy\Model\Template;
 use Ivy\Model\User;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
@@ -86,7 +86,7 @@ class App
     {
         self::router()->setBasePath(Path::get('SUBFOLDER'));
         require Path::get('PUBLIC_PATH') . 'routes/middleware.php';
-        require Template::file('template.php');
+        require TemplateManager::file('template.php');
         $this->loadPluginRoutesAssets();
         require Path::get('PUBLIC_PATH') . 'routes/web.php';
         require Path::get('PUBLIC_PATH') . 'routes/admin.php';

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Policies;
+namespace Ivy\Policy;
 
 use Ivy\Model\Profile;
 use Ivy\Model\User;

@@ -1,8 +1,11 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Manager;
 
-class PluginCollectionHandler
+use Ivy\Model\Plugin;
+use Ivy\PluginHelper;
+
+class PluginCollectionManager
 {
     private Plugin $plugin;
 

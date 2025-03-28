@@ -3,7 +3,7 @@
 namespace Ivy\Model;
 
 use Ivy\Abstract\Model;
-use Ivy\PluginInfo;
+use Ivy\Helper\PluginInfo;
 
 class Plugin extends Model
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Tags;
+namespace Ivy\Tag;
 
 use Latte\Compiler\Nodes\Php\Expression\ArrayNode;
 use Latte\Compiler\Tag;

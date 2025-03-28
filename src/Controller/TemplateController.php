@@ -8,6 +8,7 @@ use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Path;
+use Ivy\View\LatteView;
 
 class TemplateController extends Controller
 {
@@ -20,13 +21,6 @@ class TemplateController extends Controller
                 $this->redirect('admin/login');
             }
         }
-    }
-
-    public function dynamicRoute($route, $identifier): void
-    {
-        Template::$route = htmlentities($route);
-        Template::$identifier = htmlentities($identifier);
-        Template::$url = DIRECTORY_SEPARATOR . Template::$route . DIRECTORY_SEPARATOR . Template::$identifier;
     }
 
     public function post(): void
@@ -62,7 +56,7 @@ class TemplateController extends Controller
     {
         $this->authorize('index', Template::class);
 
-        Template::view('admin/template.latte');
+        LatteView::set('admin/template.latte');
     }
 
 }

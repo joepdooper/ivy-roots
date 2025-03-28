@@ -3,6 +3,7 @@
 namespace Ivy\Abstract;
 
 use Ivy\App;
+use Ivy\Model\User;
 use Ivy\Path;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -123,7 +124,7 @@ abstract class Controller
         }
 
         $shortName = basename(str_replace('\\', '/', $modelClass));
-        $policyClass = "Ivy\\Policies\\{$shortName}Policy";
+        $policyClass = "Ivy\\Policy\\{$shortName}Policy";
         $alternativePolicyClass = "{$modelClass}Policy";
 
         $policyClass = class_exists($policyClass) ? $policyClass : $alternativePolicyClass;

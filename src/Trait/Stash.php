@@ -1,14 +1,14 @@
 <?php
+namespace Ivy\Trait;
 
-namespace Ivy;
+use Ivy\App;
 
 trait Stash
 {
-    private static array $stash = [];
     private static ?array $currentData = null;
 
     /**
-     * Initialize stashing for the calling class and fetch all records.
+     * Initialize stashing for the calling class.
      *
      * @return static
      * @throws \InvalidArgumentException
@@ -41,6 +41,7 @@ trait Stash
 
         $getter = 'get' . str_replace('_', '', ucwords($column, '_'));
 
+        $stashData = [];
         foreach (self::$currentData as $instance) {
             if (method_exists($instance, $getter)) {
                 $key = strtolower(str_replace(' ', '_', $instance->$getter()));
@@ -50,9 +51,10 @@ trait Stash
                 throw new \InvalidArgumentException("Column '$column' is not valid for this model.");
             }
 
-            self::$stash[static::class][$key] = $instance;
+            $stashData[$key] = $instance;
         }
 
+        App::session()->set('stash_' . static::class, $stashData);
         self::$currentData = null;
     }
 
@@ -63,7 +65,7 @@ trait Stash
      */
     public static function getStash(): ?array
     {
-        return self::$stash[static::class] ?? null;
+        return App::session()->get('stash_' . static::class, null);
     }
 
     /**
@@ -74,6 +76,8 @@ trait Stash
      */
     public static function getStashItem(string $key)
     {
-        return self::$stash[static::class][$key] ?? null;
+        $stash = App::session()->get('stash_' . static::class, []);
+        return $stash[$key] ?? null;
     }
 }
+

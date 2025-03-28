@@ -20,6 +20,7 @@ use Ivy\Mail;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Path;
+use Ivy\View\LatteView;
 
 class UserController extends Controller
 {
@@ -83,7 +84,7 @@ class UserController extends Controller
         $this->authorize('index', User::class);
 
         $users = (new User)->fetchAll();
-        Template::view('admin/user.latte', ['users' => $users]);
+        LatteView::set('admin/user.latte', ['users' => $users]);
     }
 
     public function beforeRegister(): void
@@ -139,7 +140,7 @@ class UserController extends Controller
 
     public function viewRegister(): void
     {
-        Template::view('admin/register.latte');
+        LatteView::set('admin/register.latte');
     }
 
     public function beforeLogin(): void
@@ -201,7 +202,7 @@ class UserController extends Controller
                 $this->flashBag->add('error', 'Auth error');
             }
         }
-        Template::view('admin/login.latte');
+        LatteView::set('admin/login.latte');
     }
 
     public function beforeLogout(): void
@@ -218,18 +219,14 @@ class UserController extends Controller
     {
         $this->requirePost();
 
-        Template::hooks()->do_action('start_logout_action');
-
         User::getAuth()->logOut();
-
-        Template::hooks()->do_action('end_logout_action');
 
         $this->redirect();
     }
 
     public function viewLogout(): void
     {
-        Template::view('admin/logout.latte');
+        LatteView::set('admin/logout.latte');
     }
 
     public function beforeReset(): void
@@ -321,7 +318,7 @@ class UserController extends Controller
                 $this->redirect('admin/reset');
             }
         }
-        Template::view('admin/reset.latte', ['selector' => $selector, 'token' => $token]);
+        LatteView::set('admin/reset.latte', ['selector' => $selector, 'token' => $token]);
     }
 
 }

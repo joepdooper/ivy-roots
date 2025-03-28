@@ -51,11 +51,6 @@ abstract class Model
         throw new \Exception("Property '$property' is not writable.");
     }
 
-    public function getPath(): string
-    {
-        return Path::get('BASE_PATH') . $this->path;
-    }
-
     public function getColumns(): array
     {
         return $this->columns;
@@ -287,6 +282,11 @@ abstract class Model
     protected static function createInstance(): static
     {
         return new static();
+    }
+
+    public function getPath(): string
+    {
+        return $this->path;
     }
 
     public function count(): int {
