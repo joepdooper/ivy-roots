@@ -2,8 +2,8 @@
 
 namespace Ivy\Manager;
 
+use Ivy\Helper\PluginHelper;
 use Ivy\Model\Plugin;
-use Ivy\PluginHelper;
 
 class PluginCollectionManager
 {
