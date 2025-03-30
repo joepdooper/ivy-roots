@@ -32,37 +32,12 @@ class Profile extends Model
     ";
     }
 
-    private static function getCurrentUserProfile(): ?self
+    public static function getUserProfile(): ?self
     {
         if (self::$currentProfile === null) {
             self::$currentProfile = (new self())->where('user_id', User::getAuth()->getUserId())->fetchOne();
         }
         return self::$currentProfile;
-    }
-
-    public static function getCurrentUserId(): ?string
-    {
-        return self::getCurrentUserProfile()?->user_id;
-    }
-
-    public static function getCurrentUserImage(): ?string
-    {
-        return self::getCurrentUserProfile()?->user_image;
-    }
-
-    public static function hasCurrentUserImage(): bool
-    {
-        return !empty(self::getCurrentUserProfile()?->user_image);
-    }
-
-    public static function getCurrentUsername(): ?string
-    {
-        return self::getCurrentUserProfile()?->username;
-    }
-
-    public static function getCurrentEmail(): ?string
-    {
-        return self::getCurrentUserProfile()?->email;
     }
 
     public static function lastSeen($last_login): string

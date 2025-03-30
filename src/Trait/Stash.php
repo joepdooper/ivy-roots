@@ -1,7 +1,7 @@
 <?php
 namespace Ivy\Trait;
 
-use Ivy\App;
+use Ivy\Manager\SessionManager;
 
 trait Stash
 {
@@ -54,7 +54,7 @@ trait Stash
             $stashData[$key] = $instance;
         }
 
-        App::session()->set('stash_' . static::class, $stashData);
+        SessionManager::set('stash_' . static::class, $stashData);
         self::$currentData = null;
     }
 
@@ -65,7 +65,7 @@ trait Stash
      */
     public static function getStash(): ?array
     {
-        return App::session()->get('stash_' . static::class, null);
+        return SessionManager::get('stash_' . static::class, null);
     }
 
     /**
@@ -76,7 +76,7 @@ trait Stash
      */
     public static function getStashItem(string $key)
     {
-        $stash = App::session()->get('stash_' . static::class, []);
+        $stash = SessionManager::get('stash_' . static::class, []);
         return $stash[$key] ?? null;
     }
 }

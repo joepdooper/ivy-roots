@@ -4,7 +4,7 @@ namespace Ivy\Abstract;
 
 use Delight\Db\Throwable\EmptyWhereClauseError;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
-use Ivy\App;
+use Ivy\Manager\DatabaseManager;
 use Ivy\Path;
 
 abstract class Model
@@ -154,8 +154,8 @@ abstract class Model
     public function fetchAll(): array
     {
         $rows = !empty($this->bindings)
-            ? App::db()->select($this->query, $this->bindings)
-            : App::db()->select($this->query);
+            ? DatabaseManager::connection()->select($this->query, $this->bindings)
+            : DatabaseManager::connection()->select($this->query);
         $this->resetQuery();
 
         return array_map(fn($row) => static::createInstance()->populate($row), $rows ?? []);
@@ -164,8 +164,8 @@ abstract class Model
     public function fetchOne(): ?static
     {
         $data = !empty($this->bindings)
-            ? App::db()->selectRow($this->query, $this->bindings)
-            : App::db()->selectRow($this->query);
+            ? DatabaseManager::connection()->selectRow($this->query, $this->bindings)
+            : DatabaseManager::connection()->selectRow($this->query);
         $this->resetQuery();
 
         return $data ? $this->createInstance()->populate($data) : null;
@@ -207,11 +207,11 @@ abstract class Model
             $set = array_intersect_key($set, array_flip($this->columns));
         }
 
-        App::db()->insert($this->table, $set);
+        DatabaseManager::connection()->insert($this->table, $set);
 
         $this->resetQuery();
 
-        return App::db()->getLastInsertId();
+        return DatabaseManager::connection()->getLastInsertId();
     }
 
     public function update(): bool|int
@@ -230,11 +230,11 @@ abstract class Model
             $this->bindings['id'] = $this->id;
         }
 
-        App::db()->update($this->table, $set, $this->bindings);
+        DatabaseManager::connection()->update($this->table, $set, $this->bindings);
 
         $this->resetQuery();
 
-        return App::db()->getLastInsertId();
+        return DatabaseManager::connection()->getLastInsertId();
     }
 
     public function delete(): bool|int|string
@@ -243,11 +243,11 @@ abstract class Model
             $this->bindings['id'] = $this->id;
         }
 
-        App::db()->delete($this->table, $this->bindings);
+        DatabaseManager::connection()->delete($this->table, $this->bindings);
 
         $this->resetQuery();
 
-        return App::db()->getLastInsertId();
+        return DatabaseManager::connection()->getLastInsertId();
     }
 
     public function save(array $data): bool|int
@@ -291,7 +291,7 @@ abstract class Model
 
     public function count(): int {
         $countQuery = preg_replace('/SELECT.*?FROM/', 'SELECT COUNT(*) FROM', $this->query);
-        return (int) App::db()->selectValue($countQuery, $this->bindings);
+        return (int) DatabaseManager::connection()->selectValue($countQuery, $this->bindings);
     }
 
     public function limit(int $limit, int $offset = 0): static {

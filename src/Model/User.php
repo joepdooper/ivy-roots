@@ -5,7 +5,7 @@ namespace Ivy\Model;
 use Delight\Auth\Auth;
 use Delight\Auth\Role;
 use Ivy\Abstract\Model;
-use Ivy\App;
+use Ivy\Manager\DatabaseManager;
 
 class User extends Model
 {
@@ -61,33 +61,9 @@ class User extends Model
         return self::$auth->hasAnyRole(...$roles);
     }
 
-    /**
-     * @throws UnknownIdException
-     */
-    static function userIsSuperAdmin($id): bool
-    {
-        return self::$auth->admin()->doesUserHaveRole($id, Role::SUPER_ADMIN);
-    }
-
-    /**
-     * @throws UnknownIdException
-     */
-    static function userIsAdmin($id): bool
-    {
-        return self::$auth->admin()->doesUserHaveRole($id, Role::ADMIN);
-    }
-
-    /**
-     * @throws UnknownIdException
-     */
-    static function userIsEditor($id): bool
-    {
-        return self::$auth->admin()->doesUserHaveRole($id, Role::EDITOR);
-    }
-
     static function setAuth(): void
     {
-        self::$auth = new Auth(App::db(), true);
+        self::$auth = new Auth(DatabaseManager::connection(), true);
     }
 
     public static function getAuth(): ?Auth

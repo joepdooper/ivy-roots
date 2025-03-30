@@ -1,10 +1,10 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Manager;
 
 use Hooks;
 
-class Action
+class Hookmanager
 {
     protected static ?Hooks $hooks = null;
 

@@ -3,13 +3,13 @@
 namespace Ivy\Abstract;
 
 use Ivy\App;
+use Ivy\Manager\SessionManager;
 use Ivy\Model\User;
 use Ivy\Path;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 
 abstract class Controller
@@ -20,7 +20,7 @@ abstract class Controller
     public function __construct()
     {
         $this->request = Request::createFromGlobals();
-        $this->flashBag = App::session()->getFlashBag();
+        $this->flashBag = SessionManager::getFlashBag();
     }
 
     protected function requirePost()
@@ -59,7 +59,7 @@ abstract class Controller
 
     protected function requireCsrf(): void
     {
-        $csrfToken = App::session()->get('csrf_token');
+        $csrfToken = SessionManager::get('csrf_token');
 
         if (!$csrfToken || !hash_equals($csrfToken, $this->request->get('csrf_token', ''))) {
             $this->flashBag->add('error', 'Invalid security token.');

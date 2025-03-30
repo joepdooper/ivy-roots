@@ -3,8 +3,8 @@
 namespace Ivy\View;
 
 use Ivy\Abstract\View;
-use Ivy\App;
 use Ivy\Language;
+use Ivy\Manager\SessionManager;
 use Ivy\Manager\TemplateManager;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
@@ -29,7 +29,7 @@ class LatteView extends View
 
     public static function set(string $name, array $params = [], ?string $block = null): void
     {
-        $params['flashes'] = App::session()->getFlashBag()->all();
+        $params['flashes'] = SessionManager::getFlashBag()->all();
         self::name($name, $params, $block);
     }
 
@@ -73,9 +73,15 @@ class LatteView extends View
         self::$latte->addFunction('icon', fn($icon) => file_get_contents(Path::get('PUBLIC_PATH') . "/media/icon/" . $icon));
         self::$latte->addFunction('text', fn($key, $vars = null) => Language::translate($key, $vars) ?? $key);
         self::$latte->addFunction('path', fn($key) => Path::get($key));
-        self::$latte->addFunction('isLoggedIn', fn() => User::getAuth()->isLoggedIn());
+        self::$latte->addFunction('render', fn($key) => LatteView::render($key));
         self::$latte->addFunction('setting', fn($key) => Setting::getStash()[$key]->value ?? '');
+        self::$latte->addFunction('isPluginActive', fn($key) => in_array($key, SessionManager::get('plugin_actives')));
         self::$latte->addFunction('csrf', fn() => new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">'));
+        self::$latte->addFunction('auth', fn() => User::getAuth());
+        self::$latte->addFunction('canEditAsEditor', fn() => \Ivy\Model\User::canEditAsEditor());
+        self::$latte->addFunction('canEditAsAdmin', fn() => \Ivy\Model\User::canEditAsAdmin());
+        self::$latte->addFunction('canEditAsSuperAdmin', fn() => \Ivy\Model\User::canEditAsSuperAdmin());
+        self::$latte->addFunction('profile', fn() => \Ivy\Model\Profile::getUserProfile());
 
         self::$latte->addExtension(new \Ivy\Tag\ButtonTag());
         self::$latte->addProvider('customButtonRender', function ($args) {
@@ -89,7 +95,7 @@ class LatteView extends View
 
     public static function generateCsrfToken(): string
     {
-        $session = App::session();
+        $session = SessionManager::getSession();
         if (!$session->has('csrf_token')) {
             $session->set('csrf_token', bin2hex(random_bytes(32)));
         }
