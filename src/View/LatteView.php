@@ -6,6 +6,7 @@ use Ivy\Abstract\View;
 use Ivy\Language;
 use Ivy\Manager\SessionManager;
 use Ivy\Manager\TemplateManager;
+use Ivy\Model\Profile;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
@@ -73,15 +74,16 @@ class LatteView extends View
         self::$latte->addFunction('icon', fn($icon) => file_get_contents(Path::get('PUBLIC_PATH') . "/media/icon/" . $icon));
         self::$latte->addFunction('text', fn($key, $vars = null) => Language::translate($key, $vars) ?? $key);
         self::$latte->addFunction('path', fn($key) => Path::get($key));
-        self::$latte->addFunction('render', fn($key) => LatteView::render($key));
+        self::$latte->addFunction('file', fn($key) => TemplateManager::file($key));
+        self::$latte->addFunction('render', fn($key, $vars = []) => LatteView::render($key, $vars));
         self::$latte->addFunction('setting', fn($key) => Setting::getStash()[$key]->value ?? '');
         self::$latte->addFunction('isPluginActive', fn($key) => in_array($key, SessionManager::get('plugin_actives')));
         self::$latte->addFunction('csrf', fn() => new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">'));
         self::$latte->addFunction('auth', fn() => User::getAuth());
-        self::$latte->addFunction('canEditAsEditor', fn() => \Ivy\Model\User::canEditAsEditor());
-        self::$latte->addFunction('canEditAsAdmin', fn() => \Ivy\Model\User::canEditAsAdmin());
-        self::$latte->addFunction('canEditAsSuperAdmin', fn() => \Ivy\Model\User::canEditAsSuperAdmin());
-        self::$latte->addFunction('profile', fn() => \Ivy\Model\Profile::getUserProfile());
+        self::$latte->addFunction('canEditAsEditor', fn() => User::canEditAsEditor());
+        self::$latte->addFunction('canEditAsAdmin', fn() => User::canEditAsAdmin());
+        self::$latte->addFunction('canEditAsSuperAdmin', fn() => User::canEditAsSuperAdmin());
+        self::$latte->addFunction('profile', fn() => Profile::getUserProfile());
 
         self::$latte->addExtension(new \Ivy\Tag\ButtonTag());
         self::$latte->addProvider('customButtonRender', function ($args) {

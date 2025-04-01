@@ -2,7 +2,7 @@
 
 namespace Ivy\Helper;
 
-use Ivy\App;
+use Ivy\Manager\DatabaseManager;
 use Ivy\Path;
 
 class PluginHelper

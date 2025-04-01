@@ -79,15 +79,23 @@ abstract class Model
 
     public function select(array $columns): static
     {
-        $validColumns = array_intersect($columns, $this->columns);
-        if (empty($validColumns)) {
-            throw new \Exception("Invalid column selection: None of the specified columns exist in the model.");
+        $formattedColumns = [];
+
+        foreach ($columns as $column) {
+            if (strpos($column, '.') !== false) {
+                [$table, $col] = explode('.', $column, 2);
+                $formattedColumns[] = "`$table`.`$col`";
+            } else {
+                $formattedColumns[] = "`$this->table`.`$column`";
+            }
         }
-        $columnString = implode(', ', array_map(fn($col) => "`$this->table`.`$col`", $validColumns));
+
+        $columnString = implode(', ', $formattedColumns);
         $this->query = "SELECT $columnString FROM `$this->table`";
 
         return $this;
     }
+
 
     public function where(string $column, $value = null, string $operator = '='): static
     {
@@ -271,8 +279,11 @@ abstract class Model
     public function populate(array $data): static
     {
         foreach ($data as $key => $value) {
-            if (in_array($key, $this->columns) && isset($value) || $key === 'id') {
-                $this->{$key} = $value;
+            $setter = 'set' . ucfirst($key);
+            if (method_exists($this, $setter)) {
+                $this->$setter($value);
+            } elseif (in_array($key, $this->columns)) {
+                $this->$key = $value;
             }
         }
 
