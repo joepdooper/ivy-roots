@@ -23,7 +23,9 @@ abstract class Model
 
     public function __get($property)
     {
-        $getter = 'get' . ucfirst($property);
+        $camelCaseProperty = str_replace(' ', '', ucwords(str_replace('_', ' ', $property)));
+        $getter = 'get' . $camelCaseProperty;
+
         if (method_exists($this, $getter)) {
             return $this->$getter();
         }
@@ -37,7 +39,9 @@ abstract class Model
 
     public function __set($property, $value)
     {
-        $setter = 'set' . ucfirst($property);
+        $camelCaseProperty = str_replace(' ', '', ucwords(str_replace('_', ' ', $property)));
+        $setter = 'set' . $camelCaseProperty;
+
         if (method_exists($this, $setter)) {
             $this->$setter($value);
             return;
@@ -50,6 +54,7 @@ abstract class Model
 
         throw new \Exception("Property '$property' is not writable.");
     }
+
 
     public function getColumns(): array
     {
@@ -279,7 +284,8 @@ abstract class Model
     public function populate(array $data): static
     {
         foreach ($data as $key => $value) {
-            $setter = 'set' . ucfirst($key);
+            $camelCaseProperty = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+            $setter = 'set' . $camelCaseProperty;
             if (method_exists($this, $setter)) {
                 $this->$setter($value);
             } elseif (in_array($key, $this->columns)) {
