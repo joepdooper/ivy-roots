@@ -120,7 +120,7 @@ abstract class Controller
         $modelClass = is_object($model) ? get_class($model) : $model;
 
         if (!class_exists($modelClass)) {
-            throw new \Exception("Model [$modelClass] not found.");
+            error_log("Model {$modelClass} not found.");
         }
 
         $shortName = basename(str_replace('\\', '/', $modelClass));
@@ -130,11 +130,11 @@ abstract class Controller
         $policyClass = class_exists($policyClass) ? $policyClass : $alternativePolicyClass;
 
         if (!class_exists($policyClass)) {
-            throw new \Exception("Policy not found for [$shortName].");
+            error_log("Policy not found for {$shortName}");
         }
 
         if (!method_exists($policyClass, $ability)) {
-            throw new \Exception("Method [$ability] does not exist in [$policyClass].");
+            error_log("Method {$ability} does not exist in {$policyClass}.");
         }
 
         if (!$policyClass::$ability(new $modelClass)) {
