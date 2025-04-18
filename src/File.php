@@ -29,11 +29,12 @@ class File
         $handle->file_new_name_body = $this->name;
         $handle->process($this->directory);
         if ($handle->processed) {
-            $this->file_name = $this->name . '.' . $handle->file_src_name_ext;
+            $this->file_name = $handle->file_dst_name;
             // $handle->clean();
         } else {
-            Message::add('error : ' . $handle->error);
+            error_log('error : ' . $handle->error);
         }
+        $this->image_convert = null;
         return $this->file_name;
     }
 

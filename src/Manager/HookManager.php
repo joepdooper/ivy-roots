@@ -4,7 +4,7 @@ namespace Ivy\Manager;
 
 use Hooks;
 
-class Hookmanager
+class HookManager
 {
     protected static ?Hooks $hooks = null;
 

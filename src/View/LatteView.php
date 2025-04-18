@@ -4,6 +4,7 @@ namespace Ivy\View;
 
 use Ivy\Abstract\View;
 use Ivy\Language;
+use Ivy\Manager\HookManager;
 use Ivy\Manager\SessionManager;
 use Ivy\Manager\TemplateManager;
 use Ivy\Model\Profile;
@@ -84,6 +85,7 @@ class LatteView extends View
         self::$latte->addFunction('canEditAsAdmin', fn() => User::canEditAsAdmin());
         self::$latte->addFunction('canEditAsSuperAdmin', fn() => User::canEditAsSuperAdmin());
         self::$latte->addFunction('profile', fn() => Profile::getUserProfile());
+        self::$latte->addFunction('hook', fn($key) => HookManager::do($key));
 
         self::$latte->addExtension(new \Ivy\Tag\ButtonTag());
         self::$latte->addProvider('customButtonRender', function ($args) {
