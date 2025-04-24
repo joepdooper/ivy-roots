@@ -82,15 +82,6 @@ abstract class Controller
         return $this->request->headers->get('Accept') === 'application/json';
     }
 
-    protected function handleUploadedFile(string $field): ?string
-    {
-        $file = $this->request->files->get($field);
-        if ($file) {
-            return $file->store('uploads');
-        }
-        return null;
-    }
-
     protected function redirect(string $url = '', int $statusCode = 302): void
     {
         (new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode))->send();

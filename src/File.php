@@ -8,13 +8,13 @@ class File
 {
     protected string $directory;
     protected string $name;
-    protected ?string $file_name;
+    protected ?string $file_name = null;
     protected string $format;
     protected array $allowed;
     protected ?string $image_convert = null;
     protected ?int $width = null;
 
-    public function upload($file): string
+    public function upload($file): ?string
     {
         $handle = new Upload($file);
         $handle->allowed = $this->allowed;
