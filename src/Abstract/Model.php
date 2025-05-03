@@ -119,6 +119,17 @@ abstract class Model
         return $this;
     }
 
+    public function whereRaw(string $condition, array $bindings = []): static
+    {
+        $this->query .= str_contains($this->query, 'WHERE')
+            ? " AND $condition"
+            : " WHERE $condition";
+
+        $this->bindings = array_merge($this->bindings, $bindings);
+
+        return $this;
+    }
+
     public function whereNot(string $column, $value): static
     {
         if (is_null($value)) {
