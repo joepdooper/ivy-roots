@@ -15,6 +15,7 @@ abstract class Model
     protected string $query = '';
     protected array $bindings = [];
     protected int $id;
+    protected array $relationCache = [];
 
     public function __construct()
     {
@@ -193,6 +194,48 @@ abstract class Model
         $this->resetQuery();
 
         return $data ? $this->createInstance()->populate($data) : null;
+    }
+
+    public function hasMany(string $relatedModelClass, string $foreignKey, string $localKey = 'id'): array
+    {
+        $relationName = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
+
+        if (isset($this->relationCache[$relationName])) {
+            return $this->relationCache[$relationName];
+        }
+
+        /** @var Model $instance */
+        $instance = new $relatedModelClass();
+
+        $localValue = $this->{$localKey} ?? null;
+        if ($localValue === null) {
+            return [];
+        }
+
+        $related = $instance->where($foreignKey, $localValue)->fetchAll();
+
+        return $this->relationCache[$relationName] = $related;
+    }
+
+    public function hasOne(string $relatedModelClass, string $foreignKey, string $localKey = 'id'): ?Model
+    {
+        $relationName = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
+
+        if (isset($this->relationCache[$relationName])) {
+            return $this->relationCache[$relationName];
+        }
+
+        /** @var Model $instance */
+        $instance = new $relatedModelClass();
+
+        $localValue = $this->{$localKey} ?? null;
+        if ($localValue === null) {
+            return null;
+        }
+
+        $related = $instance->where($foreignKey, $localValue)->fetchOne();
+
+        return $this->relationCache[$relationName] = $related;
     }
 
     public function organizeByColumn(string $columnName): static

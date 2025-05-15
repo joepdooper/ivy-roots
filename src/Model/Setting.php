@@ -15,11 +15,13 @@ class Setting extends Model
         'name',
         'bool',
         'value',
-        'info'
+        'info',
+        'plugin_id'
     ];
 
     protected string $name;
     protected int $bool;
     protected ?string $value = null;
     protected ?string $info = null;
+    protected ?int $plugin_id = null;
 }

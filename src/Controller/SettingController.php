@@ -44,7 +44,7 @@ class SettingController extends Controller
     {
         $this->authorize('index', Setting::class);
 
-        $settings = (new Setting)->fetchAll();
+        $settings = (new Setting)->where('plugin_id', null)->fetchAll();
         LatteView::set('admin/setting.latte', ['settings' => $settings]);
     }
 }
