@@ -12,19 +12,27 @@ class SettingController extends Controller
 {
     private Setting $setting;
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->setting = new Setting;
+    }
+
     public function post(): void
     {
-        $this->authorize('post', Setting::class);
+        $this->setting->policy('post');
+
+        $redirect = $this->prepareData();
 
         $settings_data = $this->request->get('setting');
 
         foreach ($settings_data as $setting_data) {
             try {
                 $validated = GUMP::is_valid($setting_data, [
-                    'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/'
+                    'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
+                    'plugin_id' => 'numeric'
                 ]);
                 if ($validated === true) {
-                    $this->setting = new Setting;
                     $this->setting->save($setting_data);
                 } else {
                     foreach ($validated as $string) {
@@ -37,14 +45,26 @@ class SettingController extends Controller
         }
 
         $this->flashBag->add('success', 'Update successfully');
-        $this->redirect('admin/setting');
+        $this->redirect($redirect);
     }
 
     public function index(): void
     {
-        $this->authorize('index', Setting::class);
+        $this->setting->policy('index');
 
-        $settings = (new Setting)->where('plugin_id', null)->fetchAll();
+        $settings = $this->setting->where('plugin_id', null)->fetchAll();
         LatteView::set('admin/setting.latte', ['settings' => $settings]);
+    }
+
+    private function prepareData(string $url = '', int $statusCode = 302)
+    {
+        $refererPath = $this->getRefererPath();
+        if ($refererPath != $this->setting->getPath()){
+            $segments = explode('/',$refererPath);
+            if($segments[0] === 'plugin') {
+                $this->setting->plugin_id = (new \Ivy\Model\Plugin)->where('url', $segments[1])->fetchOne()->getId();
+            }
+        }
+        return $refererPath;
     }
 }

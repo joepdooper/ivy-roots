@@ -21,6 +21,8 @@ abstract class Controller
     {
         $this->request = Request::createFromGlobals();
         $this->flashBag = SessionManager::getFlashBag();
+
+        $this->requirements();
     }
 
     protected function requirePost()
@@ -28,6 +30,7 @@ abstract class Controller
         if (!$this->request->isMethod('POST')) {
             $this->flashBag->add('error', 'Invalid request method.');
             $this->redirect();
+            exit;
         }
         $this->requireCsrf();
     }
@@ -37,6 +40,7 @@ abstract class Controller
         if (!$this->request->isMethod('PATCH')) {
             $this->flashBag->add('error', 'Invalid request method.');
             $this->redirect();
+            exit;
         }
         $this->requireCsrf();
     }
@@ -46,14 +50,23 @@ abstract class Controller
         if (!$this->request->isMethod('GET')) {
             $this->flashBag->add('error', 'Invalid request method.');
             $this->redirect();
+            exit;
         }
     }
 
-    protected function requireLogin(): void
+    protected function requirements(): void
     {
-        if (!User::getAuth()->isLoggedIn()) {
-            $this->flashBag->add('error', 'You must be logged in.');
-            $this->redirect('admin/login');
+        $method = $this->request->getMethod();
+        switch ($method) {
+            case 'POST':
+                $this->requirePost();
+                break;
+            case 'PATCH':
+                $this->requirePatch();
+                break;
+            case 'GET':
+                $this->requireGet();
+                break;
         }
     }
 
@@ -64,7 +77,26 @@ abstract class Controller
         if (!$csrfToken || !hash_equals($csrfToken, $this->request->get('csrf_token', ''))) {
             $this->flashBag->add('error', 'Invalid security token.');
             $this->redirect();
+            exit;
         }
+    }
+
+    protected function redirect(string $url = '', int $statusCode = 302): void
+    {
+        (new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode))->send();
+    }
+
+    protected function getRefererPath(): ?string
+    {
+        $referer = $this->request->headers->get('referer');
+        $basePath = $this->request->getBasePath();
+        $path = parse_url($referer, PHP_URL_PATH);
+
+        if (!$path || !$basePath || !str_starts_with($path, $basePath)) {
+            return null;
+        }
+
+        return ltrim(substr($path, strlen($basePath)), '/');
     }
 
     protected function validate(array $rules): array
@@ -80,58 +112,5 @@ abstract class Controller
     protected function wantsJson(): bool
     {
         return $this->request->headers->get('Accept') === 'application/json';
-    }
-
-    protected function redirect(string $url = '', int $statusCode = 302): void
-    {
-        (new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode))->send();
-    }
-
-    protected function beforeAuthorize(): void
-    {
-        $method = $this->request->getMethod();
-
-        switch ($method) {
-            case 'POST':
-                $this->requirePost();
-                break;
-            case 'PATCH':
-                $this->requirePatch();
-                break;
-            case 'GET':
-                $this->requireGet();
-                break;
-        }
-    }
-
-    public function authorize(string $ability, $model)
-    {
-        $this->beforeAuthorize();
-
-        $modelClass = is_object($model) ? get_class($model) : $model;
-
-        if (!class_exists($modelClass)) {
-            error_log("Model {$modelClass} not found.");
-        }
-
-        $shortName = basename(str_replace('\\', '/', $modelClass));
-        $policyClass = "Ivy\\Policy\\{$shortName}Policy";
-        $alternativePolicyClass = "{$modelClass}Policy";
-
-        $policyClass = class_exists($policyClass) ? $policyClass : $alternativePolicyClass;
-
-        if (!class_exists($policyClass)) {
-            error_log("Policy not found for {$shortName}");
-        }
-
-        if (!method_exists($policyClass, $ability)) {
-            error_log("Method {$ability} does not exist in {$policyClass}.");
-        }
-
-        if (!$policyClass::$ability(new $modelClass)) {
-            $this->redirect('admin/login');
-        }
-
-        return true;
     }
 }

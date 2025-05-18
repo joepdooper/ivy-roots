@@ -15,6 +15,12 @@ class PluginController extends Controller
     private Plugin $plugin;
     private PluginManager $pluginManager;
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->plugin = new Plugin;
+    }
+
     public function before(): void
     {
         if (User::getAuth()->isLoggedIn()) {
@@ -28,7 +34,7 @@ class PluginController extends Controller
 
     public function post(): void
     {
-        $this->authorize('post',Plugin::class);
+        $this->plugin->policy('post');
 
         $plugins_data = $this->request->get('plugin') ?? '';
         $responses = [];
@@ -62,7 +68,7 @@ class PluginController extends Controller
 
     public function index($id = null): void
     {
-        $this->authorize('index',Plugin::class);
+        $this->plugin->policy('index');
 
         if($id) {
             $parent_id = (new Plugin)->where('url', $id)->fetchOne()->getId();

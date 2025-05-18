@@ -22,6 +22,12 @@ class ProfileController extends Controller
     private Profile $profile;
     private File $file;
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->profile = new Profile;
+    }
+
     public function before(): void
     {
         if (!User::getAuth()->isLoggedIn()) {
@@ -31,7 +37,7 @@ class ProfileController extends Controller
 
     public function post(): void
     {
-        $this->authorize('post', Profile::class);
+        $this->profile->policy('post');
 
         $data = [
             'user_id' => $this->request->get('user_id'),

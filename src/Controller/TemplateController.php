@@ -14,6 +14,12 @@ class TemplateController extends Controller
 {
     protected Template $template;
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->template = new Template;
+    }
+
     public function before(): void
     {
         if (!User::getAuth()->isLoggedIn() && Setting::getStash()['private']->bool) {
@@ -25,8 +31,7 @@ class TemplateController extends Controller
 
     public function post(): void
     {
-        $this->authorize('post', Template::class);
-
+        $this->template->policy('post');
 
         $templates_data = $this->request->get('template') ?? '';
 
@@ -54,7 +59,7 @@ class TemplateController extends Controller
 
     public function index(): void
     {
-        $this->authorize('index', Template::class);
+        $this->template->policy('index');
 
         LatteView::set('admin/template.latte');
     }

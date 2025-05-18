@@ -369,4 +369,23 @@ abstract class Model
         $this->query .= " LIMIT $limit OFFSET $offset";
         return $this;
     }
+
+    public function policy(string $action): ?bool
+    {
+        $modelClass = get_class($this);
+        $modelName = (new \ReflectionClass($modelClass))->getShortName();
+        $namespace = (new \ReflectionClass($modelClass))->getNamespaceName();
+
+        $policyClass = "{$namespace}\\{$modelName}Policy";
+
+        if (!class_exists($policyClass)) {
+            return null;
+        }
+
+        if (!method_exists($policyClass, $action)) {
+            return null;
+        }
+
+        return $policyClass::$action($this);
+    }
 }

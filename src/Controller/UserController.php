@@ -26,6 +26,12 @@ class UserController extends Controller
 {
     private User $user;
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->user = new User;
+    }
+
     public function before(): void
     {
         if (User::getAuth()->isLoggedIn()) {
@@ -37,7 +43,7 @@ class UserController extends Controller
 
     public function post(): void
     {
-        $this->authorize('post', User::class);
+        $this->user->policy('post');
 
         $users_data = $this->request->get('user');
 
@@ -81,7 +87,7 @@ class UserController extends Controller
 
     public function index(): void
     {
-        $this->authorize('index', User::class);
+        $this->user->policy('index');
 
         $users = (new User)->fetchAll();
         LatteView::set('admin/user.latte', ['users' => $users]);
