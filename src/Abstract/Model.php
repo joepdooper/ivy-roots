@@ -83,21 +83,19 @@ abstract class Model
         $this->bindings = [];
     }
 
-    public function select(array $columns): static
+    public function select(string|array $columns): static
     {
-        $formattedColumns = [];
+        $cols = [];
 
-        foreach ($columns as $column) {
-            if (strpos($column, '.') !== false) {
-                [$table, $col] = explode('.', $column, 2);
-                $formattedColumns[] = "`$table`.`$col`";
+        foreach ((array) $columns as $column) {
+            if ($column === '*') {
+                $cols[] = '*';
             } else {
-                $formattedColumns[] = "`$this->table`.`$column`";
+                $cols[] = $this->qualifyColumn($column)['qualified'];
             }
         }
 
-        $columnString = implode(', ', $formattedColumns);
-        $this->query = "SELECT $columnString FROM `$this->table`";
+        $this->query = 'SELECT ' . implode(', ', $cols) . ' FROM `' . $this->table . '`';
 
         return $this;
     }
@@ -105,44 +103,37 @@ abstract class Model
 
     public function where(string $column, $value = null, string $operator = '='): static
     {
+        $col = $this->qualifyColumn($column);
+
         if (is_null($value)) {
             $this->query .= str_contains($this->query, 'WHERE')
-                ? " AND `$this->table`.`$column` IS NULL"
-                : " WHERE `$this->table`.`$column` IS NULL";
+                ? " AND {$col['qualified']} IS NULL"
+                : " WHERE {$col['qualified']} IS NULL";
         } else {
             $this->query .= str_contains($this->query, 'WHERE')
-                ? " AND `$this->table`.`$column` $operator :$column"
-                : " WHERE `$this->table`.`$column` $operator :$column";
+                ? " AND {$col['qualified']} $operator :{$col['binding']}"
+                : " WHERE {$col['qualified']} $operator :{$col['binding']}";
 
-            $this->bindings[$column] = $value;
+            $this->bindings[$col['binding']] = $value;
         }
-
-        return $this;
-    }
-
-    public function whereRaw(string $condition, array $bindings = []): static
-    {
-        $this->query .= str_contains($this->query, 'WHERE')
-            ? " AND $condition"
-            : " WHERE $condition";
-
-        $this->bindings = array_merge($this->bindings, $bindings);
 
         return $this;
     }
 
     public function whereNot(string $column, $value): static
     {
+        $col = $this->qualifyColumn($column);
+
         if (is_null($value)) {
             $this->query .= str_contains($this->query, 'WHERE')
-                ? " AND `$this->table`.`$column` IS NOT NULL"
-                : " WHERE `$this->table`.`$column` IS NOT NULL";
+                ? " AND {$col['qualified']} IS NOT NULL"
+                : " WHERE {$col['qualified']} IS NOT NULL";
         } else {
             $this->query .= str_contains($this->query, 'WHERE')
-                ? " AND `$this->table`.`$column` != :$column"
-                : " WHERE `$this->table`.`$column` != :$column";
+                ? " AND {$col['qualified']} != :{$col['binding']}"
+                : " WHERE {$col['qualified']} != :{$col['binding']}";
 
-            $this->bindings[$column] = $value;
+            $this->bindings[$col['binding']] = $value;
         }
 
         return $this;
@@ -150,10 +141,13 @@ abstract class Model
 
     public function excludeBy(string $column, $value): static
     {
+        $col = $this->qualifyColumn($column);
+
         $this->query .= str_contains($this->query, 'WHERE')
-            ? " AND `$this->table`.`$column` != :$column"
-            : " WHERE `$this->table`.`$column` != :$column";
-        $this->bindings[$column] = $value;
+            ? " AND {$col['qualified']} != :{$col['binding']}"
+            : " WHERE {$col['qualified']} != :{$col['binding']}";
+
+        $this->bindings[$col['binding']] = $value;
 
         return $this;
     }
@@ -348,6 +342,22 @@ abstract class Model
         }
 
         return $this;
+    }
+
+    private function qualifyColumn(string $column): array
+    {
+        if (strpos($column, '.') !== false) {
+            [$table, $col] = explode('.', $column, 2);
+            return [
+                'qualified' => "`$table`.`$col`",
+                'binding' => "{$table}_{$col}"
+            ];
+        }
+
+        return [
+            'qualified' => "`$this->table`.`$column`",
+            'binding' => $column
+        ];
     }
 
     protected static function createInstance(): static

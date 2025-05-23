@@ -4,6 +4,7 @@ namespace Ivy\Controller;
 
 use GUMP;
 use Ivy\Abstract\Controller;
+use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\View\LatteView;
@@ -48,11 +49,11 @@ class SettingController extends Controller
         $this->redirect($redirect);
     }
 
-    public function index(): void
+    public function index($id = null): void
     {
         $this->setting->policy('index');
-
-        $settings = $this->setting->where('plugin_id', null)->fetchAll();
+        $plugin_id = $id ? (new Plugin)->where('url', $id)->fetchOne()?->getId() : null;
+        $settings = $this->setting->where('plugin_id', $plugin_id)->fetchAll();
         LatteView::set('admin/setting.latte', ['settings' => $settings]);
     }
 

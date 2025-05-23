@@ -29,6 +29,13 @@ class TemplateController extends Controller
         }
     }
 
+    public function index(): void
+    {
+        $this->template->policy('index');
+
+        LatteView::set('admin/template.latte');
+    }
+
     public function post(): void
     {
         $this->template->policy('post');
@@ -55,13 +62,6 @@ class TemplateController extends Controller
 
         $this->flashBag->add('success', 'Update successfully');
         $this->redirect('admin/template');
-    }
-
-    public function index(): void
-    {
-        $this->template->policy('index');
-
-        LatteView::set('admin/template.latte');
     }
 
 }
