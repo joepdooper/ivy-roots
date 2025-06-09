@@ -9,7 +9,7 @@ class Setting extends Model
 {
     use Stash;
 
-    protected string $table = 'setting';
+    protected string $table = 'settings';
     protected string $path = 'admin/setting';
     protected array $columns = [
         'name',

@@ -7,7 +7,7 @@ use Ivy\Helper\PluginInfo;
 
 class Plugin extends Model
 {
-    protected string $table = 'plugin';
+    protected string $table = 'plugins';
     protected string $path = 'admin/plugin';
     protected array $columns = [
         'name',
