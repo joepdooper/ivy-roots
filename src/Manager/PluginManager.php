@@ -6,6 +6,7 @@ use Exception;
 use Ivy\Helper\PluginHelper;
 use Ivy\Language;
 use Ivy\Model\Plugin;
+use Ivy\Model\Setting;
 use Ivy\Path;
 
 class PluginManager
@@ -37,7 +38,7 @@ class PluginManager
 
             $this->plugin->setId($this->plugin->insert());
 
-            if (!empty($this->plugin->getInfo()->getCollection())) {
+            if ($this->plugin->getInfo()->getCollection()) {
                 (new PluginCollectionManager($this->plugin))->install();
             }
 
@@ -52,8 +53,12 @@ class PluginManager
         $this->plugin->setInfo();
 
         try {
-            if (!empty($this->plugin->getInfo()->getCollection())) {
+            if ($this->plugin->getInfo()->getCollection()) {
                 (new PluginCollectionManager($this->plugin))->uninstall();
+            }
+
+            if ($this->plugin->getInfo()->getSettings()) {
+                (new Setting)->where('plugin_id', $this->plugin->id)->delete();
             }
 
             if (isset($this->plugin->getInfo()->getDatabase()['uninstall']) && !empty($this->plugin->getInfo()->getDatabase()['uninstall'])) {
