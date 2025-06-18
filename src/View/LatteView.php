@@ -78,6 +78,7 @@ class LatteView extends View
         self::$latte->addFunction('file', fn($key) => TemplateManager::file($key));
         self::$latte->addFunction('render', fn($key, $vars = []) => LatteView::render($key, $vars));
         self::$latte->addFunction('setting', fn($key) => Setting::getStash()[$key]->value ?? '');
+        self::$latte->addFunction('enabled', fn($key) => Setting::getStash()[$key]->bool ?? false);
         self::$latte->addFunction('isPluginActive', fn($key) => in_array($key, SessionManager::get('plugin_actives')));
         self::$latte->addFunction('csrf', fn() => new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">'));
         self::$latte->addFunction('auth', fn() => User::getAuth());

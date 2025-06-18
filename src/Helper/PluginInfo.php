@@ -10,7 +10,7 @@ class PluginInfo
     private ?string $url;
     private ?string $type;
     private ?bool $collection;
-    private ?bool $settings;
+    private array $settings = [];
     private array $actions = [];
     private ?array $database;
     private ?array $dependencies;
@@ -26,7 +26,7 @@ class PluginInfo
         $this->description = $infoJsonContent['description'] ?? null;
         $this->type = $infoJsonContent['type'] ?? null;
         $this->collection = $infoJsonContent['collection'] ?? null;
-        $this->settings = $infoJsonContent['settings'] ?? null;
+        $this->settings = $infoJsonContent['settings'] ?? [];
         $this->actions = $infoJsonContent['actions'] ?? [];
         $this->database = $infoJsonContent['database'] ?? null;
         $this->dependencies = $infoJsonContent['dependencies'] ?? null;
@@ -81,9 +81,17 @@ class PluginInfo
     }
 
     /**
-     * @return bool|null
+     * @return bool
      */
-    public function getSettings(): ?bool
+    public function hasSettings(): bool
+    {
+        return !empty($this->settings);
+    }
+
+    /**
+     * @return array
+     */
+    public function getSettings(): array
     {
         return $this->settings;
     }

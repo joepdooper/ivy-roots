@@ -38,6 +38,15 @@ class PluginManager
 
             $this->plugin->setId($this->plugin->insert());
 
+            if ($this->plugin->getInfo()->hasSettings()) {
+                foreach($this->plugin->getInfo()->getSettings() as $setting){
+                    $data = array_merge($setting, [
+                        'plugin_id' => $this->plugin->id,
+                    ]);
+                    (new Setting)->populate($data)->insert();
+                }
+            }
+
             if ($this->plugin->getInfo()->getCollection()) {
                 (new PluginCollectionManager($this->plugin))->install();
             }
@@ -57,7 +66,7 @@ class PluginManager
                 (new PluginCollectionManager($this->plugin))->uninstall();
             }
 
-            if ($this->plugin->getInfo()->getSettings()) {
+            if ($this->plugin->getInfo()->hasSettings()) {
                 (new Setting)->where('plugin_id', $this->plugin->id)->delete();
             }
 
