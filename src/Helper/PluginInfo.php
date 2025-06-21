@@ -9,7 +9,7 @@ class PluginInfo
     private ?string $description;
     private ?string $url;
     private ?string $type;
-    private ?bool $collection;
+    private array $collection = [];
     private array $settings = [];
     private array $actions = [];
     private ?array $database;
@@ -25,7 +25,7 @@ class PluginInfo
         $this->version = $infoJsonContent['version'] ?? null;
         $this->description = $infoJsonContent['description'] ?? null;
         $this->type = $infoJsonContent['type'] ?? null;
-        $this->collection = $infoJsonContent['collection'] ?? null;
+        $this->collection = $infoJsonContent['collection'] ?? [];
         $this->settings = $infoJsonContent['settings'] ?? [];
         $this->actions = $infoJsonContent['actions'] ?? [];
         $this->database = $infoJsonContent['database'] ?? null;
@@ -73,9 +73,17 @@ class PluginInfo
     }
 
     /**
-     * @return bool|null
+     * @return bool
      */
-    public function getCollection(): ?bool
+    public function hasCollection(): bool
+    {
+        return !empty($this->collection);
+    }
+
+    /**
+     * @return array
+     */
+    public function getCollection(): array
     {
         return $this->collection;
     }
@@ -97,6 +105,22 @@ class PluginInfo
     }
 
     /**
+     * @return bool
+     */
+    public function hasActions(): bool
+    {
+        return !empty($this->actions);
+    }
+
+    /**
+     * @return array
+     */
+    public function getActions(): array
+    {
+        return $this->actions;
+    }
+
+    /**
      * @return array|null
      */
     public function getDatabase(): ?array
@@ -110,13 +134,5 @@ class PluginInfo
     public function getDependencies(): ?array
     {
         return $this->dependencies;
-    }
-
-    /**
-     * @return array|null
-     */
-    public function getActions(): ?array
-    {
-        return $this->actions;
     }
 }

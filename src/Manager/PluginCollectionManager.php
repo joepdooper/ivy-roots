@@ -37,8 +37,9 @@ class PluginCollectionManager
 
     private function processScript(string $subfolder, array $infoJsonContent, string $action): void
     {
-        if (isset($infoJsonContent['database'][$action])) {
+        if (in_array($infoJsonContent['name'], $this->plugin->getInfo()->getCollection())) {
             $pluginUrl = PluginHelper::getCollectionDirectory($this->plugin->url) . basename($subfolder);
+
             if (preg_match('#^[a-zA-Z0-9_/.\-]+\.php$#', basename($infoJsonContent['database'][$action]))) {
                 require_once PluginHelper::getRealPath($pluginUrl . DIRECTORY_SEPARATOR . $infoJsonContent['database'][$action]);
             }
@@ -52,7 +53,7 @@ class PluginCollectionManager
                 $plugin->insert();
             }
             if ($action === 'uninstall') {
-                $plugin->where('url', $plugin->url)->where('parent_id', $this->plugin->id)->delete();
+                $plugin->where('url', $plugin->url)->where('parent_id', $plugin->parent_id)->delete();
             }
         }
     }

@@ -47,7 +47,7 @@ class PluginManager
                 }
             }
 
-            if ($this->plugin->getInfo()->getCollection()) {
+            if ($this->plugin->getInfo()->hasCollection()) {
                 (new PluginCollectionManager($this->plugin))->install();
             }
 

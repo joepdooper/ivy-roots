@@ -32,7 +32,7 @@ class User extends Model
     protected int $resettable;
     protected int $roles_mask;
     protected int $registered;
-    protected int $last_login;
+    protected ?int $last_login;
 
     static function canEditAsEditor(): bool
     {
