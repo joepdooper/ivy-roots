@@ -7,6 +7,7 @@ use Ivy\Manager\LanguageManager;
 use Ivy\Manager\RouterManager;
 use Ivy\Manager\SessionManager;
 use Ivy\Manager\TemplateManager;
+use Ivy\Model\Info;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Model\User;
@@ -46,6 +47,8 @@ class App
     private function bootstrap(): void
     {
         User::setAuth();
+        Info::stash()->keyByColumn('name');
+        Setting::stash()->keyByColumn('name');
         TemplateManager::init();
         LanguageManager::init();
     }

@@ -2,11 +2,11 @@
 
 namespace Ivy\View;
 
-use Ivy\Abstract\View;
 use Ivy\Language;
 use Ivy\Manager\HookManager;
 use Ivy\Manager\SessionManager;
 use Ivy\Manager\TemplateManager;
+use Ivy\Model\Info;
 use Ivy\Model\Profile;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
@@ -14,7 +14,7 @@ use Ivy\Model\User;
 use Ivy\Path;
 use Latte\Engine;
 
-class LatteView extends View
+class View
 {
     protected static ?Engine $latte = null;
     protected static string $name = '';
@@ -37,7 +37,7 @@ class LatteView extends View
 
     public static function render(string $name, array $params = [], ?string $block = null): void
     {
-        self::latte(self::name($name), $params, $block);
+        self::renderWithEngine(self::name($name), $params, $block);
     }
 
     public static function body(string $name, array $params = [], ?string $block = null): void
@@ -46,18 +46,18 @@ class LatteView extends View
             $params['flashes'] = $params['flashes'] ?? [];
             self::name($name, $params, $block);
         }
-        self::latte(self::$name, self::$params, self::$block);
+        self::renderWithEngine(self::$name, self::$params, self::$block);
     }
 
     public static function head(string $name, array $params = [], ?string $block = null): void
     {
         $file = TemplateManager::file($name);
         if ($file !== null) {
-            self::latte($file, $params, $block);
+            self::renderWithEngine($file, $params, $block);
         }
     }
 
-    protected static function latte(string $name, array $params = [], ?string $block = null): void
+    protected static function renderWithEngine(string $name, array $params = [], ?string $block = null): void
     {
         if (self::$latte === null) {
             self::initializeLatte();
@@ -76,9 +76,9 @@ class LatteView extends View
         self::$latte->addFunction('text', fn($key, $vars = null) => Language::translate($key, $vars) ?? $key);
         self::$latte->addFunction('path', fn($key) => Path::get($key));
         self::$latte->addFunction('file', fn($key) => TemplateManager::file($key));
-        self::$latte->addFunction('render', fn($key, $vars = []) => LatteView::render($key, $vars));
-        self::$latte->addFunction('setting', fn($key) => Setting::getStash()[$key]->value ?? '');
-        self::$latte->addFunction('enabled', fn($key) => Setting::getStash()[$key]->bool ?? false);
+        self::$latte->addFunction('render', fn($key, $vars = []) => View::render($key, $vars));
+        self::$latte->addFunction('setting', fn($key) => Info::getStash()[$key]->value ?? '');
+        self::$latte->addFunction('enabled', fn($key) => Info::getStash()[$key]->bool ?? false);
         self::$latte->addFunction('isPluginActive', fn($key) => in_array($key, SessionManager::get('plugin_actives')));
         self::$latte->addFunction('csrf', fn() => new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">'));
         self::$latte->addFunction('auth', fn() => User::getAuth());

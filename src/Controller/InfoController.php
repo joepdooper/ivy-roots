@@ -4,37 +4,37 @@ namespace Ivy\Controller;
 
 use GUMP;
 use Ivy\Abstract\Controller;
+use Ivy\Model\Info;
 use Ivy\Model\Plugin;
-use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\View\View;
 
-class SettingController extends Controller
+class InfoController extends Controller
 {
-    private Setting $setting;
+    private Info $info;
 
     public function __construct()
     {
         parent::__construct();
-        $this->setting = new Setting;
+        $this->info = new Info;
     }
 
     public function post(): void
     {
-        $this->setting->policy('post');
+        $this->info->policy('post');
 
         $redirect = $this->prepareData();
 
-        $settings_data = $this->request->get('setting');
+        $infos_data = $this->request->get('info');
 
-        foreach ($settings_data as $setting_data) {
+        foreach ($infos_data as $info_data) {
             try {
-                $validated = GUMP::is_valid($setting_data, [
+                $validated = GUMP::is_valid($info_data, [
                     'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
                     'plugin_id' => 'numeric'
                 ]);
                 if ($validated === true) {
-                    $this->setting->save($setting_data);
+                    $this->info->save($info_data);
                 } else {
                     foreach ($validated as $string) {
                         $this->flashBag->add('error', $string);
@@ -51,19 +51,19 @@ class SettingController extends Controller
 
     public function index($id = null): void
     {
-        $this->setting->policy('index');
+        $this->info->policy('index');
         $plugin_id = $id ? (new Plugin)->where('url', $id)->fetchOne()?->getId() : null;
-        $settings = $this->setting->where('plugin_id', $plugin_id)->fetchAll();
-        View::set('admin/setting.latte', ['settings' => $settings]);
+        $infos = $this->info->where('plugin_id', $plugin_id)->fetchAll();
+        View::set('admin/info.latte', ['infos' => $infos]);
     }
 
     private function prepareData(string $url = '', int $statusCode = 302)
     {
         $refererPath = $this->getRefererPath();
-        if ($refererPath != $this->setting->getPath()){
+        if ($refererPath != $this->info->getPath()){
             $segments = explode('/',$refererPath);
             if($segments[0] === 'plugin') {
-                $this->setting->plugin_id = (new \Ivy\Model\Plugin)->where('url', $segments[1])->fetchOne()->getId();
+                $this->info->plugin_id = (new \Ivy\Model\Plugin)->where('url', $segments[1])->fetchOne()->getId();
             }
         }
         return $refererPath;

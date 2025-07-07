@@ -20,7 +20,7 @@ use Ivy\Mail;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Path;
-use Ivy\View\LatteView;
+use Ivy\View\View;
 
 class UserController extends Controller
 {
@@ -90,7 +90,7 @@ class UserController extends Controller
         $this->user->policy('index');
 
         $users = (new User)->fetchAll();
-        LatteView::set('admin/user.latte', ['users' => $users]);
+        View::set('admin/user.latte', ['users' => $users]);
     }
 
     public function beforeRegister(): void
@@ -121,8 +121,8 @@ class UserController extends Controller
             });
             DatabaseManager::connection()->insert('profiles', ['user_id' => $userId]);
             // Set role to registered user
-            if (Setting::getStash()['registration_role']->bool && Setting::getStash()['registration_role']->value) {
-                $role = strtoupper(Setting::getStash()['registration_role']->value);
+            if (Info::getStash()['registration_role']->bool && Info::getStash()['registration_role']->value) {
+                $role = strtoupper(Info::getStash()['registration_role']->value);
                 $roleConstant = "\Delight\Auth\Role::$role";
                 self::$auth->admin()->addRoleForUserById($userId, constant($roleConstant));
             }
@@ -146,7 +146,7 @@ class UserController extends Controller
 
     public function viewRegister(): void
     {
-        LatteView::set('admin/register.latte');
+        View::set('admin/register.latte');
     }
 
     public function beforeLogin(): void
@@ -208,7 +208,7 @@ class UserController extends Controller
                 $this->flashBag->add('error', 'Auth error');
             }
         }
-        LatteView::set('admin/login.latte');
+        View::set('admin/login.latte');
     }
 
     public function beforeLogout(): void
@@ -232,7 +232,7 @@ class UserController extends Controller
 
     public function viewLogout(): void
     {
-        LatteView::set('admin/logout.latte');
+        View::set('admin/logout.latte');
     }
 
     public function beforeReset(): void
@@ -324,7 +324,7 @@ class UserController extends Controller
                 $this->redirect('admin/reset');
             }
         }
-        LatteView::set('admin/reset.latte', ['selector' => $selector, 'token' => $token]);
+        View::set('admin/reset.latte', ['selector' => $selector, 'token' => $token]);
     }
 
 }

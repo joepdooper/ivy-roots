@@ -15,7 +15,7 @@ use Ivy\Model\Profile;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Path;
-use Ivy\View\LatteView;
+use Ivy\View\View;
 
 class ProfileController extends Controller
 {
@@ -131,13 +131,13 @@ class ProfileController extends Controller
     public function user(): void
     {
         $profile = (new Profile)->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
-        LatteView::set('admin/profile.latte', ['profile' => $profile]);
+        View::set('admin/profile.latte', ['profile' => $profile]);
     }
 
     public function public($id): void
     {
         $profile = (new Profile)->where('id', $id)->fetchOne();
-        LatteView::set('include/profile.latte', ['profile' => $profile]);
+        View::set('include/profile.latte', ['profile' => $profile]);
     }
 
     private function saveAvatar(): string

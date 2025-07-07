@@ -25,6 +25,30 @@ abstract class Controller
         $this->requirements();
     }
 
+    public function save($id): void
+    {
+        if($this->request->get('delete') !== null){
+            $this->delete($id);
+        } else {
+            $this->update($id);
+        }
+    }
+
+    public function insert($id): void
+    {
+        // insert
+    }
+
+    public function update($id): void
+    {
+        // update
+    }
+
+    public function delete($id): void
+    {
+        // delete
+    }
+
     protected function requirePost()
     {
         if (!$this->request->isMethod('POST')) {

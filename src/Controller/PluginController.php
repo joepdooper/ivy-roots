@@ -8,7 +8,7 @@ use Ivy\Model\Plugin;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Path;
-use Ivy\View\LatteView;
+use Ivy\View\View;
 
 class PluginController extends Controller
 {
@@ -95,7 +95,7 @@ class PluginController extends Controller
             }
             $uninstalled_plugins = $uninstalled_plugins_info;
         }
-        LatteView::set('admin/plugin.latte', ['installed_plugins' => $installed_plugins, 'uninstalled_plugins' => $uninstalled_plugins]);
+        View::set('admin/plugin.latte', ['installed_plugins' => $installed_plugins, 'uninstalled_plugins' => $uninstalled_plugins]);
     }
 
 }

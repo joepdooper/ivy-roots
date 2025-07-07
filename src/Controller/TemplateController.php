@@ -8,7 +8,7 @@ use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Path;
-use Ivy\View\LatteView;
+use Ivy\View\View;
 
 class TemplateController extends Controller
 {
@@ -33,7 +33,7 @@ class TemplateController extends Controller
     {
         $this->template->policy('index');
 
-        LatteView::set('admin/template.latte');
+        View::set('admin/template.latte');
     }
 
     public function post(): void

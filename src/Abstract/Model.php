@@ -272,7 +272,7 @@ abstract class Model
 
         $this->resetQuery();
 
-        return DatabaseManager::connection()->getLastInsertId();
+        return $this->setId(DatabaseManager::connection()->getLastInsertId())->getId();
     }
 
     public function update(): bool|int
