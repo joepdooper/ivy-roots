@@ -38,6 +38,7 @@ class App
         $this->loadPluginRoutesAssets();
 
         require Path::get('PUBLIC_PATH') . 'routes/web.php';
+        require Path::get('PUBLIC_PATH') . 'routes/user.php';
         require Path::get('PUBLIC_PATH') . 'routes/admin.php';
         require Path::get('PUBLIC_PATH') . 'routes/error.php';
 

@@ -31,7 +31,7 @@ class ProfileController extends Controller
     public function before(): void
     {
         if (!User::getAuth()->isLoggedIn()) {
-            $this->redirect('admin/login');
+            $this->redirect('user/login');
         }
     }
 

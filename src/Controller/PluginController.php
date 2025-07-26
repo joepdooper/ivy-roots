@@ -28,7 +28,7 @@ class PluginController extends Controller
                 $this->redirect();
             }
         } else {
-            $this->redirect('admin/login');
+            $this->redirect('user/login');
         }
     }
 
