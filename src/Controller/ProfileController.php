@@ -145,7 +145,7 @@ class ProfileController extends Controller
         $this->file = new File;
         $this->file->setName(bin2hex(random_bytes(16)));
         $this->file->setAllowed(array('image/*'));
-        $this->file->setDirectory(Path::get('PUBLIC_PATH') . Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
+        $this->file->setDirectory(Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
         $this->file->setWidth('120');
         $avatar = $this->file->upload($this->request->files->get('avatar'));
         $this->file->setImageConvert( 'webp');
@@ -157,7 +157,7 @@ class ProfileController extends Controller
     private function deleteAvatar(): null
     {
         $this->file = new File;
-        $this->file->setDirectory(Path::get('PUBLIC_PATH') . Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
+        $this->file->setDirectory(Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
         $this->file->delete($this->profile->getUserImage());
 
         return null;

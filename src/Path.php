@@ -41,10 +41,11 @@ final class Path
             'PROTOCOL'     => $protocol,
             'DOMAIN'       => $domain,
             'CURRENT_PAGE' => $currentPage,
+            'PROJECT_PATH' => dirname($documentRoot) . DIRECTORY_SEPARATOR,
+            'MEDIA_PATH'   => dirname($documentRoot) . DIRECTORY_SEPARATOR . "media" . DIRECTORY_SEPARATOR,
+            'PLUGINS_PATH'  => dirname($documentRoot) . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR,
+            'TEMPLATES_PATH' => dirname($documentRoot) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR,
             'PUBLIC_PATH'  => rtrim($documentRoot . DIRECTORY_SEPARATOR . $scriptPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR,
-            'MEDIA_PATH'   => "media" . DIRECTORY_SEPARATOR,
-            'PLUGIN_PATH'  => "plugins" . DIRECTORY_SEPARATOR,
-            'TEMPLATES_PATH' => "templates" . DIRECTORY_SEPARATOR
         ];
 
         $serverPort = $_ENV['SERVER_PORT'] ?? $_SERVER['HTTP_X_FORWARDED_PORT'] ?? $_SERVER['SERVER_PORT'] ?? 80;

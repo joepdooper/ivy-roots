@@ -51,7 +51,7 @@ class Language
 
     private static function loadFile($firstKey): void
     {
-        $langPath = Path::get('PUBLIC_PATH') . 'language' . DIRECTORY_SEPARATOR . self::$defaultLang . DIRECTORY_SEPARATOR . $firstKey . '.php';
+        $langPath = Path::get('PROJECT_PATH') . 'language' . DIRECTORY_SEPARATOR . self::$defaultLang . DIRECTORY_SEPARATOR . $firstKey . '.php';
 
         if (file_exists($langPath)) {
             self::$translations[$firstKey] = include $langPath;
@@ -64,7 +64,7 @@ class Language
 
     private static function loadPluginFile($firstKey, $secondKey): void
     {
-        $langPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $firstKey . DIRECTORY_SEPARATOR . 'language' . DIRECTORY_SEPARATOR . self::$defaultLang . DIRECTORY_SEPARATOR . $secondKey . '.php';
+        $langPath = Path::get('PLUGINS_PATH') . $firstKey . DIRECTORY_SEPARATOR . 'language' . DIRECTORY_SEPARATOR . self::$defaultLang . DIRECTORY_SEPARATOR . $secondKey . '.php';
 
         if (file_exists($langPath)) {
             self::$translations[$firstKey.'_'.$secondKey] = include $langPath;

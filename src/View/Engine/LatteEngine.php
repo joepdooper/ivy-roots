@@ -19,11 +19,11 @@ class LatteEngine implements EngineInterface
     public function __construct()
     {
         $this->latte = new Engine();
-        $this->latte->setTempDirectory(Path::get('PUBLIC_PATH') . 'cache/templates');
+        $this->latte->setTempDirectory(Path::get('PROJECT_PATH') . 'cache/templates');
         $this->latte->setAutoRefresh($_ENV['APP_ENV'] ?? 'production' === 'development');
 
         // Register functions
-        $this->latte->addFunction('icon', fn($icon) => file_get_contents(Path::get('PUBLIC_PATH') . "/media/icon/" . $icon));
+        $this->latte->addFunction('icon', fn($icon) => file_get_contents(Path::get('PROJECT_PATH') . "/media/icon/" . $icon));
         $this->latte->addFunction('text', fn($key, $vars = null) => Language::translate($key, $vars) ?? $key);
         $this->latte->addFunction('path', fn($key) => Path::get($key));
         $this->latte->addFunction('file', fn($key) => TemplateManager::file($key));

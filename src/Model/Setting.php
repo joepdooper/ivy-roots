@@ -16,7 +16,8 @@ class Setting extends Model
         'bool',
         'value',
         'info',
-        'plugin_id'
+        'plugin_id',
+        'is_default'
     ];
 
     protected string $name;
@@ -24,4 +25,5 @@ class Setting extends Model
     protected ?string $value = null;
     protected ?string $info = null;
     protected ?int $plugin_id = null;
+    protected int $is_default;
 }

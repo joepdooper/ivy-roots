@@ -30,7 +30,7 @@ class PluginManager
             }
 
             if (isset($this->plugin->getInfo()->getDatabase()['install']) && !empty($this->plugin->getInfo()->getDatabase()['install']) && !empty($this->plugin->getInfo()->getUrl())) {
-                $installPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $this->plugin->getInfo()->getUrl() . DIRECTORY_SEPARATOR . $this->plugin->getInfo()->getDatabase()['install'];
+                $installPath = Path::get('PLUGINS_PATH') . $this->plugin->getInfo()->getUrl() . DIRECTORY_SEPARATOR . $this->plugin->getInfo()->getDatabase()['install'];
                 if (file_exists($installPath)) {
                     require_once $installPath;
                 }
@@ -71,7 +71,7 @@ class PluginManager
             }
 
             if (isset($this->plugin->getInfo()->getDatabase()['uninstall']) && !empty($this->plugin->getInfo()->getDatabase()['uninstall'])) {
-                $uninstallPath = Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $this->plugin->getInfo()->getUrl() . DIRECTORY_SEPARATOR . $this->plugin->getInfo()->getDatabase()['uninstall'];
+                $uninstallPath = Path::get('PLUGINS_PATH') . $this->plugin->getInfo()->getUrl() . DIRECTORY_SEPARATOR . $this->plugin->getInfo()->getDatabase()['uninstall'];
                 if (file_exists($uninstallPath)) {
                     require_once $uninstallPath;
                 }

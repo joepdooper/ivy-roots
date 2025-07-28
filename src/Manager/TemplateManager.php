@@ -11,8 +11,12 @@ class TemplateManager
     public static function init(): void
     {
         $sql = "SELECT `value` FROM `templates` WHERE `type` = :type";
-        define('_TEMPLATE_BASE', Path::get('TEMPLATES_PATH') . DatabaseManager::connection()->selectValue($sql, ['base']) . DIRECTORY_SEPARATOR);
-        define('_TEMPLATE_SUB', Path::get('TEMPLATES_PATH') . DatabaseManager::connection()->selectValue($sql, ['sub']) . DIRECTORY_SEPARATOR);
+
+        $templateBase = DatabaseManager::connection()->selectValue($sql, ['base']);
+        $templateSub = DatabaseManager::connection()->selectValue($sql, ['sub']);
+
+        define('_TEMPLATE_BASE', Path::get('TEMPLATES_PATH') . $templateBase . DIRECTORY_SEPARATOR);
+        define('_TEMPLATE_SUB', Path::get('TEMPLATES_PATH') . $templateSub . DIRECTORY_SEPARATOR);
     }
 
     public static function file(string $filename): ?string

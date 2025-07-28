@@ -3,6 +3,7 @@
 namespace Ivy\Manager;
 
 use Ivy\Model\Template;
+use Ivy\Path;
 
 class AssetManager
 {
@@ -12,17 +13,17 @@ class AssetManager
 
     public static function addCSS($name): void
     {
-        self::$css[] = TemplateManager::file($name);
+        self::$css[] = str_replace(dirname(Path::get('ROOT')), '',TemplateManager::file($name));
     }
 
     public static function addJS($name): void
     {
-        self::$js[] = TemplateManager::file($name);
+        self::$js[] = str_replace(dirname(Path::get('ROOT')), '',TemplateManager::file($name));
     }
 
     public static function addESM($name): void
     {
-        self::$esm[] = TemplateManager::file($name);
+        self::$esm[] = str_replace(dirname(Path::get('ROOT')), '',TemplateManager::file($name));
     }
 
     /**

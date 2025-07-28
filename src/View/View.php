@@ -69,10 +69,10 @@ class View
     protected static function initializeLatte(): void
     {
         self::$latte = new Engine();
-        self::$latte->setTempDirectory(Path::get('PUBLIC_PATH') . 'cache/templates');
+        self::$latte->setTempDirectory(Path::get('PROJECT_PATH') . 'cache/templates');
         self::$latte->setAutoRefresh($_ENV['APP_ENV'] ?? 'production' === 'development');
 
-        self::$latte->addFunction('icon', fn($icon) => file_get_contents(Path::get('PUBLIC_PATH') . "/media/icon/" . $icon));
+        self::$latte->addFunction('icon', fn($icon) => file_get_contents(Path::get('PROJECT_PATH') . "/media/icon/" . $icon));
         self::$latte->addFunction('text', fn($key, $vars = null) => Language::translate($key, $vars) ?? $key);
         self::$latte->addFunction('path', fn($key) => Path::get($key));
         self::$latte->addFunction('file', fn($key) => TemplateManager::file($key));

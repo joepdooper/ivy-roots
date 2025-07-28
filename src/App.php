@@ -20,7 +20,7 @@ class App
         if (!empty($plugins)) {
             SessionManager::set('plugin_actives', array_map(fn($plugin) => $plugin->name, $plugins));
             foreach ($plugins as $plugin) {
-                require Path::get('PUBLIC_PATH') . Path::get('PLUGIN_PATH') . $plugin->url . DIRECTORY_SEPARATOR . 'plugin.php';
+                require Path::get('PLUGINS_PATH') . $plugin->url . DIRECTORY_SEPARATOR . 'plugin.php';
             }
         } else {
             SessionManager::set('plugin_actives', []);
@@ -32,15 +32,15 @@ class App
         $router = RouterManager::instance();
         $router->setBasePath(Path::get('SUBFOLDER'));
 
-        require Path::get('PUBLIC_PATH') . 'routes/middleware.php';
+        require Path::get('PROJECT_PATH') . 'routes/middleware.php';
 
         require TemplateManager::file('template.php');
         $this->loadPluginRoutesAssets();
 
-        require Path::get('PUBLIC_PATH') . 'routes/web.php';
-        require Path::get('PUBLIC_PATH') . 'routes/user.php';
-        require Path::get('PUBLIC_PATH') . 'routes/admin.php';
-        require Path::get('PUBLIC_PATH') . 'routes/error.php';
+        require Path::get('PROJECT_PATH') . 'routes/web.php';
+        require Path::get('PROJECT_PATH') . 'routes/user.php';
+        require Path::get('PROJECT_PATH') . 'routes/admin.php';
+        require Path::get('PROJECT_PATH') . 'routes/error.php';
 
         $router->run();
     }
@@ -56,7 +56,7 @@ class App
 
     public function run(): void
     {
-        (\Dotenv\Dotenv::createImmutable(Path::get('PUBLIC_PATH')))->load();
+        (\Dotenv\Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
         $this->bootstrap();
         $this->loadRoutes();
     }
