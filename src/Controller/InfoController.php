@@ -9,7 +9,7 @@ use Ivy\Model\Plugin;
 use Ivy\Model\Template;
 use Ivy\View\View;
 
-class InfoController extends Controller
+class InfoController extends SettingController
 {
     private Info $info;
 
@@ -55,17 +55,5 @@ class InfoController extends Controller
         $plugin_id = $id ? (new Plugin)->where('url', $id)->fetchOne()?->getId() : null;
         $infos = $this->info->where('plugin_id', $plugin_id)->fetchAll();
         View::set('admin/info.latte', ['infos' => $infos]);
-    }
-
-    private function prepareData(string $url = '', int $statusCode = 302)
-    {
-        $refererPath = $this->getRefererPath();
-        if ($refererPath != $this->info->getPath()){
-            $segments = explode('/',$refererPath);
-            if($segments[0] === 'plugin') {
-                $this->info->plugin_id = (new \Ivy\Model\Plugin)->where('url', $segments[1])->fetchOne()->getId();
-            }
-        }
-        return $refererPath;
     }
 }

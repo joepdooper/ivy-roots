@@ -57,7 +57,7 @@ class SettingController extends Controller
         View::set('admin/setting.latte', ['settings' => $settings]);
     }
 
-    private function prepareData(string $url = '', int $statusCode = 302)
+    protected function prepareData(string $url = '', int $statusCode = 302)
     {
         $refererPath = $this->getRefererPath();
         if ($refererPath != $this->setting->getPath()){

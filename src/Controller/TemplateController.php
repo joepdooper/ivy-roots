@@ -7,7 +7,7 @@ use Ivy\Abstract\Controller;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
-use Ivy\Path;
+use Ivy\Core\Path;
 use Ivy\View\View;
 
 class TemplateController extends Controller

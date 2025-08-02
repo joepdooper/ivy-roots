@@ -4,10 +4,10 @@ namespace Ivy\Manager;
 
 use Exception;
 use Ivy\Helper\PluginHelper;
-use Ivy\Language;
+use Ivy\Core\Language;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
-use Ivy\Path;
+use Ivy\Core\Path;
 
 class PluginManager
 {

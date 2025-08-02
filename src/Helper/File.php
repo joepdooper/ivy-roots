@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Helper;
 
 use Verot\Upload\Upload;
 

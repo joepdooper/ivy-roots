@@ -2,7 +2,7 @@
 
 namespace Ivy\Manager;
 
-use Ivy\Path;
+use Ivy\Core\Path;
 
 class TemplateManager
 {

@@ -1,6 +1,7 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Core;
+
 
 use Ivy\Manager\DatabaseManager;
 use Ivy\Manager\LanguageManager;

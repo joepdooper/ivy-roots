@@ -9,12 +9,12 @@ use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UserAlreadyExistsException;
 use GUMP;
 use Ivy\Abstract\Controller;
-use Ivy\File;
+use Ivy\Core\Path;
+use Ivy\Helper\File;
 use Ivy\Mail;
 use Ivy\Model\Profile;
 use Ivy\Model\Template;
 use Ivy\Model\User;
-use Ivy\Path;
 use Ivy\View\View;
 
 class ProfileController extends Controller

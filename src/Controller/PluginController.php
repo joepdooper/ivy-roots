@@ -7,7 +7,7 @@ use Ivy\Manager\PluginManager;
 use Ivy\Model\Plugin;
 use Ivy\Model\Template;
 use Ivy\Model\User;
-use Ivy\Path;
+use Ivy\Core\Path;
 use Ivy\View\View;
 
 class PluginController extends Controller

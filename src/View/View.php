@@ -2,7 +2,7 @@
 
 namespace Ivy\View;
 
-use Ivy\Language;
+use Ivy\Core\Language;
 use Ivy\Manager\HookManager;
 use Ivy\Manager\SessionManager;
 use Ivy\Manager\TemplateManager;
@@ -11,7 +11,7 @@ use Ivy\Model\Profile;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
-use Ivy\Path;
+use Ivy\Core\Path;
 use Latte\Engine;
 
 class View
@@ -72,9 +72,10 @@ class View
         self::$latte->setTempDirectory(Path::get('PROJECT_PATH') . 'cache/templates');
         self::$latte->setAutoRefresh($_ENV['APP_ENV'] ?? 'production' === 'development');
 
-        self::$latte->addFunction('icon', fn($icon) => file_get_contents(Path::get('PROJECT_PATH') . "/media/icon/" . $icon));
+        self::$latte->addFunction('icon', fn($icon) => file_get_contents(Path::get('MEDIA_PATH') . "icons/" . $icon));
         self::$latte->addFunction('text', fn($key, $vars = null) => Language::translate($key, $vars) ?? $key);
         self::$latte->addFunction('path', fn($key) => Path::get($key));
+        self::$latte->addFunction('media', fn($key) => Path::get('PUBLIC_URL') . 'media/' . $key);
         self::$latte->addFunction('file', fn($key) => TemplateManager::file($key));
         self::$latte->addFunction('render', fn($key, $vars = []) => View::render($key, $vars));
         self::$latte->addFunction('setting', fn($key) => Info::getStash()[$key]->value ?? '');

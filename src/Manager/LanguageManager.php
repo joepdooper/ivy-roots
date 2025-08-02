@@ -3,7 +3,7 @@ namespace Ivy\Manager;
 
 use Ivy\Model\Info;
 use Ivy\Model\Setting;
-use Ivy\Language;
+use Ivy\Core\Language;
 
 class LanguageManager
 {

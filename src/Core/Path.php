@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Core;
 
 use Dotenv\Dotenv;
 
@@ -42,7 +42,7 @@ final class Path
             'DOMAIN'       => $domain,
             'CURRENT_PAGE' => $currentPage,
             'PROJECT_PATH' => dirname($documentRoot) . DIRECTORY_SEPARATOR,
-            'MEDIA_PATH'   => dirname($documentRoot) . DIRECTORY_SEPARATOR . "media" . DIRECTORY_SEPARATOR,
+            'MEDIA_PATH'   => dirname($documentRoot) . DIRECTORY_SEPARATOR . "public/media" . DIRECTORY_SEPARATOR,
             'PLUGINS_PATH'  => dirname($documentRoot) . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR,
             'TEMPLATES_PATH' => dirname($documentRoot) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR,
             'PUBLIC_PATH'  => rtrim($documentRoot . DIRECTORY_SEPARATOR . $scriptPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR,
@@ -52,6 +52,7 @@ final class Path
         $serverPort = ($serverPort != 80) ? ':' . $serverPort : '';
 
         self::$paths['BASE_PATH'] = rtrim(self::$paths['DOMAIN'] . $serverPort . DIRECTORY_SEPARATOR . self::$paths['SUBFOLDER'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        self::$paths['PUBLIC_URL'] = rtrim(self::$paths['DOMAIN'] . $serverPort . DIRECTORY_SEPARATOR . self::$paths['SUBFOLDER'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         self::$initialized = true;
     }

@@ -2,14 +2,14 @@
 
 namespace Ivy\View;
 
-use Ivy\Language;
+use Ivy\Core\Language;
 use Ivy\Manager\HookManager;
 use Ivy\Manager\SessionManager;
 use Ivy\Manager\TemplateManager;
 use Ivy\Model\Info;
 use Ivy\Model\Profile;
 use Ivy\Model\User;
-use Ivy\Path;
+use Ivy\Core\Path;
 use Latte\Engine;
 
 class LatteEngine implements EngineInterface

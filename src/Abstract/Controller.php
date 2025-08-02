@@ -5,7 +5,7 @@ namespace Ivy\Abstract;
 use Ivy\App;
 use Ivy\Manager\SessionManager;
 use Ivy\Model\User;
-use Ivy\Path;
+use Ivy\Core\Path;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -92,7 +92,7 @@ abstract class Controller
         $basePath = $this->request->getBasePath();
         $path = parse_url($referer, PHP_URL_PATH);
 
-        if (!$path || !$basePath || !str_starts_with($path, $basePath)) {
+        if (!$path || !str_starts_with($path, $basePath)) {
             return null;
         }
 

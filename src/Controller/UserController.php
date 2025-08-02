@@ -19,7 +19,7 @@ use Ivy\Abstract\Controller;
 use Ivy\Mail;
 use Ivy\Model\Template;
 use Ivy\Model\User;
-use Ivy\Path;
+use Ivy\Core\Path;
 use Ivy\View\View;
 
 class UserController extends Controller

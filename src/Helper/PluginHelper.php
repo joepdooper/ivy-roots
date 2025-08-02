@@ -3,7 +3,7 @@
 namespace Ivy\Helper;
 
 use Ivy\Manager\DatabaseManager;
-use Ivy\Path;
+use Ivy\Core\Path;
 
 class PluginHelper
 {

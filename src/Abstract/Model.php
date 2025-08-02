@@ -5,7 +5,7 @@ namespace Ivy\Abstract;
 use Delight\Db\Throwable\EmptyWhereClauseError;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
 use Ivy\Manager\DatabaseManager;
-use Ivy\Path;
+use Ivy\Core\Path;
 
 abstract class Model
 {
