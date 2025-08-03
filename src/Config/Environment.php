@@ -6,11 +6,11 @@ class Environment
 {
     public static function isDev(): bool
     {
-        return getenv('APP_ENV') === 'development';
+        return $_ENV['APP_ENV'] === 'development';
     }
 
     public static function isProd(): bool
     {
-        return getenv('APP_ENV') === 'production';
+        return $_ENV['APP_ENV'] === 'production';
     }
 }

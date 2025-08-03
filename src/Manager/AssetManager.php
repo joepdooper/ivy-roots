@@ -15,27 +15,45 @@ class AssetManager
 
     public static function addCSS($name): void
     {
-        if(Environment::isDev()){
-            unlink(Path::get('PUBLIC_PATH').$name);
-            symlink(TemplateManager::file($name), Path::get('PUBLIC_PATH') . $name);
+        if(Environment::isDev()) {
+            $publicFile = Path::get('PUBLIC_PATH') . $name;
+            $originalFile = TemplateManager::file($name);
+            if (file_exists($publicFile)) {
+                unlink($publicFile);
+            }
+            if (file_exists($originalFile)) {
+                copy($originalFile, $publicFile);
+            }
         }
         self::$css[] = '/' . $name;
     }
 
     public static function addJS($name): void
     {
-        if(Environment::isDev()){
-            unlink(Path::get('PUBLIC_PATH').$name);
-            symlink(TemplateManager::file($name), Path::get('PUBLIC_PATH').$name);
+        if(Environment::isDev()) {
+            $publicFile = Path::get('PUBLIC_PATH') . $name;
+            $originalFile = TemplateManager::file($name);
+            if (file_exists($publicFile)) {
+                unlink($publicFile);
+            }
+            if (file_exists($originalFile)) {
+                copy($originalFile, $publicFile);
+            }
         }
         self::$js[] = '/' . $name;
     }
 
     public static function addESM($name): void
     {
-        if(Environment::isDev()){
-            unlink(Path::get('PUBLIC_PATH').$name);
-            symlink(TemplateManager::file($name), Path::get('PUBLIC_PATH').$name);
+        if(Environment::isDev()) {
+            $publicFile = Path::get('PUBLIC_PATH') . $name;
+            $originalFile = TemplateManager::file($name);
+            if (file_exists($publicFile)) {
+                unlink($publicFile);
+            }
+            if (file_exists($originalFile)) {
+                copy($originalFile, $publicFile);
+            }
         }
         self::$esm[] = '/' . $name;
     }
@@ -94,4 +112,3 @@ class AssetManager
         return self::$esm;
     }
 }
-
