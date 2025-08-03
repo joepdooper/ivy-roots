@@ -84,7 +84,8 @@ class PluginController extends Controller
             $plugin->setInfo();
             $values_to_remove_from_uninstalled_plugins[] = $plugin->url;
         }
-        if(!$id) {
+        $uninstalled_plugins = [];
+        if(!$id && is_dir(Path::get('PLUGINS_PATH'))) {
             $uninstalled_plugins = array_filter(scandir(Path::get('PLUGINS_PATH')), function ($plugin) use ($values_to_remove_from_uninstalled_plugins) {
                 return !in_array($plugin, $values_to_remove_from_uninstalled_plugins);
             });
