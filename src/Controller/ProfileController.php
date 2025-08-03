@@ -162,4 +162,22 @@ class ProfileController extends Controller
 
         return null;
     }
+
+    public function verify($selector = null, $token = null) {
+        if (isset($selector) && isset($token)) {
+            try {
+                User::getAuth()->confirmEmail($selector, $token);
+                $this->flashBag->add('success', 'Email address has been verified');
+            } catch (\Delight\Auth\InvalidSelectorTokenPairException $e) {
+                $this->flashBag->add('error', 'Invalid token');
+            } catch (\Delight\Auth\TokenExpiredException $e) {
+                $this->flashBag->add('error', 'Token expired');
+            } catch (\Delight\Auth\UserAlreadyExistsException $e) {
+                $this->flashBag->add('warning', 'Email address already exists');
+            } catch (\Delight\Auth\TooManyRequestsException $e) {
+                $this->flashBag->add('error', 'Invalid token');
+            }
+        }
+        $this->redirect('admin/profile');
+    }
 }
