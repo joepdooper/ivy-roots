@@ -16,10 +16,10 @@ use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
 use Ivy\Abstract\Controller;
-use Ivy\Mail;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Core\Path;
+use Ivy\Service\Mail;
 use Ivy\View\View;
 
 class UserController extends Controller

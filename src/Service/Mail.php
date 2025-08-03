@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy;
+namespace Ivy\Service;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
