@@ -32,16 +32,5 @@
     "samdark/sitemap": "^2.4",
     "predis/predis": "^3.0@alpha",
     "ezyang/htmlpurifier": "dev-master"
-  },
-  "require-dev": {
-    "pestphp/pest": "3.x-dev",
-    "phpstan/phpstan": "2.0.x-dev",
-    "kint-php/kint": "dev-master",
-    "joepdooper/ivy-cultivate": "dev-main"
-  },
-  "config": {
-    "allow-plugins": {
-      "pestphp/pest-plugin": true
-    }
   }
 }
