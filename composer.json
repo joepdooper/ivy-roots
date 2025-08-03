@@ -1,13 +1,13 @@
 {
-    "name": "joepdooper/ivy-roots",
-    "description": "A set of classes designed to build and extend functionality in ivy",
-    "type": "library",
-    "license": "MIT",
-    "autoload": {
+  "name": "joepdooper/ivy-roots",
+  "description": "A set of classes designed to build and extend functionality in ivy",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
     "psr-4": {
         "Ivy\\": "src/"
     }
-},
+  },
     "authors": [
         {
             "name": "Joep Dooper"
@@ -15,7 +15,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=8.2.0",
+        "php": ">=8.3.0",
         "ext-pdo": "*",
         "delight-im/auth": "^8.3",
         "delight-im/db": "^1.3",
