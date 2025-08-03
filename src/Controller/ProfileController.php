@@ -11,10 +11,10 @@ use GUMP;
 use Ivy\Abstract\Controller;
 use Ivy\Core\Path;
 use Ivy\Helper\File;
-use Ivy\Mail;
 use Ivy\Model\Profile;
 use Ivy\Model\Template;
 use Ivy\Model\User;
+use Ivy\Service\Mail;
 use Ivy\View\View;
 
 class ProfileController extends Controller
@@ -86,8 +86,8 @@ class ProfileController extends Controller
             }
             if (User::getAuth()->getEmail() !== $data['email']) {
                 try {
-                    User::getAuth()->changeEmail($data['email'], function ($selector, $token) {
-                        $url = _BASE_PATH . 'admin/profile/' . urlencode($selector) . '/' . urlencode($token);
+                    User::getAuth()->changeEmail($data['email'], function ($selector, $token) use($data) {
+                        $url = Path::get('PUBLIC_URL') . 'admin/profile/' . urlencode($selector) . '/' . urlencode($token);
                         // send email
                         $mail = new Mail();
                         $mail->addAddress($data['email'], $data['username']);
@@ -105,7 +105,7 @@ class ProfileController extends Controller
                     $this->flashBag->add('error', 'Account not verified');
                 } catch (NotLoggedInException) {
                     $this->flashBag->add('error', 'Not logged in');
-                } catch (TooManyRequestsException) {
+                } catch (TooManyRequestsException $e) {
                     $this->flashBag->add('error', 'Too many requests');
                 }
             }
