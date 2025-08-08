@@ -3,6 +3,7 @@
 namespace Ivy\Model;
 
 use Ivy\Abstract\Model;
+use Ivy\Manager\DatabaseManager;
 
 class Profile extends Model
 {
@@ -30,6 +31,32 @@ class Profile extends Model
     SELECT `profiles`.`id`, `profiles`.`user_id`, `profiles`.`user_image`, `users`.`email`, `users`.`username`, `users`.`status`, `users`.`roles_mask`, `users`.`last_login` FROM `profiles`
     INNER JOIN `users` ON `users`.`id` = `profiles`.`user_id`
     ";
+    }
+
+    public function update(): bool|int
+    {
+        $set = $this->toAssocArray();
+
+        unset($set['username']);
+        unset($set['email']);
+
+        if(empty($set)){
+            return false;
+        }
+
+        if (!empty($this->columns)) {
+            $set = array_intersect_key($set, array_flip($this->columns));
+        }
+
+        if (empty($this->bindings) && isset($this->id)) {
+            $this->bindings['id'] = $this->id;
+        }
+
+        DatabaseManager::connection()->update($this->table, $set, $this->bindings);
+
+        $this->resetQuery();
+
+        return DatabaseManager::connection()->getLastInsertId();
     }
 
     public static function getUserProfile(): ?self
