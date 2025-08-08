@@ -63,8 +63,11 @@ trait Stash
      *
      * @return array|null
      */
-    public static function getStash(): ?array
+    public static function getStash($key = null): ?array
     {
+        if($key){
+            return SessionManager::get('stash_' . static::class, null)[$key];
+        }
         return SessionManager::get('stash_' . static::class, null);
     }
 

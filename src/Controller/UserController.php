@@ -16,6 +16,10 @@ use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
 use Ivy\Abstract\Controller;
+use Ivy\Manager\DatabaseManager;
+use Ivy\Model\Info;
+use Ivy\Model\Profile;
+use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Core\Path;
@@ -113,7 +117,7 @@ class UserController extends Controller
 
         try {
             $userId = User::getAuth()->register($this->request->get('email'), $this->request->get('password'), $this->request->get('username'), function ($selector, $token) {
-                $url = Path::get('BASE_PATH') . 'login/' . urlencode($selector) . '/' . urlencode($token);
+                $url = Path::get('BASE_PATH') . 'user/login/' . urlencode($selector) . '/' . urlencode($token);
                 // send email
                 $mail = new Mail();
                 $mail->addAddress($this->request->get('email'), $this->request->get('username'));
@@ -123,11 +127,13 @@ class UserController extends Controller
             });
             DatabaseManager::connection()->insert('profiles', ['user_id' => $userId]);
             // Set role to registered user
-            if (Info::getStash()['registration_role']->bool && Info::getStash()['registration_role']->value) {
-                $role = strtoupper(Info::getStash()['registration_role']->value);
+
+            if (isset(Setting::getStash()['registration_role']) && Setting::getStash()['registration_role']->value) {
+                $role = strtoupper(Setting::getStash()['registration_role']->value);
                 $roleConstant = "\Delight\Auth\Role::$role";
-                self::$auth->admin()->addRoleForUserById($userId, constant($roleConstant));
+                User::getAuth()->admin()->addRoleForUserById($userId, constant($roleConstant));
             }
+
         } catch (InvalidEmailException) {
             $this->flashBag->add('error', 'Invalid email address');
             $this->redirect('user/register');
