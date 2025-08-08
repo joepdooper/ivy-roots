@@ -9,6 +9,7 @@ use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UserAlreadyExistsException;
 use GUMP;
 use Ivy\Abstract\Controller;
+use Ivy\Core\Language;
 use Ivy\Core\Path;
 use Ivy\Helper\File;
 use Ivy\Model\Profile;
@@ -40,16 +41,10 @@ class ProfileController extends Controller
         $this->profile->policy('post');
 
         $data = [
-            'user_id' => $this->request->get('user_id'),
             'username' => $this->request->get('username'),
             'email' => $this->request->get('email'),
             'avatar' => $this->request->get('avatar') ?? $this->request->files->get('avatar')
         ];
-
-        if ((int) $this->request->get('user_id') !== (int) $_SESSION['auth_user_id']) {
-            $this->flashBag->add('error', 'Invalid user ID');
-            return;
-        }
 
         GUMP::add_validator("image_or_delete", function($field, $input, $param = null) {
             if (!isset($input[$field])) {
@@ -75,10 +70,10 @@ class ProfileController extends Controller
 
         if ($validated === true) {
 
-            $this->profile = (new Profile)->where('user_id', $this->request->get('user_id'))->fetchOne();
+            $this->profile = (new Profile)->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
 
             if(User::getAuth()->getUsername() !== $data['username']) {
-                (new User)->where('id', $this->request->get('user_id'))->populate(
+                (new User)->where('id', $_SESSION['auth_user_id'])->populate(
                     [
                         'username' => $data['username']
                     ]
@@ -111,11 +106,18 @@ class ProfileController extends Controller
             }
 
             if($this->request->get('avatar') === 'delete') {
+                $file = new File;
+                $file->setDirectory(Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
+                $file->delete($this->profile->user_image);
                 $this->profile->populate(['user_image' => ''])->update();
             }
 
-            if (!empty($this->request->files->get('avatar')['name'])) {
-                $this->profile->populate(['user_image' => $this->saveAvatar()])->update();
+            if ($this->request->files->get('avatar') && $this->request->files->get('avatar')->isValid()) {
+                try {
+                    $this->profile->populate(['user_image' => $this->saveAvatar()])->update();
+                } catch(\Exception $e) {
+                    $this->flashBag->add('error', Language::translate('user.avatar_saved_unsuccessfully'));
+                }
             }
 
         } else {
