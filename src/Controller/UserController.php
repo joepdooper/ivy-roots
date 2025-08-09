@@ -260,7 +260,7 @@ class UserController extends Controller
         if ($this->request->get('email')) {
             try {
                 User::getAuth()->forgotPassword($this->request->get('email'), function ($selector, $token) {
-                    $url = Path::get('BASE_PATH') . 'reset/' . urlencode($selector) . '/' . urlencode($token);
+                    $url = Path::get('BASE_PATH') . 'user/reset/' . urlencode($selector) . '/' . urlencode($token);
                     // send email
                     $mail = new Mail();
                     $mail->addAddress($this->request->get('email'));

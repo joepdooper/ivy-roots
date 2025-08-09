@@ -2,7 +2,7 @@
 
 namespace Ivy\Core;
 
-use Dotenv\Dotenv;
+use Ivy\Config\Environment;
 
 final class Path
 {
@@ -48,12 +48,27 @@ final class Path
             'PUBLIC_PATH'  => rtrim($documentRoot . DIRECTORY_SEPARATOR . $scriptPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR,
         ];
 
-        $serverPort = $_ENV['SERVER_PORT'] ?? $_SERVER['HTTP_X_FORWARDED_PORT'] ?? $_SERVER['SERVER_PORT'] ?? 80;
-        $serverPort = ($serverPort != 80) ? ':' . $serverPort : '';
+        $serverPort = isset($_ENV['APP_ENV']) ? (Environment::isDev() ? self::getServerPort() : '') : self::getServerPort();
 
         self::$paths['BASE_PATH'] = rtrim(self::$paths['DOMAIN'] . $serverPort . DIRECTORY_SEPARATOR . self::$paths['SUBFOLDER'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         self::$paths['PUBLIC_URL'] = rtrim(self::$paths['DOMAIN'] . $serverPort . DIRECTORY_SEPARATOR . self::$paths['SUBFOLDER'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         self::$initialized = true;
+    }
+
+    private static function getServerPort(): string
+    {
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+            || (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] === 'https');
+
+        $defaultPort = $isHttps ? 443 : 80;
+
+        $port = $_ENV['SERVER_PORT']
+            ?? $_SERVER['HTTP_X_FORWARDED_PORT']
+            ?? $_SERVER['SERVER_PORT']
+            ?? $defaultPort;
+
+        return ($port != 80 && $port != 443) ? ':' . $port : '';
     }
 }
