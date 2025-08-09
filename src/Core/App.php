@@ -12,6 +12,7 @@ use Ivy\Model\Info;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Model\User;
+use Ivy\View\View;
 
 class App
 {
@@ -43,7 +44,15 @@ class App
         require Path::get('PROJECT_PATH') . 'routes/admin.php';
         require Path::get('PROJECT_PATH') . 'routes/error.php';
 
-        $router->run();
+        try {
+            $router->run();
+        } catch (\Ivy\Exceptions\AuthorizationException $e) {
+            http_response_code(403);
+            View::set('errors/forbidden.latte', [
+                'message' => $e->getMessage()
+            ]);
+            // exit;
+        }
     }
 
     private function bootstrap(): void

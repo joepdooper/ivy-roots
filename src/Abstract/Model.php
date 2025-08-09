@@ -380,11 +380,11 @@ abstract class Model
         return $this;
     }
 
-    public function policy(string $action): ?bool
+    public function policy(string $action)
     {
         $modelClass = get_class($this);
         $modelName = (new \ReflectionClass($modelClass))->getShortName();
-        $namespace = (new \ReflectionClass($modelClass))->getNamespaceName();
+        $namespace = str_replace('Model', 'Policy', (new \ReflectionClass($modelClass))->getNamespaceName());
 
         $policyClass = "{$namespace}\\{$modelName}Policy";
 
@@ -396,6 +396,8 @@ abstract class Model
             return null;
         }
 
-        return $policyClass::$action($this);
+        if ($policyClass::$action($this) !== true) {
+            throw new \Ivy\Exceptions\AuthorizationException;
+        }
     }
 }
