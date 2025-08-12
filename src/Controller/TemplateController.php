@@ -23,11 +23,7 @@ class TemplateController extends Controller
     public function before(): void
     {
         if (!User::getAuth()->isLoggedIn() && Setting::getStash()['private']->bool) {
-            if (!in_array(Path::get('CURRENT_PAGE'), [
-                Path::get('PUBLIC_URL') . 'user/login',
-                Path::get('PUBLIC_URL') . 'user/reset',
-                Path::get('PUBLIC_URL') . 'user/register',
-            ])) {
+            if (strpos(Path::get('CURRENT_PAGE'), Path::get('PUBLIC_URL') . 'user/') !== 0) {
                 $this->redirect('user/login');
             }
         }
