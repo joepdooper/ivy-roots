@@ -23,7 +23,7 @@ class TemplateController extends Controller
     public function before(): void
     {
         if (!User::getAuth()->isLoggedIn() && Setting::getStash()['private']->bool) {
-            if (strpos(Path::get('CURRENT_PAGE'), Path::get('PUBLIC_URL') . 'user/') !== 0) {
+            if (!$this->isAlwaysPublicPath(Path::get('CURRENT_PAGE'))) {
                 $this->redirect('user/login');
             }
         }
@@ -62,6 +62,23 @@ class TemplateController extends Controller
 
         $this->flashBag->add('success', 'Update successfully');
         $this->redirect('admin/template');
+    }
+
+    private function isAlwaysPublicPath(string $current): bool
+    {
+        $allowed = [
+            Path::get('PUBLIC_URL') . 'user/login',
+            Path::get('PUBLIC_URL') . 'user/reset',
+            Path::get('PUBLIC_URL') . 'user/register',
+        ];
+
+        foreach ($allowed as $prefix) {
+            if ($current === $prefix || str_starts_with($current, $prefix . '/')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
