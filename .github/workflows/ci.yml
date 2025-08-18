@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [8.3, 8.2] # Test against multiple PHP versions
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # --- PHP Setup ---
+    - name: Setup PHP ${{ matrix.php }}
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+        tools: composer:v2
+
+    - name: Show PHP version
+      run: php -v
+
+    # --- Composer ---
+    - name: Validate composer.json
+      run: composer validate --strict
+
+    - name: Cache Composer packages
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-${{ matrix.php }}-
+
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Verify Composer dependencies
+      run: composer check-platform-reqs
+
+    # --- PHP Static Analysis ---
+    - name: Run PHPStan
+      uses: php-actions/phpstan@v3
+      with:
+        path: src/
+        php_version: ${{ matrix.php }}
+        level: 1
+
+    # --- PHP Lint ---
+    - name: PHP lint
+      run: find src/ -name "*.php" -print0 | xargs -0 -n1 php -l
+
+    # --- Tests (commented out, none yet) ---
+    # - name: Run tests
+    #   run: vendor/bin/pest
