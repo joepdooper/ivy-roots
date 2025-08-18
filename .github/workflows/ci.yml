@@ -50,9 +50,11 @@ jobs:
         run: composer check-platform-reqs
 
       # Run PHPStan
+      - name: Setup PHPStan
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: phpstan
+      
       - name: Run PHPStan
-        run: vendor/bin/phpstan analyse src/ --level=1
-
-      # Optional: run tests (commented out until you add them)
-      #- name: Run Pest tests
-      #  run: vendor/bin/pest
+        run: phpstan analyse src/ --level=1
