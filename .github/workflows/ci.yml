@@ -1,4 +1,4 @@
-name: CI - ivy-roots
+name: PHP CI
 
 on:
   push:
@@ -6,49 +6,57 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      # Checkout code
+      - uses: actions/checkout@v4
 
-    # --- PHP Setup ---
-    - name: Setup PHP 8.3
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: 8.3
-        tools: composer:v2
+      # Setup PHP 8.3
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
 
-    - name: Show PHP version
-      run: php -v
+      # Show PHP version
+      - name: Show PHP version
+        run: php -v
 
-    # --- Composer ---
-    - name: Validate composer.json
-      run: composer validate --strict
+      # Validate composer.json
+      - name: Validate composer.json
+        run: composer validate --strict
 
-    - name: Cache Composer packages
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-8.3-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-8.3-
+      # Cache Composer packages
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
 
-    - name: Install Composer dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest
+      # Install dependencies (no lock file)
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
 
-    - name: Verify Composer dependencies
-      run: composer check-platform-reqs
+      # Verify PHP platform requirements
+      - name: Check platform requirements
+        run: composer check-platform-reqs
 
-    # --- PHPStan ---
-    - name: Run PHPStan
-      uses: php-actions/phpstan@v3
-      with:
-        path: src/
-        php_version: 8.3
-        level: 1
+      # Run PHPStan
+      - name: Run PHPStan
+        uses: php-actions/phpstan@v3
+        with:
+          path: src/
+          php_version: 8.3
+          level: 1
 
-    # --- Tests (commented out) ---
-    # - name: Run tests
-    #   run: vendor/bin/pest
+      # Optional: run tests (commented out until you add them)
+      #- name: Run Pest tests
+      #  run: vendor/bin/pest
