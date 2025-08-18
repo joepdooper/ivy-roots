@@ -42,8 +42,8 @@ jobs:
             ${{ runner.os }}-php-
 
       # Install dependencies (no lock file)
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+      - name: Install Composer dependencies (including dev)
+        run: composer install --prefer-dist --no-progress --no-suggest --ignore-platform-reqs
 
       # Verify PHP platform requirements
       - name: Check platform requirements
