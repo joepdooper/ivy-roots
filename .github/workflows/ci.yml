@@ -1,4 +1,4 @@
-name: CI
+name: CI - ivy-roots
 
 on:
   push:
@@ -9,18 +9,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php: [8.3, 8.2] # Test against multiple PHP versions
 
     steps:
     - uses: actions/checkout@v4
 
     # --- PHP Setup ---
-    - name: Setup PHP ${{ matrix.php }}
+    - name: Setup PHP 8.3
       uses: shivammathur/setup-php@v2
       with:
-        php-version: ${{ matrix.php }}
+        php-version: 8.3
         tools: composer:v2
 
     - name: Show PHP version
@@ -34,9 +31,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: vendor
-        key: ${{ runner.os }}-php-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
+        key: ${{ runner.os }}-php-8.3-${{ hashFiles('**/composer.lock') }}
         restore-keys: |
-          ${{ runner.os }}-php-${{ matrix.php }}-
+          ${{ runner.os }}-php-8.3-
 
     - name: Install Composer dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
@@ -44,18 +41,14 @@ jobs:
     - name: Verify Composer dependencies
       run: composer check-platform-reqs
 
-    # --- PHP Static Analysis ---
+    # --- PHPStan ---
     - name: Run PHPStan
       uses: php-actions/phpstan@v3
       with:
         path: src/
-        php_version: ${{ matrix.php }}
+        php_version: 8.3
         level: 1
 
-    # --- PHP Lint ---
-    - name: PHP lint
-      run: find src/ -name "*.php" -print0 | xargs -0 -n1 php -l
-
-    # --- Tests (commented out, none yet) ---
+    # --- Tests (commented out) ---
     # - name: Run tests
     #   run: vendor/bin/pest
