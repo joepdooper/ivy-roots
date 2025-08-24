@@ -4,6 +4,7 @@ namespace Ivy\Controller;
 
 use GUMP;
 use Ivy\Abstract\Controller;
+use Ivy\Model\Profile;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
@@ -34,6 +35,11 @@ class TemplateController extends Controller
         $this->template->policy('index');
 
         View::set('admin/template.latte');
+    }
+
+    public function root(): void
+    {
+        View::set('body.latte');
     }
 
     public function post(): void
@@ -80,5 +86,4 @@ class TemplateController extends Controller
 
         return false;
     }
-
 }

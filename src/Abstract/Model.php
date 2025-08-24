@@ -388,16 +388,14 @@ abstract class Model
 
         $policyClass = "{$namespace}\\{$modelName}Policy";
 
-        if (!class_exists($policyClass)) {
-            return null;
-        }
-
-        if (!method_exists($policyClass, $action)) {
-            return null;
+        if (!class_exists($policyClass) || !method_exists($policyClass, $action)) {
+            return false;
         }
 
         if ($policyClass::$action($this) !== true) {
             throw new \Ivy\Exceptions\AuthorizationException;
         }
+
+        return true;
     }
 }

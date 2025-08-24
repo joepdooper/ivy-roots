@@ -2,10 +2,10 @@
 
 namespace Ivy\Core;
 
-
 use Ivy\Manager\DatabaseManager;
 use Ivy\Manager\LanguageManager;
 use Ivy\Manager\RouterManager;
+use Ivy\Manager\SecurityManager;
 use Ivy\Manager\SessionManager;
 use Ivy\Manager\TemplateManager;
 use Ivy\Model\Info;
@@ -36,8 +36,8 @@ class App
 
         require Path::get('PROJECT_PATH') . 'routes/middleware.php';
 
-        require TemplateManager::file('template.php');
         $this->loadPluginRoutesAssets();
+        require TemplateManager::file('template.php');
 
         require Path::get('PROJECT_PATH') . 'routes/web.php';
         require Path::get('PROJECT_PATH') . 'routes/user.php';
@@ -67,6 +67,7 @@ class App
     public function run(): void
     {
         (\Dotenv\Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
+        SecurityManager::setSecurityHeaders();
         $this->bootstrap();
         $this->loadRoutes();
     }

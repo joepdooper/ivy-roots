@@ -13,49 +13,42 @@ class AssetManager
     protected static array $js = array();
     protected static array $esm = array();
 
-    public static function addCSS($name): void
+    public static function addCSS(string $name): void
     {
-        if(Environment::isDev()) {
-            $publicFile = Path::get('PUBLIC_PATH') . $name;
-            $originalFile = TemplateManager::file($name);
-            if (file_exists($publicFile)) {
-                unlink($publicFile);
-            }
-            if (file_exists($originalFile)) {
-                copy($originalFile, $publicFile);
-            }
-        }
-        self::$css[] = '/' . $name;
+        self::handleAsset($name, self::$css);
     }
 
-    public static function addJS($name): void
+    public static function addJS(string $name): void
     {
-        if(Environment::isDev()) {
-            $publicFile = Path::get('PUBLIC_PATH') . $name;
-            $originalFile = TemplateManager::file($name);
-            if (file_exists($publicFile)) {
-                unlink($publicFile);
-            }
-            if (file_exists($originalFile)) {
-                copy($originalFile, $publicFile);
-            }
-        }
-        self::$js[] = '/' . $name;
+        self::handleAsset($name, self::$js);
     }
 
-    public static function addESM($name): void
+    public static function addESM(string $name): void
     {
-        if(Environment::isDev()) {
+        self::handleAsset($name, self::$esm);
+    }
+
+    private static function handleAsset(string $name, array &$collection): void
+    {
+        if (Environment::isDev()) {
             $publicFile = Path::get('PUBLIC_PATH') . $name;
             $originalFile = TemplateManager::file($name);
-            if (file_exists($publicFile)) {
-                unlink($publicFile);
-            }
+
             if (file_exists($originalFile)) {
+                $publicDir = dirname($publicFile);
+                if (!is_dir($publicDir)) {
+                    mkdir($publicDir, 0755, true);
+                }
+
+                if (file_exists($publicFile)) {
+                    unlink($publicFile);
+                }
+
                 copy($originalFile, $publicFile);
             }
         }
-        self::$esm[] = '/' . $name;
+
+        $collection[] = '/' . $name;
     }
 
     /**

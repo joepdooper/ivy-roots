@@ -12,6 +12,7 @@ use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Core\Path;
+use Ivy\Config\Environment;
 use Latte\Engine;
 
 class View
@@ -70,7 +71,7 @@ class View
     {
         self::$latte = new Engine();
         self::$latte->setTempDirectory(Path::get('PROJECT_PATH') . 'cache/templates');
-        self::$latte->setAutoRefresh($_ENV['APP_ENV'] ?? 'production' === 'development');
+        self::$latte->setAutoRefresh(Environment::isDev());
 
         self::$latte->addFunction('icon', fn($icon) => file_get_contents(Path::get('MEDIA_PATH') . "icons/" . $icon));
         self::$latte->addFunction('text', fn($key, $vars = null) => Language::translate($key, $vars) ?? $key);
@@ -88,6 +89,13 @@ class View
         self::$latte->addFunction('canEditAsSuperAdmin', fn() => User::canEditAsSuperAdmin());
         self::$latte->addFunction('profile', fn() => Profile::getUserProfile());
         self::$latte->addFunction('hook', fn($key) => HookManager::do($key));
+        self::$latte->addFunction('policy', function ($obj, string $ability): bool {
+            try {
+                return $obj->policy($ability);
+            } catch (\Ivy\Exceptions\AuthorizationException $e) {
+                return false;
+            }
+        });
 
         self::$latte->addExtension(new \Ivy\Tag\ButtonTag());
         self::$latte->addProvider('customButtonRender', function ($args) {
