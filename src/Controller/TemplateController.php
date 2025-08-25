@@ -32,7 +32,7 @@ class TemplateController extends Controller
 
     public function index(): void
     {
-        $this->template->policy('index');
+        $this->template->authorize('index');
 
         View::set('admin/template.latte');
     }
@@ -44,7 +44,7 @@ class TemplateController extends Controller
 
     public function post(): void
     {
-        $this->template->policy('post');
+        $this->template->authorize('post');
 
         $templates_data = $this->request->get('template') ?? '';
 

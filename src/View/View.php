@@ -89,13 +89,6 @@ class View
         self::$latte->addFunction('canEditAsSuperAdmin', fn() => User::canEditAsSuperAdmin());
         self::$latte->addFunction('profile', fn() => Profile::getUserProfile());
         self::$latte->addFunction('hook', fn($key) => HookManager::do($key));
-        self::$latte->addFunction('policy', function ($obj, string $ability): bool {
-            try {
-                return $obj->policy($ability);
-            } catch (\Ivy\Exceptions\AuthorizationException $e) {
-                return false;
-            }
-        });
 
         self::$latte->addExtension(new \Ivy\Tag\ButtonTag());
         self::$latte->addProvider('customButtonRender', function ($args) {

@@ -34,7 +34,7 @@ class PluginController extends Controller
 
     public function post(): void
     {
-        $this->plugin->policy('post');
+        $this->plugin->authorize('post');
 
         $plugins_data = $this->request->get('plugin') ?? '';
         $responses = [];
@@ -68,7 +68,7 @@ class PluginController extends Controller
 
     public function index($id = null): void
     {
-        $this->plugin->policy('index');
+        $this->plugin->authorize('index');
 
         if($id) {
             $parent_id = (new Plugin)->where('url', $id)->fetchOne()->getId();

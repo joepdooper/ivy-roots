@@ -392,10 +392,15 @@ abstract class Model
             return false;
         }
 
-        if ($policyClass::$action($this) !== true) {
-            throw new \Ivy\Exceptions\AuthorizationException;
-        }
+        return $policyClass::$action($this) === true;
+    }
 
-        return true;
+    public function authorize(string $action): void
+    {
+        if (!$this->policy($action)) {
+            throw new \Ivy\Exceptions\AuthorizationException(
+                "Not authorized to perform [{$action}] on " . static::class
+            );
+        }
     }
 }

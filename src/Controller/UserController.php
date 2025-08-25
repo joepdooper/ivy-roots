@@ -49,7 +49,7 @@ class UserController extends Controller
 
     public function post(): void
     {
-        $this->user->policy('post');
+        $this->user->authorize('post');
 
         $users_data = $this->request->get('user');
 
@@ -93,7 +93,7 @@ class UserController extends Controller
 
     public function index(): void
     {
-        $this->user->policy('index');
+        $this->user->authorize('index');
 
         $users = (new User)->fetchAll();
         View::set('admin/user.latte', ['users' => $users]);

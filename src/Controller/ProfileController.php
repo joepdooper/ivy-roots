@@ -38,7 +38,7 @@ class ProfileController extends Controller
 
     public function post(): void
     {
-        $this->profile->policy('post');
+        $this->profile->authorize('post');
 
         $data = [
             'username' => $this->request->get('username'),
