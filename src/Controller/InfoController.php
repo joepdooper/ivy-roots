@@ -21,7 +21,7 @@ class InfoController extends SettingController
 
     public function post(): void
     {
-        $this->info->policy('post');
+        $this->info->authorize('post');
 
         $redirect = $this->prepareData();
 
@@ -51,7 +51,7 @@ class InfoController extends SettingController
 
     public function index($id = null): void
     {
-        $this->info->policy('index');
+        $this->info->authorize('index');
         $plugin_id = $id ? (new Plugin)->where('url', $id)->fetchOne()?->getId() : null;
         $infos = $this->info->where('plugin_id', $plugin_id)->fetchAll();
         View::set('admin/info.latte', ['infos' => $infos]);

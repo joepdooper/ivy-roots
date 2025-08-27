@@ -21,7 +21,7 @@ class SettingController extends Controller
 
     public function post(): void
     {
-        $this->setting->policy('post');
+        $this->setting->authorize('post');
 
         $redirect = $this->prepareData();
 
@@ -51,7 +51,7 @@ class SettingController extends Controller
 
     public function index($id = null): void
     {
-        $this->setting->policy('index');
+        $this->setting->authorize('index');
         $plugin_id = $id ? (new Plugin)->where('url', $id)->fetchOne()?->getId() : null;
         $settings = $this->setting->where('plugin_id', $plugin_id)->fetchAll();
         View::set('admin/setting.latte', ['settings' => $settings]);

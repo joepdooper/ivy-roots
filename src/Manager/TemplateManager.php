@@ -28,6 +28,9 @@ class TemplateManager
                 return $fullPath;
             }
         }
+        if (file_exists(Path::get('PROJECT_PATH') . $filename)) {
+            return Path::get('PROJECT_PATH') . $filename;
+        }
         return $filename;
     }
 }

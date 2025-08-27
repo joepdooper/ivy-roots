@@ -388,16 +388,19 @@ abstract class Model
 
         $policyClass = "{$namespace}\\{$modelName}Policy";
 
-        if (!class_exists($policyClass)) {
-            return null;
+        if (!class_exists($policyClass) || !method_exists($policyClass, $action)) {
+            return false;
         }
 
-        if (!method_exists($policyClass, $action)) {
-            return null;
-        }
+        return $policyClass::$action($this) === true;
+    }
 
-        if ($policyClass::$action($this) !== true) {
-            throw new \Ivy\Exceptions\AuthorizationException;
+    public function authorize(string $action): void
+    {
+        if (!$this->policy($action)) {
+            throw new \Ivy\Exceptions\AuthorizationException(
+                "Not authorized to perform [{$action}] on " . static::class
+            );
         }
     }
 }
