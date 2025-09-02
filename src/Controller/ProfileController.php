@@ -11,7 +11,6 @@ use GUMP;
 use Ivy\Abstract\Controller;
 use Ivy\Core\Language;
 use Ivy\Core\Path;
-use Ivy\Helper\File;
 use Ivy\Model\Profile;
 use Ivy\Model\Template;
 use Ivy\Model\User;
@@ -21,7 +20,6 @@ use Ivy\View\View;
 class ProfileController extends Controller
 {
     private Profile $profile;
-    private File $file;
 
     public function __construct()
     {
@@ -106,18 +104,15 @@ class ProfileController extends Controller
             }
 
             if($this->request->get('avatar') === 'delete') {
-                $file = new File;
-                $file->setDirectory(Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
-                $file->delete($this->profile->user_image);
-                $this->profile->populate(['user_image' => ''])->update();
+                $this->profile->unlinkUserImage();
+                $this->profile->update();
             }
 
-            if ($this->request->files->get('avatar') && $this->request->files->get('avatar')->isValid()) {
-                try {
-                    $this->profile->populate(['user_image' => $this->saveAvatar()])->update();
-                } catch(\Exception $e) {
-                    $this->flashBag->add('error', Language::translate('user.avatar_saved_unsuccessfully'));
-                }
+            if($this->request->files->has('avatar')){
+//                $this->profile->user_image = $this->uploadMedia($this->request->files->get('avatar'))
+//                    ->resizeImage(120, null)
+//                    ->fileName();
+                $this->profile->update();
             }
 
         } else {
@@ -140,29 +135,6 @@ class ProfileController extends Controller
     {
         $profile = (new Profile)->where('id', $id)->fetchOne();
         View::set('include/profile.latte', ['profile' => $profile]);
-    }
-
-    private function saveAvatar(): string
-    {
-        $this->file = new File;
-        $this->file->setName(bin2hex(random_bytes(16)));
-        $this->file->setAllowed(array('image/*'));
-        $this->file->setDirectory(Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
-        $this->file->setWidth('120');
-        $avatar = $this->file->upload($this->request->files->get('avatar'));
-        $this->file->setImageConvert( 'webp');
-        $this->file->upload($this->request->files->get('avatar'));
-
-        return $avatar;
-    }
-
-    private function deleteAvatar(): null
-    {
-        $this->file = new File;
-        $this->file->setDirectory(Path::get('MEDIA_PATH') . 'profile' . DIRECTORY_SEPARATOR);
-        $this->file->delete($this->profile->getUserImage());
-
-        return null;
     }
 
     public function verify($selector = null, $token = null) {
