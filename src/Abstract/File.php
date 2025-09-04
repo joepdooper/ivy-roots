@@ -2,15 +2,16 @@
 
 namespace Ivy\Abstract;
 
+use Items\Collection\Image\ImageSize;
 use Ivy\Core\Path;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 abstract class File
 {
-    protected UploadedFile $uploadFile;
+    protected ?UploadedFile $uploadFile;
     protected string $fileName;
 
-    public function __construct(UploadedFile $uploadedFile)
+    public function __construct(?UploadedFile $uploadedFile = null)
     {
         $this->uploadFile = $uploadedFile;
     }
@@ -87,6 +88,13 @@ abstract class File
             }
 
             $this->uploadFile->move($destination, $this->fileName);
+        }
+    }
+
+    public function remove($file):void
+    {
+        if($file){
+            unlink(Path::get('MEDIA_PATH') . $this->getUploadPath() . DIRECTORY_SEPARATOR . $file);
         }
     }
 }
