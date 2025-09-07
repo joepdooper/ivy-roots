@@ -13,6 +13,7 @@ use Items\Collection\Image\ImageFileService;
 use Ivy\Abstract\Controller;
 use Ivy\Core\Language;
 use Ivy\Core\Path;
+use Ivy\Manager\SessionManager;
 use Ivy\Model\Profile;
 use Ivy\Model\Template;
 use Ivy\Model\User;
@@ -117,7 +118,7 @@ class ProfileController extends Controller
                 }
                 if ($this->request->get('avatar') === 'delete') {
                     $file = new ImageFile();
-                    $file->remove($this->profile->user_image);
+                    $file->setUploadPath('profile')->remove($this->profile->user_image);
                     $this->profile->user_image = '';
                     $this->profile->update();
                 }
