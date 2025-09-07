@@ -9,11 +9,20 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 abstract class File
 {
     protected ?UploadedFile $uploadFile;
+    protected ?string $extension;
+    protected ?string $mimeType;
+
+    protected string $uploadPath;
+
     protected string $fileName;
 
     public function __construct(?UploadedFile $uploadedFile = null)
     {
-        $this->uploadFile = $uploadedFile;
+        if($uploadedFile){
+            $this->uploadFile = $uploadedFile;
+            $this->extension = strtolower($uploadedFile->getClientOriginalExtension());
+            $this->mimeType = $uploadedFile->getMimeType();
+        }
     }
 
     public function getUploadFile(): UploadedFile
@@ -21,51 +30,71 @@ abstract class File
         return $this->uploadFile;
     }
 
+    public function getExtension(): string
+    {
+        return $this->extension;
+    }
+
+    public function getMimeType(): string
+    {
+        return $this->mimeType;
+    }
+
+    public function getUploadPath(): string
+    {
+        return $this->uploadPath;
+    }
+
+    public function setUploadPath($uploadPath): static
+    {
+        $this->uploadPath = $uploadPath;
+
+        return $this;
+    }
+
     public function getFileName(): string
     {
         return $this->fileName;
     }
 
-    abstract public function getUploadPath(): string|array;
-    abstract public function getAllowedMimeTypes(): array;
-    abstract public function getAllowedExtensions(): array;
+    public function setFileName($fileName): static
+    {
+        $this->fileName = $fileName;
+
+        return $this;
+    }
+
+    public function generateFileName(): string
+    {
+        $this->fileName = bin2hex(random_bytes(16)) . '.' . $this->extension;
+
+        return $this->fileName;
+    }
 
     /**
      * @throws RuntimeException
      */
-    public function process(): static
+    public function validate(): static
     {
         if (!$this->uploadFile->isValid()) {
             throw new RuntimeException("Upload failed with error: " . $this->uploadFile->getError());
         }
 
-        $ext = strtolower($this->uploadFile->getClientOriginalExtension());
-        $mime = $this->uploadFile->getMimeType();
-
-        if (!$this->isMimeAllowed($mime)) {
+        if (!$this->isMimeAllowed()) {
             throw new RuntimeException("File type not allowed: $mime");
         }
 
-        if (!in_array($ext, $this->getAllowedExtensions(), true)) {
+        if (!in_array($this->extension, $this->getAllowedExtensions(), true)) {
             throw new RuntimeException("File extension not allowed: .$ext");
         }
-
-        $this->fileName = $this->generateFileName($ext);
-
-        $this->upload();
 
         return $this;
     }
 
-    public function generateFileName(string $extension): string
-    {
-        return bin2hex(random_bytes(16)) . '.' . $extension;
-    }
-
-    protected function isMimeAllowed(string $mime): bool
+    protected function isMimeAllowed(): bool
     {
         foreach ($this->getAllowedMimeTypes() as $allowed) {
-            if ($allowed === $mime || (str_ends_with($allowed, '/*') && str_starts_with($mime, substr($allowed, 0, strpos($allowed, '/')) . '/'))) {
+            if ($allowed === $this->mimeType || (str_ends_with($allowed, '/*') && str_starts_with($this->mimeType, substr($allowed, 0, strpos($allowed, '/')) . '/'))) {
                 return true;
             }
         }
@@ -73,28 +102,13 @@ abstract class File
         return false;
     }
 
-    protected function upload(): void
+    public function remove(?string $fileName = null): void
     {
-        $paths = $this->getUploadPath();
-        if (!is_array($paths)) {
-            $paths = [$paths];
-        }
-
-        foreach ($paths as $path){
-            $destination = Path::get('MEDIA_PATH') . DIRECTORY_SEPARATOR . trim($path, DIRECTORY_SEPARATOR);
-
-            if (!is_dir($destination)) {
-                mkdir($destination, 0755, true);
-            }
-
-            $this->uploadFile->move($destination, $this->fileName);
+        if($fileName){
+            unlink(Path::get('MEDIA_PATH') . trim($this->getUploadPath(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName);
         }
     }
 
-    public function remove($file):void
-    {
-        if($file){
-            unlink(Path::get('MEDIA_PATH') . $this->getUploadPath() . DIRECTORY_SEPARATOR . $file);
-        }
-    }
+    abstract public function getAllowedMimeTypes(): array;
+    abstract public function getAllowedExtensions(): array;
 }
