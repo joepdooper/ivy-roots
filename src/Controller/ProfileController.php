@@ -8,9 +8,12 @@ use Delight\Auth\NotLoggedInException;
 use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UserAlreadyExistsException;
 use GUMP;
+use Items\Collection\Image\ImageFile;
+use Items\Collection\Image\ImageFileService;
 use Ivy\Abstract\Controller;
 use Ivy\Core\Language;
 use Ivy\Core\Path;
+use Ivy\Manager\SessionManager;
 use Ivy\Model\Profile;
 use Ivy\Model\Template;
 use Ivy\Model\User;
@@ -103,18 +106,23 @@ class ProfileController extends Controller
                 }
             }
 
-            if($this->request->get('avatar') === 'delete') {
-                $this->profile->unlinkUserImage();
-                $this->profile->update();
+            if(in_array("Image", SessionManager::get('plugin_actives'))) {
+                if ($this->request->files->has('avatar')) {
+                    $file = new ImageFile($this->request->files->get('avatar'));
+                    $this->profile->user_image = $file
+                        ->setUploadPath('profile')
+                        ->setImageWidth(120)
+                        ->generateFileName();
+                    (new ImageFileService)->add($file)->upload();
+                    $this->profile->update();
+                }
+                if ($this->request->get('avatar') === 'delete') {
+                    $file = new ImageFile();
+                    $file->setUploadPath('profile')->remove($this->profile->user_image);
+                    $this->profile->user_image = '';
+                    $this->profile->update();
+                }
             }
-
-            if($this->request->files->has('avatar')){
-//                $this->profile->user_image = $this->uploadMedia($this->request->files->get('avatar'))
-//                    ->resizeImage(120, null)
-//                    ->fileName();
-                $this->profile->update();
-            }
-
         } else {
             foreach ($validated as $string) {
                 $this->flashBag->add('error', $string);
