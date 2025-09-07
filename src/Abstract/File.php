@@ -77,15 +77,15 @@ abstract class File
     public function validate(): static
     {
         if (!$this->uploadFile->isValid()) {
-            throw new RuntimeException("Upload failed with error: " . $this->uploadFile->getError());
+            throw new \RuntimeException("Upload failed with error: " . $this->uploadFile->getError());
         }
 
         if (!$this->isMimeAllowed()) {
-            throw new RuntimeException("File type not allowed: $mime");
+            throw new \RuntimeException("File type not allowed: $this->mimeType");
         }
 
         if (!in_array($this->extension, $this->getAllowedExtensions(), true)) {
-            throw new RuntimeException("File extension not allowed: .$ext");
+            throw new \RuntimeException("File extension not allowed: .$this->extension");
         }
 
         return $this;
