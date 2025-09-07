@@ -1,0 +1,4 @@
+parameters:
+    ignoreErrors:
+        - '#Instantiated class Items\\Collection\\Image\\ImageFile not found#'
+        - '#Instantiated class Items\\Collection\\Image\\ImageFileService not found#'

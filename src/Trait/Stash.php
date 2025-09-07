@@ -23,7 +23,7 @@ trait Stash
 
         self::$currentData = (new $type())->fetchAll();
 
-        return new static();
+        return static::createInstance();
     }
 
     /**
@@ -81,6 +81,14 @@ trait Stash
     {
         $stash = SessionManager::get('stash_' . static::class, []);
         return $stash[$key] ?? null;
+    }
+
+    /**
+     * @phpstan-return static
+     */
+    protected static function createInstance(): static
+    {
+        return new static();
     }
 }
 
