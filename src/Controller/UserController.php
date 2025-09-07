@@ -9,9 +9,11 @@ use Delight\Auth\EmailNotVerifiedException;
 use Delight\Auth\InvalidEmailException;
 use Delight\Auth\InvalidPasswordException;
 use Delight\Auth\InvalidSelectorTokenPairException;
+use Delight\Auth\NotLoggedInException;
 use Delight\Auth\ResetDisabledException;
 use Delight\Auth\Role;
 use Delight\Auth\TokenExpiredException;
+use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
@@ -126,8 +128,8 @@ class UserController extends Controller
                 $mail->send();
             });
             DatabaseManager::connection()->insert('profiles', ['user_id' => $userId]);
-            // Set role to registered user
 
+            // Set role to registered user
             if (isset(Setting::getStash()['registration_role']) && Setting::getStash()['registration_role']->value) {
                 $role = strtoupper(Setting::getStash()['registration_role']->value);
                 $roleConstant = "\Delight\Auth\Role::$role";

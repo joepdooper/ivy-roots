@@ -92,7 +92,7 @@ class ProfileController extends Controller
                         $mail->setAltBody('Reset your email address with this link: ' . $url);
                         $mail->send();
                     });
-                    $this->flashBag->add('success', 'An email has been sent to ' . $email . ' with a link to confirm the email address');
+                    $this->flashBag->add('success', 'An email has been sent to ' . $data['email'] . ' with a link to confirm the email address');
                 } catch (InvalidEmailException) {
                     $this->flashBag->add('error', 'Invalid email address');
                 } catch (UserAlreadyExistsException) {

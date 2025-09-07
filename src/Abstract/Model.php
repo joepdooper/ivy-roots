@@ -234,7 +234,7 @@ abstract class Model
 
     public function organizeByColumn(string $columnName): static
     {
-        $this->rows = array_reduce($this->fetchAll(), function ($carry, $object) use ($columnName) {
+        array_reduce($this->fetchAll(), function ($carry, $object) use ($columnName) {
             $key = str_replace(' ', '_', strtolower($object->{$columnName} ?? ''));
             $carry[$key] = $object;
             return $carry;
