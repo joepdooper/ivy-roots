@@ -363,7 +363,7 @@ abstract class Model
     /**
      * @phpstan-return static
      */
-    protected static function createInstance(): static
+    private static function createInstance(): static
     {
         return new static();
     }
