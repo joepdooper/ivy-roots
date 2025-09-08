@@ -21,9 +21,10 @@ trait Stash
             throw new \InvalidArgumentException("Class '$type' does not have a fetchAll method.");
         }
 
-        self::$currentData = (new $type())->fetchAll();
+        $instance = new $type();
+        self::$currentData = $instance->fetchAll();
 
-        return static::createInstance();
+        return $instance;
     }
 
     /**
@@ -81,14 +82,6 @@ trait Stash
     {
         $stash = SessionManager::get('stash_' . static::class, []);
         return $stash[$key] ?? null;
-    }
-
-    /**
-     * @phpstan-return static
-     */
-    protected static function createInstance(): static
-    {
-        return new static();
     }
 }
 
