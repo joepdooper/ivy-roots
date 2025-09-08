@@ -170,14 +170,34 @@ abstract class Model
         return $this;
     }
 
+    /**
+     * Create an uninitialized instance of the model (bypassing __construct).
+     *
+     * @param array|null $data Optional data to populate.
+     * @return static
+     */
+    protected static function hydrate(array $data = null): static
+    {
+        $ref = new \ReflectionClass(static::class);
+        /** @var static $instance */
+        $instance = $ref->newInstanceWithoutConstructor();
+
+        if ($data !== null) {
+            $instance->populate($data);
+        }
+
+        return $instance;
+    }
+
     public function fetchAll(): array
     {
         $rows = !empty($this->bindings)
             ? DatabaseManager::connection()->select($this->query, $this->bindings)
             : DatabaseManager::connection()->select($this->query);
+
         $this->resetQuery();
 
-        return array_map(fn($row) => static::createInstance()->populate($row), $rows ?? []);
+        return array_map(fn($row) => static::hydrate($row), $rows ?? []);
     }
 
     public function fetchOne(): ?static
@@ -185,9 +205,10 @@ abstract class Model
         $data = !empty($this->bindings)
             ? DatabaseManager::connection()->selectRow($this->query, $this->bindings)
             : DatabaseManager::connection()->selectRow($this->query);
+
         $this->resetQuery();
 
-        return $data ? $this->createInstance()->populate($data) : null;
+        return $data ? static::hydrate($data) : null;
     }
 
     public function hasMany(string $relatedModelClass, string $foreignKey, string $localKey = 'id'): array
@@ -358,14 +379,6 @@ abstract class Model
             'qualified' => "`$this->table`.`$column`",
             'binding' => $column
         ];
-    }
-
-    /**
-     * @phpstan-return static
-     */
-    private static function createInstance(): static
-    {
-        return new static();
     }
 
     public function getPath(): string
