@@ -4,6 +4,7 @@ namespace Ivy\Controller;
 
 use GUMP;
 use Ivy\Abstract\Controller;
+use Ivy\Manager\TemplateManager;
 use Ivy\Model\Profile;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
@@ -34,7 +35,10 @@ class TemplateController extends Controller
     {
         $this->template->authorize('index');
 
-        View::set('admin/template.latte');
+        View::set('admin/template.latte', [
+            'templateBase' => basename(TemplateManager::getTemplateBase()),
+            'templateSub' => basename(TemplateManager::getTemplateSub())
+        ]);
     }
 
     public function root(): void
@@ -65,6 +69,8 @@ class TemplateController extends Controller
                 $this->flashBag->add('error', $e->getMessage());
             }
         }
+
+        TemplateManager::init(true);
 
         $this->flashBag->add('success', 'Update successfully');
         $this->redirect('admin/template');
