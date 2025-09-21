@@ -1,18 +1,10 @@
 <?php
 namespace Ivy\Trait;
 
-use Ivy\Manager\SessionManager;
-
 trait Stash
 {
-    private static ?array $currentData = null;
+    private static array $stashData = [];
 
-    /**
-     * Initialize stashing for the calling class.
-     *
-     * @return static
-     * @throws \InvalidArgumentException
-     */
     public static function stash(): static
     {
         $type = static::class;
@@ -22,28 +14,23 @@ trait Stash
         }
 
         $instance = new $type();
-        self::$currentData = $instance->fetchAll();
+        self::$stashData[$type] = $instance->fetchAll();
 
         return $instance;
     }
 
-    /**
-     * Stash objects by a specific column key.
-     *
-     * @param string $column The column name to use as the key.
-     * @return void
-     * @throws \InvalidArgumentException
-     */
     public function keyByColumn(string $column): void
     {
-        if (self::$currentData === null) {
+        $type = static::class;
+
+        if (!isset(self::$stashData[$type])) {
             throw new \RuntimeException("No data available to stash. Call stash() first.");
         }
 
         $getter = 'get' . str_replace('_', '', ucwords($column, '_'));
 
         $stashData = [];
-        foreach (self::$currentData as $instance) {
+        foreach (self::$stashData[$type] as $instance) {
             if (method_exists($instance, $getter)) {
                 $key = strtolower(str_replace(' ', '_', $instance->$getter()));
             } elseif (property_exists($instance, $column)) {
@@ -55,33 +42,28 @@ trait Stash
             $stashData[$key] = $instance;
         }
 
-        SessionManager::set('stash_' . static::class, $stashData);
-        self::$currentData = null;
+        self::$stashData[$type] = $stashData;
     }
 
-    /**
-     * Retrieve stashed objects for the calling class.
-     *
-     * @return array|null
-     */
-    public static function getStash($key = null): ?array
+    public static function stashGet(string $key): mixed
     {
-        if($key){
-            return SessionManager::get('stash_' . static::class, null)[$key];
+        return self::$stashData[static::class][$key] ?? null;
+    }
+
+    public static function stashSet(string $key, mixed $value): void
+    {
+        self::$stashData[static::class][$key] = $value;
+    }
+
+    public static function stashUpdate(string $key, callable $callback): void
+    {
+        if (isset(self::$stashData[static::class][$key])) {
+            self::$stashData[static::class][$key] = $callback(self::$stashData[static::class][$key]);
         }
-        return SessionManager::get('stash_' . static::class, null);
     }
 
-    /**
-     * Retrieve a specific item from the stash.
-     *
-     * @param string $key
-     * @return mixed|null
-     */
-    public static function getStashItem(string $key)
+    public static function stashClear(): void
     {
-        $stash = SessionManager::get('stash_' . static::class, []);
-        return $stash[$key] ?? null;
+        unset(self::$stashData[static::class]);
     }
 }
-

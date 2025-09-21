@@ -130,8 +130,8 @@ class UserController extends Controller
             DatabaseManager::connection()->insert('profiles', ['user_id' => $userId]);
 
             // Set role to registered user
-            if (isset(Setting::getStash()['registration_role']) && Setting::getStash()['registration_role']->value) {
-                $role = strtoupper(Setting::getStash()['registration_role']->value);
+            if (isset(Setting::stashGet('registration_role')->value) {
+                $role = strtoupper(Setting::stashGet('registration_role')->value);
                 $roleConstant = "\Delight\Auth\Role::$role";
                 User::getAuth()->admin()->addRoleForUserById($userId, constant($roleConstant));
             }

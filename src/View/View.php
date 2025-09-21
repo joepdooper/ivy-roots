@@ -79,8 +79,8 @@ class View
         self::$latte->addFunction('media', fn($key) => Path::get('PUBLIC_URL') . 'media/' . $key);
         self::$latte->addFunction('file', fn($key) => TemplateManager::file($key));
         self::$latte->addFunction('render', fn($key, $vars = []) => View::render($key, $vars));
-        self::$latte->addFunction('setting', fn($key) => Info::getStash()[$key]->value ?? '');
-        self::$latte->addFunction('enabled', fn($key) => Info::getStash()[$key]->bool ?? false);
+        self::$latte->addFunction('setting', fn($key) => Info::stashGet($key)->value ?? '');
+        self::$latte->addFunction('enabled', fn($key) => Info::stashGet($key)->bool ?? false);
         self::$latte->addFunction('isPluginActive', fn($key) => in_array($key, SessionManager::get('plugin_actives')));
         self::$latte->addFunction('csrf', fn() => new \Latte\Runtime\Html('<input type="hidden" name="csrf_token" value="' . self::generateCsrfToken() . '">'));
         self::$latte->addFunction('auth', fn() => User::getAuth());

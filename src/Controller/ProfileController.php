@@ -107,7 +107,7 @@ class ProfileController extends Controller
             }
 
             if(in_array("Image", SessionManager::get('plugin_actives'))) {
-                if ($this->request->files->has('avatar')) {
+                if ($this->request->files->get('avatar')) {
                     $file = new ImageFile($this->request->files->get('avatar'));
                     $this->profile->user_image = $file
                         ->setUploadPath('profile')
