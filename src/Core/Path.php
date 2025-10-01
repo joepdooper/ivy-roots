@@ -44,7 +44,9 @@ final class Path
             'PROJECT_PATH' => dirname($documentRoot) . DIRECTORY_SEPARATOR,
             'MEDIA_PATH'   => dirname($documentRoot) . DIRECTORY_SEPARATOR . "public/media" . DIRECTORY_SEPARATOR,
             'PLUGINS_PATH'  => dirname($documentRoot) . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR,
+            'PLUGINS_FOLDER'  => "plugins" . DIRECTORY_SEPARATOR,
             'TEMPLATES_PATH' => dirname($documentRoot) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR,
+            'TEMPLATES_FOLDER' => "templates" . DIRECTORY_SEPARATOR,
             'PUBLIC_PATH'  => rtrim($documentRoot . DIRECTORY_SEPARATOR . $scriptPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR,
         ];
 

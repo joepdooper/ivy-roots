@@ -16,4 +16,12 @@ class SettingPolicy
     {
         return User::canEditAsAdmin();
     }
+
+    public static function delete(Setting $setting): bool
+    {
+        if(!$setting->is_default && User::canEditAsAdmin()){
+            return true;
+        }
+        return false;
+    }
 }

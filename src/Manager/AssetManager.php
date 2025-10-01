@@ -12,6 +12,7 @@ class AssetManager
     protected static array $css = array();
     protected static array $js = array();
     protected static array $esm = array();
+    protected static array $vite = array();
 
     public static function addCSS(string $name): void
     {
@@ -26,7 +27,7 @@ class AssetManager
     public static function addViteEntry(string $name): void
     {
         $name = ltrim($name, '/');
-        if (!in_array($name, self::$esm, true)) self::$esm[] = $name;
+        if (!in_array($name, self::$vite, true)) self::$vite[] = $name;
     }
 
     /**
@@ -81,34 +82,63 @@ class AssetManager
     public static function getViteEntry(): array
     {
         if (Environment::isDev()) {
-            self::generatePluginsEntry();
-            $viteDevUrl = 'http://' . $_ENV['VITE_HOST'] . ':' . $_ENV['VITE_PORT'];
-            return [$viteDevUrl . '/js/vite.modules.js?t=' . time()];
+//            if(self::isViteRunning()){
+                self::generatePluginsEntry();
+                $viteDevUrl = Path::get('PROTOCOL') . '://' . $_ENV['VITE_FRONTEND_HOST'] . ':' . $_ENV['VITE_PORT'];
+                return [
+                    $viteDevUrl . '/@vite/client',
+                    $viteDevUrl . '/vite.modules.js?t=' . time()
+                ];
+//            } else {
+//                foreach (self::$vite as $module) {
+//                    self::handleAsset($module, self::$esm);
+//                }
+//                return self::$esm;
+//            }
         }
 
-        $manifestPath = Path::get('PUBLIC_PATH') . 'dist/manifest.json';
-        if (!file_exists($manifestPath)) return [];
+        return [
+            Path::get('PUBLIC_URL') . 'js/vite.bundle.js'
+        ];
+    }
 
-        $manifest = json_decode(file_get_contents($manifestPath), true);
-        $entryKey = 'js/modules.js';
-        if (!isset($manifest[$entryKey])) return [];
+    public static function isViteRunning(): bool
+    {
+        if (!function_exists('curl_init')) {
+            return false;
+        }
 
-        return ['/dist/' . $manifest[$entryKey]['file']];
+        $ch = curl_init(Path::get('PROTOCOL') . '://' . $_ENV['VITE_BACKEND_HOST'] . ':' . $_ENV['VITE_PORT'] . '/' . '@vite/client');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0.2);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 0.5);
+
+        curl_exec($ch);
+        $error = curl_errno($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        return ($error === 0 && $httpCode >= 200 && $httpCode < 500);
     }
 
     protected static function generatePluginsEntry(): void
     {
-        if (empty(self::$esm)) return;
+        if (empty(self::$vite)) return;
 
-        $srcDir = Path::get('PUBLIC_PATH') . DIRECTORY_SEPARATOR . 'js';
-        $entryFile = $srcDir . DIRECTORY_SEPARATOR . 'vite.modules.js';
+        $entryFile = Path::get('PROJECT_PATH') . 'vite.modules.js';
 
         $lines = [];
-        foreach (self::$esm as $esm) {
-            $lines[] = "import '../" . str_replace('\\', '/', $esm) . "';";
+        foreach (self::$vite as $module) {
+            $module = str_replace('\\', '/', $module);
+//            if (preg_match('/_(admin|dev)\.js$/', $module)) {
+//                continue;
+//            }
+            $lines[] = "import '/" . $module . "';";
+            if (file_exists(Path::get('PUBLIC_PATH') . $module)) {
+                unlink(Path::get('PUBLIC_PATH') . $module);
+            }
         }
-
-        if (!is_dir($srcDir)) mkdir($srcDir, 0755, true);
 
         $content = implode("\n", $lines) . "\n";
 

@@ -267,9 +267,10 @@ abstract class Model
     public function toAssocArray(): array
     {
         $assocArray = [];
+        $objectVars = get_object_vars($this);
 
         foreach ($this->columns as $column) {
-            if (property_exists($this, $column) && isset($this->{$column})) {
+            if (property_exists($this, $column) && array_key_exists($column, $objectVars)) {
                 $assocArray[$column] = $this->{$column};
             }
         }
@@ -359,6 +360,9 @@ abstract class Model
                 $this->$setter($value);
             } elseif (in_array($key, $this->columns)) {
                 $this->$key = $value;
+            }
+            if($key === 'birthday_'){
+                d($key, $value);
             }
         }
 

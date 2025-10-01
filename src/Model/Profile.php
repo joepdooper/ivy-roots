@@ -14,13 +14,15 @@ class Profile extends Model
         'user_id',
         'username',
         'email',
-        'user_image'
+        'user_image',
+        'birthday'
     ];
 
     protected int $user_id;
     protected string $username;
     protected string $email;
     protected ?string $user_image;
+    protected ?string $birthday;
 
     private static ?Profile $currentProfile = null;
 
@@ -28,7 +30,7 @@ class Profile extends Model
     {
         parent::__construct();
         $this->query = "
-    SELECT `profiles`.`id`, `profiles`.`user_id`, `profiles`.`user_image`, `users`.`email`, `users`.`username`, `users`.`status`, `users`.`roles_mask`, `users`.`last_login` FROM `profiles`
+    SELECT `profiles`.`id`, `profiles`.`user_id`, `profiles`.`user_image`, `profiles`.`birthday`, `users`.`email`, `users`.`username`, `users`.`status`, `users`.`roles_mask`, `users`.`last_login` FROM `profiles`
     INNER JOIN `users` ON `users`.`id` = `profiles`.`user_id`
     ";
     }

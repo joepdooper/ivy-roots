@@ -44,7 +44,8 @@ class ProfileController extends Controller
         $data = [
             'username' => $this->request->get('username'),
             'email' => $this->request->get('email'),
-            'avatar' => $this->request->get('avatar') ?? $this->request->files->get('avatar')
+            'avatar' => $this->request->get('avatar') ?? $this->request->files->get('avatar'),
+            'birthday' => empty($this->request->get('birthday')) ? null : $this->request->get('birthday')
         ];
 
         GUMP::add_validator("image_or_delete", function($field, $input, $param = null) {
@@ -66,12 +67,17 @@ class ProfileController extends Controller
         $validated = GUMP::is_valid($data, [
             'username' => 'required|alpha_numeric_dash',
             'email' => 'required|valid_email',
-            'avatar' => 'image_or_delete'
+            'avatar' => 'image_or_delete',
+            'birthday' => 'date'
         ]);
 
         if ($validated === true) {
 
             $this->profile = (new Profile)->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
+
+            $this->profile->populate([
+                'birthday' => $data['birthday']
+            ])->update();
 
             if(User::getAuth()->getUsername() !== $data['username']) {
                 (new User)->where('id', $_SESSION['auth_user_id'])->populate(

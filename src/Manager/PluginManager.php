@@ -20,6 +20,7 @@ class PluginManager
 
     public function install(): array
     {
+        $this->plugin->authorize('install');
         $this->plugin->setInfo();
 
         try {
@@ -42,6 +43,7 @@ class PluginManager
                 foreach($this->plugin->getInfo()->getSettings() as $setting){
                     $data = array_merge($setting, [
                         'plugin_id' => $this->plugin->id,
+                        'is_default' => 1
                     ]);
                     (new Setting)->populate($data)->insert();
                 }
@@ -59,6 +61,7 @@ class PluginManager
 
     public function uninstall(): array
     {
+        $this->plugin->authorize('uninstall');
         $this->plugin->setInfo();
 
         try {
