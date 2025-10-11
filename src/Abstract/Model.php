@@ -361,9 +361,6 @@ abstract class Model
             } elseif (in_array($key, $this->columns)) {
                 $this->$key = $value;
             }
-            if($key === 'birthday_'){
-                d($key, $value);
-            }
         }
 
         return $this;
