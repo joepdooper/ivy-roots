@@ -152,6 +152,32 @@ abstract class Model
         return $this;
     }
 
+    public function whereIn(string $column, array $values): static
+    {
+        if (empty($values)) {
+            $this->query .= str_contains($this->query, 'WHERE')
+                ? " AND 1 = 0"
+                : " WHERE 1 = 0";
+            return $this;
+        }
+
+        $col = $this->qualifyColumn($column);
+        $placeholders = [];
+
+        foreach ($values as $i => $value) {
+            $key = "{$col['binding']}_{$i}";
+            $placeholders[] = ":$key";
+            $this->bindings[$key] = $value;
+        }
+
+        $inClause = implode(', ', $placeholders);
+        $this->query .= str_contains($this->query, 'WHERE')
+            ? " AND {$col['qualified']} IN ($inClause)"
+            : " WHERE {$col['qualified']} IN ($inClause)";
+
+        return $this;
+    }
+
     public function addJoin(string $table, string $firstColumn, string $operator, string $secondColumn, string $type = 'INNER'): static
     {
         $this->query .= " $type JOIN `$table` ON `$this->table`.`$firstColumn` $operator `$table`.`$secondColumn`";

@@ -3,7 +3,7 @@ namespace Ivy\Trait;
 
 trait Factory
 {
-    public function factory(): object
+    public static function factory(): object
     {
         $factoryClass = static::class . 'Factory';
 
@@ -23,22 +23,39 @@ trait Factory
         }
 
         $defaults = $factory->defaults();
-        $columns = $this->getColumns();
+        $columns  = $this->getColumns();
 
-        $merged = array_merge($defaults, array_intersect_key($data, array_flip($columns)));
+        foreach ($defaults as $key => &$value) {
+            if (is_object($value) && method_exists($value, 'createFromRequest')) {
+                // Create related model and set the foreign key
+                $related = $value->createFromRequest();
+                $value = $related->getId();
+            }
+        }
 
-        $this->populate($merged);
+        $existing = [];
+        foreach ($columns as $column) {
+            if (property_exists($this, $column) && isset($this->$column)) {
+                $existing[$column] = $this->$column;
+            }
+        }
+
+        $filtered = array_intersect_key($data, array_flip($columns));
+        $merged = array_merge($defaults, $existing, $filtered);
+
+        $this->populate($merged)->insert();
 
         return $this;
     }
 
+
+
     public function updateFromRequest(array $data = []): static
     {
-        $factory = $this->factory();
         $columns = $this->getColumns();
         $filtered = array_intersect_key($data, array_flip($columns));
 
-        $this->populate($filtered);
+        $this->populate($filtered)->update();
 
         return $this;
     }
