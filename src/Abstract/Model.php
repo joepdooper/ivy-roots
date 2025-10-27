@@ -14,7 +14,7 @@ abstract class Model
     protected array $columns = [];
     protected string $query = '';
     protected array $bindings = [];
-    protected int $id;
+    protected ?int $id = null;
     protected array $relationCache = [];
 
     public function __construct()
@@ -68,7 +68,7 @@ abstract class Model
         return $this;
     }
 
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -277,6 +277,35 @@ abstract class Model
         $related = $instance->where($foreignKey, $localValue)->fetchOne();
 
         return $this->relationCache[$relationName] = $related;
+    }
+
+    public function hasManyThroughPivot(
+        string $relatedClass,
+        string $pivotTable
+    ): array {
+        $cacheKey = __FUNCTION__ . '_' . $pivotTable;
+        if (isset($this->relationCache[$cacheKey])) return $this->relationCache[$cacheKey];
+
+        $id = $this->id ?? null;
+        if (!$id) return $this->relationCache[$cacheKey] = [];
+
+        /** @var \Ivy\Abstract\Model $related */
+        $related = new $relatedClass();
+
+        $pivotLocalKey = 'entity_id';
+        $pivotRelatedKey = strtolower((new \ReflectionClass($relatedClass))->getShortName()) . '_id';
+
+        $cols = array_merge(['id'], $related->getColumns());
+        $columns = implode(', ', array_map(fn($col) => "`{$related->table}`.`$col`", $cols));
+        $columns .= ", `$pivotTable`.`id` AS `pivot_id`";
+
+        $related->query = "SELECT $columns FROM `{$related->table}` INNER JOIN `$pivotTable` ON `{$related->table}`.`id` = `$pivotTable`.`$pivotRelatedKey` WHERE `$pivotTable`.`$pivotLocalKey` = :id AND `$pivotTable`.`entity_table` = :table";
+
+        $related->bindings = ['id' => $id, 'table' => $this->table];
+
+        $rows = $related->fetchAll();
+
+        return $this->relationCache[$cacheKey] = $rows;
     }
 
     public function organizeByColumn(string $columnName): static

@@ -79,6 +79,7 @@ class View
         self::$latte->addFunction('text', fn($key, $vars = null) => Language::translate($key, $vars) ?? $key);
         self::$latte->addFunction('path', fn($key) => Path::get($key));
         self::$latte->addFunction('media', fn($key) => Path::get('PUBLIC_URL') . 'media/' . $key);
+        self::$latte->addFunction('route', fn($key) => preg_match('#^' . str_replace('*', '.*', $key) . '$#', Path::get('CURRENT_ROUTE')) === 1);
         self::$latte->addFunction('file', fn($key) => TemplateManager::file($key));
         self::$latte->addFunction('render', fn($key, $vars = []) => View::render($key, $vars));
         self::$latte->addFunction('info', fn($key) => Info::stashGet($key)->value ?? '');
