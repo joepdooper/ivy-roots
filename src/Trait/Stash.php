@@ -1,4 +1,5 @@
 <?php
+
 namespace Ivy\Trait;
 
 trait Stash
@@ -9,12 +10,10 @@ trait Stash
     {
         $type = static::class;
 
-        if (!method_exists($type, 'fetchAll')) {
-            throw new \InvalidArgumentException("Class '$type' does not have a fetchAll method.");
-        }
-
         $instance = new $type();
-        self::$stashData[$type] = $instance->fetchAll();
+        $instances = $instance->fetchAll();
+
+        self::$stashData[$type] = $instances;
 
         return $instance;
     }
@@ -27,10 +26,10 @@ trait Stash
             throw new \RuntimeException("No data available to stash. Call stash() first.");
         }
 
-        $getter = 'get' . str_replace('_', '', ucwords($column, '_'));
-
         $stashData = [];
         foreach (self::$stashData[$type] as $instance) {
+            $getter = 'get' . str_replace('_', '', ucwords($column, '_'));
+
             if (method_exists($instance, $getter)) {
                 $key = strtolower(str_replace(' ', '_', $instance->$getter()));
             } elseif (property_exists($instance, $column)) {
@@ -53,13 +52,6 @@ trait Stash
     public static function stashSet(string $key, mixed $value): void
     {
         self::$stashData[static::class][$key] = $value;
-    }
-
-    public static function stashUpdate(string $key, callable $callback): void
-    {
-        if (isset(self::$stashData[static::class][$key])) {
-            self::$stashData[static::class][$key] = $callback(self::$stashData[static::class][$key]);
-        }
     }
 
     public static function stashClear(): void
