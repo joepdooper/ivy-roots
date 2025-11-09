@@ -12,35 +12,36 @@ trait CanPersist
         $query = $this->query ?? "SELECT * FROM `{$this->table}`";
         $bindings = $this->bindings ?? [];
 
-        return $db->select($query, $bindings) ?: [];
+        $rows = $db->select($query, $bindings) ?: [];
+
+        $this->resetQuery();
+        return $rows;
     }
 
     public function fetchAll(): array
     {
         $rows = $this->fetchAllRaw();
-        $instances = [];
+        $models = array_map(fn($row) => (new static())->populate($row), $rows);
 
-        foreach ($rows as $row) {
-            $instance = static::hydrate($row);
-
-            foreach ($this->with ?? [] as $relation) {
-                if (method_exists($instance, $relation)) {
-                    $instance->setRelation($relation, $instance->$relation());
+        if (!empty($this->with)) {
+            foreach ($models as $model) {
+                foreach ($this->with as $relation) {
+                    if (method_exists($model, $relation)) {
+                        $related = $model->$relation();
+                        $model->setRelation($relation, $related);
+                    }
                 }
             }
-
-            $instances[] = $instance;
         }
 
-        return $instances;
+        return $models;
     }
-
 
     public function fetchOne(): ?static
     {
-        $this->query .= " LIMIT 1";
-        $rows = $this->fetchAllRaw();
-        return isset($rows[0]) ? $this->hydrate($rows[0]) : null;
+        $result = $this->limit(1)->fetchAll();
+        $this->resetQuery();
+        return $result[0] ?? null;
     }
 
     public function populate(array $data): static

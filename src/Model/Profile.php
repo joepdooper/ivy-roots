@@ -35,7 +35,7 @@ class Profile extends Model
     ";
     }
 
-    public function update(): bool|int
+    public function update(): static
     {
         $set = $this->toAssocArray();
 

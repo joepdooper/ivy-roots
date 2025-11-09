@@ -1,4 +1,5 @@
 <?php
+
 namespace Ivy\Trait;
 
 trait Factory
@@ -16,7 +17,7 @@ trait Factory
 
     public function createFromRequest(array $data = []): static
     {
-        $factory = $this->factory();
+        $factory = static::factory();
 
         if (!method_exists($factory, 'defaults')) {
             throw new \RuntimeException("Factory for " . static::class . " must define defaults()");
@@ -27,9 +28,16 @@ trait Factory
 
         foreach ($defaults as $key => &$value) {
             if (is_object($value) && method_exists($value, 'createFromRequest')) {
-                // Create related model and set the foreign key
                 $related = $value->createFromRequest();
                 $value = $related->getId();
+            } elseif (is_array($value)) {
+                $relatedIds = [];
+                foreach ($value as $rel) {
+                    if (is_object($rel) && method_exists($rel, 'createFromRequest')) {
+                        $relatedIds[] = $rel->createFromRequest()->getId();
+                    }
+                }
+                $value = $relatedIds;
             }
         }
 
@@ -47,8 +55,6 @@ trait Factory
 
         return $this;
     }
-
-
 
     public function updateFromRequest(array $data = []): static
     {

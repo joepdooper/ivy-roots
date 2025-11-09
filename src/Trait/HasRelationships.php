@@ -1,51 +1,76 @@
 <?php
 namespace Ivy\Trait;
 
+use Ivy\Manager\DatabaseManager;
+
 trait HasRelationships
 {
     protected array $relations = [];
     protected array $with = [];
 
-    public function hasOne(string $relatedModelClass, string $foreignKey, string $localKey = 'id'): ?object
+    protected function resolveRelation(string $relatedClass, string $foreignKey, string $localKey = 'id', bool $single = false): mixed
     {
-        $relationName = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+        $relationName = $trace[2]['function'] ?? null; // caller of hasOne/hasMany
+
+        if (!$relationName) {
+            throw new \RuntimeException('Cannot determine relation name.');
+        }
+
         if (isset($this->relations[$relationName])) {
             return $this->relations[$relationName];
         }
 
-        $instance = new $relatedModelClass();
-        if (method_exists($instance, 'resetQuery')) {
-            $instance->resetQuery();
-        }
-
         $localValue = $this->{$localKey} ?? null;
         if ($localValue === null) {
-            $this->relations[$relationName] = null;
-            return null;
+            return $this->relations[$relationName] = $single ? null : [];
         }
 
-        return $this->relations[$relationName] = $instance->where($foreignKey, $localValue)->fetchOne();
+        $instance = new $relatedClass();
+        $instance->resetQuery();
+
+        $result = $instance->where($foreignKey, $localValue)
+            ->{$single ? 'fetchOne' : 'fetchAll'}();
+
+        return $this->relations[$relationName] = $result;
     }
 
-    public function hasMany(string $relatedModelClass, string $foreignKey, string $localKey = 'id'): array
+    public function hasOne(string $relatedClass, string $foreignKey, string $localKey = 'id'): ?object
     {
-        $relationName = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
-        if (isset($this->relations[$relationName])) {
-            return $this->relations[$relationName];
-        }
+        return $this->resolveRelation($relatedClass, $foreignKey, $localKey, true);
+    }
 
-        $instance = new $relatedModelClass();
-        if (method_exists($instance, 'resetQuery')) {
-            $instance->resetQuery();
-        }
+    public function hasMany(string $relatedClass, string $foreignKey, string $localKey = 'id'): array
+    {
+        return $this->resolveRelation($relatedClass, $foreignKey, $localKey, false);
+    }
 
+    protected function getPivotRelatedIds(
+        string $pivotTable,
+        string $relatedPivotKey,
+        string $foreignPivotKey = null,
+        ?string $morphType = null,
+        ?string $morphId = null,
+        string $localKey = 'id'
+    ): array {
         $localValue = $this->{$localKey} ?? null;
-        if ($localValue === null) {
-            $this->relations[$relationName] = [];
-            return [];
+        if (!$localValue) return [];
+
+        $db = DatabaseManager::connection();
+        $query = "SELECT `$relatedPivotKey` FROM `$pivotTable` WHERE 1=1";
+        $params = [];
+
+        if ($foreignPivotKey && !$morphType && !$morphId) {
+            $query .= " AND `$foreignPivotKey` = ?";
+            $params[] = $localValue;
+        } elseif ($morphType && $morphId) {
+            $query .= " AND `$morphType` = ? AND `$morphId` = ?";
+            $params[] = $this->table;
+            $params[] = $localValue;
         }
 
-        return $this->relations[$relationName] = $instance->where($foreignKey, $localValue)->fetchAll();
+        $rows = $db->select($query, $params);
+        return $rows ? array_column($rows, $relatedPivotKey) : [];
     }
 
     public function belongsToMany(
@@ -54,44 +79,100 @@ trait HasRelationships
         string $foreignPivotKey,
         string $relatedPivotKey,
         string $localKey = 'id',
-        string $relatedKey = 'id'
+        string $relatedKey = 'id',
+        ?string $morphType = null,
+        ?string $morphId = null
     ): array {
         $relationName = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
-
         if (isset($this->relations[$relationName])) {
             return $this->relations[$relationName];
         }
 
-        $localValue = $this->{$localKey} ?? null;
-        if ($localValue === null) {
-            $this->relations[$relationName] = [];
-            return [];
-        }
-
-        $db = \Ivy\Manager\DatabaseManager::connection();
-
-        $pivotQuery = "SELECT `$relatedPivotKey` FROM `$pivotTable` WHERE `$foreignPivotKey` = ?";
-        $bindings = [$localValue];
-
-        if (isset($this->table)) {
-            $pivotQuery .= " AND `entity_table` = ?";
-            $bindings[] = $this->table;
-        }
-
-        $rows = $db->select($pivotQuery, $bindings);
-        if (!$rows) {
-            $this->relations[$relationName] = [];
-            return [];
-        }
-
-        $relatedIds = array_map(static fn($row) => $row[$relatedPivotKey], $rows);
+        $relatedIds = $this->getPivotRelatedIds($pivotTable, $relatedPivotKey, $foreignPivotKey, $morphType, $morphId, $localKey);
+        if (!$relatedIds) return $this->relations[$relationName] = [];
 
         $related = new $relatedClass();
         $related->resetQuery();
 
-        $models = $related->whereIn($relatedKey, $relatedIds)->fetchAll();
+        return $this->relations[$relationName] = $related
+            ->whereIn($relatedKey, $relatedIds)
+            ->fetchAll();
+    }
 
-        return $this->relations[$relationName] = $models;
+    protected function insertPivotRow(string $pivotTable, array $data): void
+    {
+        DatabaseManager::connection()->insert($pivotTable, $data);
+    }
+
+    protected function deletePivotRow(string $pivotTable, array $conditions): void
+    {
+        $where = [];
+        $params = [];
+        foreach ($conditions as $col => $val) {
+            $where[] = "`$col` = ?";
+            $params[] = $val;
+        }
+        DatabaseManager::connection()->exec(
+            "DELETE FROM `$pivotTable` WHERE " . implode(' AND ', $where),
+            $params
+        );
+    }
+
+    public function attachPivot(
+        string $pivotTable,
+        string $foreignPivotKey,
+        string $relatedPivotKey,
+        int $relatedId,
+        string $localKey = 'id'
+    ): void {
+        $localValue = $this->{$localKey} ?? null;
+        if (!$localValue) return;
+        $this->insertPivotRow($pivotTable, [$foreignPivotKey => $localValue, $relatedPivotKey => $relatedId]);
+    }
+
+    public function detachPivot(
+        string $pivotTable,
+        string $foreignPivotKey,
+        string $relatedPivotKey,
+        int $relatedId,
+        string $localKey = 'id'
+    ): void {
+        $localValue = $this->{$localKey} ?? null;
+        if (!$localValue) return;
+        $this->deletePivotRow($pivotTable, [$foreignPivotKey => $localValue, $relatedPivotKey => $relatedId]);
+    }
+
+    public function syncPivot(
+        string $pivotTable,
+        string $foreignPivotKey,
+        string $relatedPivotKey,
+        array $relatedIds,
+        string $localKey = 'id',
+        ?string $morphType = null,
+        ?string $morphId = null
+    ): void {
+        $relatedIds = array_unique(array_map('intval', $relatedIds));
+        $localValue = $this->{$localKey} ?? null;
+        if (!$localValue) return;
+
+        $existing = $this->getPivotRelatedIds($pivotTable, $relatedPivotKey, $foreignPivotKey, $morphType, $morphId, $localKey);
+
+        $toAttach = array_diff($relatedIds, $existing);
+        $toDetach = array_diff($existing, $relatedIds);
+
+        foreach ($toAttach as $id) {
+            $row = $morphType && $morphId
+                ? [$morphType => $this->table, $morphId => $localValue, $relatedPivotKey => $id]
+                : [$foreignPivotKey => $localValue, $relatedPivotKey => $id];
+            $this->insertPivotRow($pivotTable, $row);
+        }
+
+        foreach ($toDetach as $id) {
+            $conditions = $morphType && $morphId
+                ? [$morphType => $this->table, $morphId => $localValue, $relatedPivotKey => $id]
+                : [$foreignPivotKey => $localValue, $relatedPivotKey => $id];
+            $this->deletePivotRow($pivotTable, $conditions);
+        }
     }
 
     public function setRelation(string $relationName, $value): void

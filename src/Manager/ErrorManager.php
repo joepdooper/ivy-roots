@@ -18,7 +18,7 @@ class ErrorManager
 
         $logFile = $_ENV['ERROR_LOG_FILE'];
         if ($logFile) {
-            ini_set('error_log', Path::get('BASE_PATH') . $logFile);
+            ini_set('error_log', Path::get('PROJECT_PATH') . $logFile);
         }
     }
 }

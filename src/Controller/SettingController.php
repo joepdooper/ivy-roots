@@ -23,29 +23,39 @@ class SettingController extends Controller
     {
         $this->setting->authorize('post');
 
-        $redirect = $this->prepareData();
+        $redirect = $this->resolveRefererContext();
 
-        $settings_data = $this->request->get('setting');
-
-        foreach ($settings_data as $setting_data) {
+        foreach ($this->request->get('setting') ?? [] as $data) {
             try {
-                $validated = GUMP::is_valid($setting_data, [
+                $validated = \GUMP::is_valid($data, [
+                    'name' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
                     'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
                     'plugin_id' => 'numeric'
                 ]);
-                if ($validated === true) {
-                    $this->setting->save($setting_data);
-                } else {
-                    foreach ($validated as $string) {
-                        $this->flashBag->add('error', $string);
-                    }
+
+                if ($validated !== true) {
+                    foreach ($validated as $msg) $this->flashBag->add('error', $msg);
+                    continue;
                 }
+
+                if (empty($data['name'])) continue;
+
+                $setting = !empty($data['id'])
+                    ? (new Setting())->where('id', $data['id'])->fetchOne()
+                    : new Setting();
+
+                if (isset($data['delete']) && !empty($data['id'])) {
+                    $setting?->delete();
+                } else {
+                    $setting->populate($data)->save();
+                }
+
             } catch (\Exception $e) {
                 $this->flashBag->add('error', $e->getMessage());
             }
         }
 
-        $this->flashBag->add('success', 'Update successfully');
+        $this->flashBag->add('success', 'Settings updated successfully.');
         $this->redirect($redirect);
     }
 
@@ -57,7 +67,7 @@ class SettingController extends Controller
         View::set('admin/setting.latte', ['settings' => $settings]);
     }
 
-    protected function prepareData(string $url = '', int $statusCode = 302)
+    protected function resolveRefererContext(string $url = '', int $statusCode = 302)
     {
         $refererPath = $this->getRefererPath();
         if ($refererPath != $this->setting->getPath()){

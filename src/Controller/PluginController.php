@@ -47,12 +47,12 @@ class PluginController extends Controller
                 $this->pluginManager = new PluginManager($this->plugin);
                 $responses[] = $this->pluginManager->install();
             } else {
-                $this->plugin->where('id', $plugin_data['id'])->fetchOne()->populate($plugin_data);
+                $plugin = $this->plugin->where('id', $plugin_data['id'])->fetchOne()->populate($plugin_data);
                 if (isset($plugin_data['delete'])) {
-                    $this->pluginManager = new PluginManager($this->plugin);
+                    $this->pluginManager = new PluginManager($plugin);
                     $responses[] = $this->pluginManager->uninstall();
                 } else {
-                    $this->plugin->update();
+                    $plugin->update();
                 }
             }
 

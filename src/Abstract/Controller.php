@@ -76,16 +76,6 @@ abstract class Controller
         }
     }
 
-    protected function input(string $key, $default = null)
-    {
-        return $this->request->request->get($key, $default);
-    }
-
-    protected function only(array $keys): array
-    {
-        return array_intersect_key($this->request->request->all(), array_flip($keys));
-    }
-
     protected function validate(array $rules): bool
     {
         $result = \GUMP::is_valid($this->request->request->all(), $rules);
@@ -111,5 +101,18 @@ abstract class Controller
     protected function wantsJson(): bool
     {
         return $this->request->headers->get('Accept') === 'application/json';
+    }
+
+    protected function getRefererPath(): ?string
+    {
+        $referer = $this->request->headers->get('referer');
+        $basePath = $this->request->getBasePath();
+        $path = parse_url($referer, PHP_URL_PATH);
+
+        if (!$path || !str_starts_with($path, $basePath)) {
+            return null;
+        }
+
+        return ltrim(substr($path, strlen($basePath)), '/');
     }
 }

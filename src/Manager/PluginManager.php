@@ -37,7 +37,7 @@ class PluginManager
                 }
             }
 
-            $this->plugin->setId($this->plugin->insert());
+            $this->plugin->insert();
 
             if ($this->plugin->getInfo()->hasSettings()) {
                 foreach($this->plugin->getInfo()->getSettings() as $setting){

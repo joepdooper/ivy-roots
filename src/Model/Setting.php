@@ -22,10 +22,10 @@ class Setting extends Model
     ];
 
     protected string $name;
-    protected int $bool;
+    protected int $bool = 0;
     protected ?string $value = null;
     protected ?string $info = null;
     protected ?int $plugin_id = null;
-    protected int $is_default;
-    protected ?string $token;
+    protected int $is_default = 0;
+    protected ?string $token = null;
 }

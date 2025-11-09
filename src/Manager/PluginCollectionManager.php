@@ -53,7 +53,8 @@ class PluginCollectionManager
                 $plugin->insert();
             }
             if ($action === 'uninstall') {
-                $plugin->where('url', $plugin->url)->where('parent_id', $plugin->parent_id)->delete();
+                $plugin = $plugin->where('url', $plugin->url)->where('parent_id', $plugin->parent_id)->fetchOne();
+                $plugin->delete();
             }
         }
     }
