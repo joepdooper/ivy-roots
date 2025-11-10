@@ -92,6 +92,13 @@ abstract class Model
         return (bool)$deleted;
     }
 
+    public function deleteAll(): int
+    {
+        $db = \Ivy\Manager\DatabaseManager::connection();
+        $query = preg_replace('/SELECT \* FROM/', "DELETE FROM", $this->query, 1);
+        return $db->exec($query, $this->bindings ?? []);
+    }
+
     public function save(): static
     {
         if ($this->id === null) {
