@@ -6,6 +6,7 @@ use GUMP;
 use Ivy\Abstract\Controller;
 use Ivy\Model\Info;
 use Ivy\Model\Plugin;
+use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\View\View;
 
@@ -23,23 +24,34 @@ class InfoController extends SettingController
     {
         $this->info->authorize('post');
 
-        $redirect = $this->prepareData();
+        $redirect = $this->resolveRefererContext();
 
-        $infos_data = $this->request->get('info');
+        foreach ($this->request->get('info') as $data) {
 
-        foreach ($infos_data as $info_data) {
             try {
-                $validated = GUMP::is_valid($info_data, [
+                $validated = \GUMP::is_valid($data, [
+                    'name' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
                     'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
                     'plugin_id' => 'numeric'
                 ]);
-                if ($validated === true) {
-                    $this->info->save($info_data);
-                } else {
-                    foreach ($validated as $string) {
-                        $this->flashBag->add('error', $string);
-                    }
+
+                if ($validated !== true) {
+                    foreach ($validated as $msg) $this->flashBag->add('error', $msg);
+                    continue;
                 }
+
+                if (empty($data['name'])) continue;
+
+                $info = !empty($data['id'])
+                    ? (new Info)->where('id', $data['id'])->fetchOne()
+                    : new Info();
+
+                if (isset($data['delete']) && !empty($data['id'])) {
+                    $info?->delete();
+                } else {
+                    $info->populate($data)->save();
+                }
+
             } catch (\Exception $e) {
                 $this->flashBag->add('error', $e->getMessage());
             }
