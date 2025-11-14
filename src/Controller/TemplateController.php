@@ -41,30 +41,24 @@ class TemplateController extends Controller
         ]);
     }
 
-    public function root(): void
-    {
-        View::set('body.latte');
-    }
-
     public function post(): void
     {
         $this->template->authorize('post');
 
-        $templates_data = $this->request->get('template') ?? '';
-
-        foreach ($templates_data as $template_data) {
+        foreach ($this->request->get('template') as $data) {
             try {
-                $validated = GUMP::is_valid($template_data, [
+                $validated = GUMP::is_valid($data, [
                     'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/'
                 ]);
-                if ($validated === true) {
-                    $this->template = new Template;
-                    $this->template->save($template_data);
-                } else {
-                    foreach ($validated as $string) {
-                        $this->flashBag->add('error', $string);
-                    }
+
+                if ($validated !== true) {
+                    foreach ($validated as $msg) $this->flashBag->add('error', $msg);
+                    continue;
                 }
+
+                $template = (new Template)->where('id', $data['id'])->fetchOne();
+                $template->populate($data)->update();
+
             } catch (\Exception $e) {
                 $this->flashBag->add('error', $e->getMessage());
             }

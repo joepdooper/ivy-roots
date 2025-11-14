@@ -41,7 +41,7 @@ class SettingController extends Controller
                 if (empty($data['name'])) continue;
 
                 $setting = !empty($data['id'])
-                    ? (new Setting())->where('id', $data['id'])->fetchOne()
+                    ? (new Setting)->where('id', $data['id'])->fetchOne()
                     : new Setting();
 
                 if (isset($data['delete']) && !empty($data['id'])) {

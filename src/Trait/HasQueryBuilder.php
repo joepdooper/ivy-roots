@@ -3,6 +3,11 @@ namespace Ivy\Trait;
 
 trait HasQueryBuilder
 {
+    public static function query(): static
+    {
+        return new static();
+    }
+
     public function select(string|array $columns): static
     {
         $cols = [];
