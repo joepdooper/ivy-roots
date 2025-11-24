@@ -18,38 +18,54 @@ trait HasQueryBuilder
         return $this;
     }
 
-    public function where(string $column, $value = null, string $operator = '='): static
+    public function where(string $column, $value = null, string $operator = '=', string $boolean = 'AND'): static
     {
         $col = $this->qualifyColumn($column);
-        if (is_null($value)) {
-            $this->query .= str_contains($this->query, 'WHERE')
-                ? " AND {$col['qualified']} IS NULL"
-                : " WHERE {$col['qualified']} IS NULL";
-        } else {
-            $this->query .= str_contains($this->query, 'WHERE')
-                ? " AND {$col['qualified']} $operator :{$col['binding']}"
-                : " WHERE {$col['qualified']} $operator :{$col['binding']}";
+
+        $condition = is_null($value)
+            ? "{$col['qualified']} IS NULL"
+            : "{$col['qualified']} $operator :{$col['binding']}";
+
+        $prefix = str_contains($this->query, 'WHERE') ? " $boolean " : " WHERE ";
+        $this->query .= $prefix . $condition;
+
+        if (!is_null($value)) {
             $this->bindings[$col['binding']] = $value;
         }
+
         return $this;
     }
 
-    public function whereNot(string $column, $value): static
+    public function orWhere(string $column, $value = null, string $operator = '='): static
+    {
+        return $this->where($column, $value, $operator, 'OR');
+    }
+
+    public function whereNot(string $column, $value, string $boolean = 'AND'): static
     {
         $col = $this->qualifyColumn($column);
+
         $this->query .= str_contains($this->query, 'WHERE')
-            ? " AND {$col['qualified']} != :{$col['binding']}"
+            ? " $boolean {$col['qualified']} != :{$col['binding']}"
             : " WHERE {$col['qualified']} != :{$col['binding']}";
+
         $this->bindings[$col['binding']] = $value;
+
         return $this;
     }
 
-    public function whereIn(string $column, array $values): static
+    public function orWhereNot(string $column, $value): static
+    {
+        return $this->whereNot($column, $value, 'OR');
+    }
+
+    public function whereIn(string $column, array $values, string $boolean = 'AND'): static
     {
         if (empty($values)) {
-            $this->query .= str_contains($this->query, 'WHERE') ? " AND 1 = 0" : " WHERE 1 = 0";
+            $this->query .= str_contains($this->query, 'WHERE') ? " $boolean 1 = 0" : " WHERE 1 = 0";
             return $this;
         }
+
         $col = $this->qualifyColumn($column);
         $placeholders = [];
         foreach ($values as $i => $value) {
@@ -57,9 +73,17 @@ trait HasQueryBuilder
             $placeholders[] = ":$key";
             $this->bindings[$key] = $value;
         }
-        $this->query .= str_contains($this->query, 'WHERE') ? " AND {$col['qualified']} IN (" . implode(', ', $placeholders) . ")"
+
+        $this->query .= str_contains($this->query, 'WHERE')
+            ? " $boolean {$col['qualified']} IN (" . implode(', ', $placeholders) . ")"
             : " WHERE {$col['qualified']} IN (" . implode(', ', $placeholders) . ")";
+
         return $this;
+    }
+
+    public function orWhereIn(string $column, array $values): static
+    {
+        return $this->whereIn($column, $values, 'OR');
     }
 
     public function addJoin(string $table, string $firstColumn, string $operator, string $secondColumn, string $type = 'INNER'): static

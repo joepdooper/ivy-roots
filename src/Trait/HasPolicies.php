@@ -3,15 +3,18 @@ namespace Ivy\Trait;
 
 trait HasPolicies
 {
-    public function policy(string $action)
+    public function policy(string $action): bool
     {
         $modelClass = get_class($this);
         $modelName = (new \ReflectionClass($modelClass))->getShortName();
         $namespace = str_replace('Model', 'Policy', (new \ReflectionClass($modelClass))->getNamespaceName());
         $policyClass = "{$namespace}\\{$modelName}Policy";
 
-        if (!class_exists($policyClass) || !method_exists($policyClass, $action)) return false;
-        return $policyClass::$action($this) === true;
+        if (!class_exists($policyClass) || !method_exists($policyClass, $action)) {
+            return false;
+        }
+
+        return (bool) $policyClass::$action($this);
     }
 
     public function authorize(string $action): void

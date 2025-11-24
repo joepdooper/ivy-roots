@@ -27,4 +27,20 @@ trait HasFilters
 
         return $this;
     }
+
+    public function orFilter(string $term): static
+    {
+        foreach ($this->filterable as $column) {
+            $this->orWhere($column, 'LIKE', "%{$term}%");
+        }
+        return $this;
+    }
+
+    public function when(bool $condition, callable $callback): static
+    {
+        if ($condition) {
+            $callback($this);
+        }
+        return $this;
+    }
 }
