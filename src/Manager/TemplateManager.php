@@ -2,6 +2,7 @@
 
 namespace Ivy\Manager;
 
+use Ivy\Config\Environment;
 use Ivy\Core\Path;
 
 class TemplateManager
@@ -69,9 +70,11 @@ class TemplateManager
 
         $paths = [self::$templateSub, self::$templateBase];
         foreach ($paths as $path) {
+
             if (!$path) continue;
 
             $fullPath = $path . $filename;
+
             if (file_exists($fullPath)) {
                 return self::$cache[$filename] = $fullPath;
             }

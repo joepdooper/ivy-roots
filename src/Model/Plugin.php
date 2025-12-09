@@ -24,8 +24,8 @@ class Plugin extends Model
     protected string $version;
     protected ?string $description = null;
     protected ?string $type = null;
-    protected ?int $active;
-    protected ?int $parent_id;
+    protected ?int $active = null;
+    protected ?int $parent_id = null;
     protected PluginInfo $info;
 
     /**

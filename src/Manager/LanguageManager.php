@@ -9,6 +9,6 @@ class LanguageManager
 {
     public static function init(): void
     {
-        Language::setDefaultLang(substr(Info::getStashItem('language')->value, 0, 2));
+        Language::setDefaultLang(substr(Info::stashGet('language')->value, 0, 2));
     }
 }

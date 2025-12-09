@@ -2,6 +2,8 @@
 
 namespace Ivy\Core;
 
+use Ivy\Manager\TemplateManager;
+
 class Language
 {
     protected static string $defaultLang = 'en';
@@ -64,7 +66,7 @@ class Language
 
     private static function loadPluginFile($firstKey, $secondKey): void
     {
-        $langPath = Path::get('PLUGINS_PATH') . $firstKey . DIRECTORY_SEPARATOR . 'language' . DIRECTORY_SEPARATOR . self::$defaultLang . DIRECTORY_SEPARATOR . $secondKey . '.php';
+        $langPath = TemplateManager::file(Path::get('PLUGINS_FOLDER') . $firstKey . DIRECTORY_SEPARATOR . 'language' . DIRECTORY_SEPARATOR . self::$defaultLang . DIRECTORY_SEPARATOR . $secondKey . '.php');
 
         if (file_exists($langPath)) {
             self::$translations[$firstKey.'_'.$secondKey] = include $langPath;

@@ -3,6 +3,7 @@
 namespace Ivy\Core;
 
 use Ivy\Manager\DatabaseManager;
+use Ivy\Manager\ErrorManager;
 use Ivy\Manager\LanguageManager;
 use Ivy\Manager\RouterManager;
 use Ivy\Manager\SecurityManager;
@@ -67,6 +68,7 @@ class App
     public function run(): void
     {
         (\Dotenv\Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
+        ErrorManager::setErrorReporting();
         SecurityManager::setSecurityHeaders();
         $this->bootstrap();
         $this->loadRoutes();

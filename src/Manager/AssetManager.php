@@ -5,103 +5,197 @@ namespace Ivy\Manager;
 use Ivy\Config\Environment;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
+use Ivy\Model\User;
 use Ivy\Core\Path;
 
 class AssetManager
 {
-    protected static array $css = array();
-    protected static array $js = array();
-    protected static array $esm = array();
+    protected static array $css  = [];
+    protected static array $js   = [];
+    protected static array $vite = [];
 
-    public static function addCSS(string $name): void
+    /**
+     * Register a CSS asset.
+     */
+    public static function addCSS(string $path): void
     {
-        self::handleAsset($name, self::$css);
-    }
-
-    public static function addJS(string $name): void
-    {
-        self::handleAsset($name, self::$js);
-    }
-
-    public static function addESM(string $name): void
-    {
-        self::handleAsset($name, self::$esm);
-    }
-
-    private static function handleAsset(string $name, array &$collection): void
-    {
-        if (Environment::isDev()) {
-            $publicFile = Path::get('PUBLIC_PATH') . $name;
-            $originalFile = TemplateManager::file($name);
-
-            if (file_exists($originalFile)) {
-                $publicDir = dirname($publicFile);
-                if (!is_dir($publicDir)) {
-                    mkdir($publicDir, 0755, true);
-                }
-
-                if (file_exists($publicFile)) {
-                    unlink($publicFile);
-                }
-
-                copy($originalFile, $publicFile);
-            }
-        }
-
-        $collection[] = '/' . $name;
+        self::addAsset($path, self::$css);
     }
 
     /**
-     * @return array
+     * Register a JS asset.
+     */
+    public static function addJS(string $path): void
+    {
+        self::addAsset($path, self::$js);
+    }
+
+    /**
+     * Register a Vite entry module.
+     */
+    public static function addViteEntry(string $entry): void
+    {
+        $entry = ltrim($entry, '/');
+        if (!in_array($entry, self::$vite, true)) {
+            self::$vite[] = $entry;
+        }
+    }
+
+    /**
+     * Get compiled CSS assets.
      */
     public static function getCss(): array
     {
-        if (Setting::getStash()['minify_css']->bool) {
-            if (Environment::isDev() && !file_exists('/css/minified.css')) {
-                $minify = new \MatthiasMullie\Minify\CSS();
-                foreach (self::$css as $cssfile) {
-                    $minify->add(Path::get('PUBLIC_PATH') . ltrim($cssfile, '/'));
-                }
-                $minify->minify(Path::get('PUBLIC_PATH') . 'css/minified.css');
-            }
-            self::$css = ['/css/minified.css'];
-        } else {
-            if (Environment::isDev() && file_exists(Path::get('PUBLIC_PATH') . 'css/minified.css')) {
-                unlink(Path::get('PUBLIC_PATH') . 'css/minified.css');
-            }
-        }
-
-        return self::$css;
+        return self::processAssets(self::$css, 'css', Setting::stashGet('minify_css')->bool);
     }
 
     /**
-     * @return array
+     * Get compiled JS assets.
      */
     public static function getJs(): array
     {
-        if (Setting::getStash()['minify_js']->bool) {
-            if (Environment::isDev() && !file_exists('/js/minified.js')) {
-                $minify = new \MatthiasMullie\Minify\JS();
-                foreach (self::$js as $jsfile) {
-                    $minify->add(Path::get('PUBLIC_PATH') . ltrim($jsfile, '/'));
-                }
-                $minify->minify(Path::get('PUBLIC_PATH') . 'js/minified.js');
-            }
-            self::$js = ['/js/minified.js'];
-        } else {
-            if (Environment::isDev() && file_exists(Path::get('PUBLIC_PATH') . 'js/minified.js')) {
-                unlink(Path::get('PUBLIC_PATH') . 'js/minified.js');
-            }
-        }
-
-        return self::$js;
+        return self::processAssets(self::$js, 'js', Setting::stashGet('minify_js')->bool);
     }
 
     /**
-     * @return array
+     * Get active Vite entry files depending on environment.
      */
-    public static function getEsm(): array
+    public static function getViteEntry(): array
     {
-        return self::$esm;
+        $isDev = Environment::isDev();
+
+        if ($isDev) {
+            self::generatePluginsEntry();
+            $viteHost = Path::get('PROTOCOL') . '://' . $_ENV['VITE_FRONTEND_HOST'] . ':' . $_ENV['VITE_PORT'] . '/';
+
+            $files = [
+                $viteHost . '@vite/client',
+                $viteHost . 'vite.base.js'
+            ];
+
+            if (User::getAuth()->isLoggedIn()) {
+                if (User::canEditAsEditor()) $files[] = $viteHost . 'vite.editor.js';
+                if (User::canEditAsAdmin())  $files[] = $viteHost . 'vite.admin.js';
+            }
+
+            return $files;
+        }
+
+        $version = Info::stashGet('updated')->value ?? time();
+        $public  = Path::get('PUBLIC_URL') . 'js/';
+
+        $files = [$public . 'vite.base.js?d=' . $version];
+
+        if (User::getAuth()->isLoggedIn()) {
+            if (User::canEditAsEditor()) $files[] = $public . 'vite.editor.js?d=' . $version;
+            if (User::canEditAsAdmin())  $files[] = $public . 'vite.admin.js?d=' . $version;
+        }
+
+        return $files;
+    }
+
+    /**
+     * Check if Vite dev server is running.
+     */
+    public static function isViteRunning(): bool
+    {
+        if (!function_exists('curl_init')) return false;
+
+        $url = Path::get('PROTOCOL') . '://' . $_ENV['VITE_BACKEND_HOST'] . ':' . $_ENV['VITE_PORT'] . '/@vite/client';
+        $ch  = curl_init($url);
+
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_NOBODY         => true,
+            CURLOPT_CONNECTTIMEOUT => 0.2,
+            CURLOPT_TIMEOUT        => 0.5,
+        ]);
+
+        curl_exec($ch);
+        $success = (curl_errno($ch) === 0 && curl_getinfo($ch, CURLINFO_HTTP_CODE) < 500);
+        curl_close($ch);
+
+        return $success;
+    }
+
+    /**
+     * Generate plugin-based Vite entry files dynamically.
+     */
+    protected static function generatePluginsEntry(): void
+    {
+        if (empty(self::$vite)) return;
+
+        $groups = ['base' => [], 'admin' => [], 'editor' => []];
+
+        foreach (self::$vite as $module) {
+            $path = str_replace('\\', '/', $module);
+            match (true) {
+                str_ends_with($path, '_admin.js')  => $groups['admin'][]  = $path,
+                str_ends_with($path, '_editor.js') => $groups['editor'][] = $path,
+                default                            => $groups['base'][]   = $path,
+            };
+        }
+
+        foreach ($groups as $name => $modules) {
+            if (!$modules) continue;
+
+            $entryFile = Path::get('PROJECT_PATH') . "vite.{$name}.js";
+            $content   = implode("\n", array_map(fn($m) => "import '/$m';", $modules)) . "\n";
+
+            if (!file_exists($entryFile) || file_get_contents($entryFile) !== $content) {
+                file_put_contents($entryFile, $content);
+            }
+        }
+    }
+
+    /**
+     * Handle adding and syncing asset in dev mode.
+     */
+    private static function addAsset(string $path, array &$collection): void
+    {
+        $path = ltrim($path, '/');
+
+        if (Environment::isDev()) {
+            $src = TemplateManager::file($path);
+            $dest = Path::get('PUBLIC_PATH') . $path;
+
+            if (file_exists($src)) {
+                if (!is_dir(dirname($dest))) mkdir(dirname($dest), 0755, true);
+                if (file_exists($dest)) unlink($dest);
+                copy($src, $dest);
+            }
+        }
+
+        $collection[] = '/' . $path;
+    }
+
+    /**
+     * Handle minification and dev cleanup.
+     */
+    private static function processAssets(array $assets, string $type, bool $shouldMinify): array
+    {
+        $minifiedPath = Path::get('PUBLIC_PATH') . "{$type}/minified.{$type}";
+        $minifiedUrl  = "/{$type}/minified.{$type}";
+
+        if ($shouldMinify) {
+            if (Environment::isDev() && !file_exists($minifiedPath)) {
+                $minifierClass = "\\MatthiasMullie\\Minify\\" . strtoupper($type);
+                $minify = new $minifierClass();
+
+                foreach ($assets as $file) {
+                    $minify->add(Path::get('PUBLIC_PATH') . ltrim($file, '/'));
+                }
+
+                $minify->minify($minifiedPath);
+            }
+            return [$minifiedUrl];
+        }
+
+        // Cleanup old minified file in dev mode
+        if (Environment::isDev() && file_exists($minifiedPath)) {
+            unlink($minifiedPath);
+        }
+
+        return $assets;
     }
 }

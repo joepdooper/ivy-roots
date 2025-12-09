@@ -2,15 +2,15 @@
 
 namespace Ivy\Abstract;
 
-use Ivy\App;
 use Ivy\Manager\SessionManager;
-use Ivy\Model\User;
 use Ivy\Core\Path;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
+use Ivy\Middleware\RequestNormalizer;
+use Ivy\Middleware\CsrfVerifier;
+use Ivy\Middleware\MiddlewarePipeline;
 
 abstract class Controller
 {
@@ -21,28 +21,34 @@ abstract class Controller
     {
         $this->request = Request::createFromGlobals();
         $this->flashBag = SessionManager::getFlashBag();
-
+        $this->runMiddlewares();
         $this->requirements();
     }
 
-    protected function requirePost()
+    protected function runMiddlewares(): void
+    {
+        $pipeline = new MiddlewarePipeline();
+        $pipeline->add(new RequestNormalizer());
+        $pipeline->add(new CsrfVerifier());
+        $pipeline->handle($this->request, fn(Request $req) => null);
+    }
+
+    protected function requirePost(): void
     {
         if (!$this->request->isMethod('POST')) {
             $this->flashBag->add('error', 'Invalid request method.');
             $this->redirect();
             exit;
         }
-        $this->requireCsrf();
     }
 
-    protected function requirePatch()
+    protected function requirePatch(): void
     {
         if (!$this->request->isMethod('PATCH')) {
             $this->flashBag->add('error', 'Invalid request method.');
             $this->redirect();
             exit;
         }
-        $this->requireCsrf();
     }
 
     protected function requireGet(): void
@@ -70,20 +76,31 @@ abstract class Controller
         }
     }
 
-    protected function requireCsrf(): void
+    protected function validate(array $rules): bool
     {
-        $csrfToken = SessionManager::get('csrf_token');
-
-        if (!$csrfToken || !hash_equals($csrfToken, $this->request->get('csrf_token', ''))) {
-            $this->flashBag->add('error', 'Invalid security token.');
-            $this->redirect();
-            exit;
+        $result = \GUMP::is_valid($this->request->request->all(), $rules);
+        if ($result !== true) {
+            foreach ($result as $error) {
+                $this->flashBag->add('error', $error);
+            }
         }
+        return $result === true;
     }
 
     protected function redirect(string $url = '', int $statusCode = 302): void
     {
         (new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode))->send();
+        exit;
+    }
+
+    protected function json(array $data, int $status = 200): JsonResponse
+    {
+        return new JsonResponse($data, $status);
+    }
+
+    protected function wantsJson(): bool
+    {
+        return $this->request->headers->get('Accept') === 'application/json';
     }
 
     protected function getRefererPath(): ?string
@@ -97,20 +114,5 @@ abstract class Controller
         }
 
         return ltrim(substr($path, strlen($basePath)), '/');
-    }
-
-    protected function validate(array $rules): array
-    {
-        return $this->request->validate($rules);
-    }
-
-    protected function json(array $data, int $status = 200): JsonResponse
-    {
-        return new JsonResponse($data, $status);
-    }
-
-    protected function wantsJson(): bool
-    {
-        return $this->request->headers->get('Accept') === 'application/json';
     }
 }

@@ -16,12 +16,15 @@ class Info extends Model
         'value',
         'info',
         'plugin_id',
-        'is_default'
+        'is_default',
+        'token'
     ];
 
     protected string $name;
     protected ?string $value = null;
     protected ?string $info = null;
     protected ?int $plugin_id = null;
-    protected int $is_default;
+    protected int $is_default = 0;
+    protected ?string $token = null;
 }
+

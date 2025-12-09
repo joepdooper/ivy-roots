@@ -33,7 +33,9 @@ final class Path
 
         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
         $domain = isset($_SERVER['SERVER_NAME']) ? $protocol . '://' . $_SERVER['SERVER_NAME'] : 'http://localhost';
-        $currentPage = isset($_SERVER['HTTP_HOST']) ? $protocol . '://' . $_SERVER['HTTP_HOST'] . ($_SERVER['REQUEST_URI'] ?? '/') : 'http://localhost/';
+        $currentUri = $_SERVER['REQUEST_URI'] ?? '/';
+        $currentPage = isset($_SERVER['HTTP_HOST']) ? $protocol . '://' . $_SERVER['HTTP_HOST'] . $currentUri : 'http://localhost/';
+        $currentRoute = parse_url($currentUri, PHP_URL_PATH);
 
         self::$paths = [
             'SUBFOLDER'    => $scriptPath !== '' ? $scriptPath . DIRECTORY_SEPARATOR : '',
@@ -41,10 +43,13 @@ final class Path
             'PROTOCOL'     => $protocol,
             'DOMAIN'       => $domain,
             'CURRENT_PAGE' => $currentPage,
+            'CURRENT_ROUTE' => $currentRoute,
             'PROJECT_PATH' => dirname($documentRoot) . DIRECTORY_SEPARATOR,
             'MEDIA_PATH'   => dirname($documentRoot) . DIRECTORY_SEPARATOR . "public/media" . DIRECTORY_SEPARATOR,
             'PLUGINS_PATH'  => dirname($documentRoot) . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR,
+            'PLUGINS_FOLDER'  => "plugins" . DIRECTORY_SEPARATOR,
             'TEMPLATES_PATH' => dirname($documentRoot) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR,
+            'TEMPLATES_FOLDER' => "templates" . DIRECTORY_SEPARATOR,
             'PUBLIC_PATH'  => rtrim($documentRoot . DIRECTORY_SEPARATOR . $scriptPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR,
         ];
 
@@ -58,17 +63,19 @@ final class Path
 
     private static function getServerPort(): string
     {
+        $port = $_SERVER['SERVER_PORT'] ?? null;
+
+        if (isset($_SERVER['HTTP_X_FORWARDED_PORT'])) {
+            $port = $_SERVER['HTTP_X_FORWARDED_PORT'];
+        }
+
         $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
-            || (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] === 'https');
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-        $defaultPort = $isHttps ? 443 : 80;
+        if (($isHttps && $port == 443) || (!$isHttps && $port == 80)) {
+            return '';
+        }
 
-        $port = $_ENV['SERVER_PORT']
-            ?? $_SERVER['HTTP_X_FORWARDED_PORT']
-            ?? $_SERVER['SERVER_PORT']
-            ?? $defaultPort;
-
-        return ($port != 80 && $port != 443) ? ':' . $port : '';
+        return ':' . $port;
     }
 }

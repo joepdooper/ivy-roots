@@ -26,8 +26,8 @@ class PluginManager
         try {
             if (!empty($missing = PluginHelper::getMissingDependencies($this->plugin->getInfo()->getDependencies()))) {
                 $count = count($missing);
-                $message = "This plugin has " . ($count > 1 ? "dependencies" : "dependency") . ". Please install the " . ($count > 1 ? "plugins" : "plugin") . " " . implode(", ", $missing);
-                return ['status' => 'error', 'message' => $message];
+                $message = "This plugin has " . $count . ($count > 1 ? " dependencies" : " dependency") . ". Please install the " . ($count > 1 ? "plugins" : "plugin") . " " . implode(", ", $missing);
+                return ['status' => 'warning', 'message' => $message];
             }
 
             if (isset($this->plugin->getInfo()->getDatabase()['install']) && !empty($this->plugin->getInfo()->getDatabase()['install']) && !empty($this->plugin->getInfo()->getUrl())) {
@@ -37,7 +37,7 @@ class PluginManager
                 }
             }
 
-            $this->plugin->setId($this->plugin->insert());
+            $this->plugin->insert();
 
             if ($this->plugin->getInfo()->hasSettings()) {
                 foreach($this->plugin->getInfo()->getSettings() as $setting){
@@ -70,7 +70,7 @@ class PluginManager
             }
 
             if ($this->plugin->getInfo()->hasSettings()) {
-                (new Setting)->where('plugin_id', $this->plugin->id)->delete();
+                $settings = (new Setting)->where('plugin_id', $this->plugin->id)->deleteAll();
             }
 
             if (isset($this->plugin->getInfo()->getDatabase()['uninstall']) && !empty($this->plugin->getInfo()->getDatabase()['uninstall'])) {
