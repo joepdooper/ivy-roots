@@ -31,7 +31,7 @@ trait HasFilters
     public function orFilter(string $term): static
     {
         foreach ($this->filterable as $column) {
-            $this->orWhere($column, 'LIKE', "%{$term}%");
+            $this->orWhere($column, "%{$term}%", 'LIKE');
         }
         return $this;
     }

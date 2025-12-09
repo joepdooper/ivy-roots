@@ -190,4 +190,38 @@ trait HasRelationships
         $this->with = $relations;
         return $this;
     }
+
+    public function wherePivotHasAll(
+        string $pivotTable,
+        string $valueColumn,
+        array $values,
+        string $entityColumn = 'entity_table'
+    ): static {
+        if (empty($values)) {
+            return $this;
+        }
+
+        $table = $this->table;
+        $count = count($values);
+        $placeholders = implode(',', array_fill(0, $count, '?'));
+
+        $sql = "
+        SELECT entity_id
+        FROM {$pivotTable}
+        WHERE {$entityColumn} = ?
+          AND {$valueColumn} IN ($placeholders)
+        GROUP BY entity_id
+        HAVING COUNT(DISTINCT {$valueColumn}) = ?
+    ";
+
+        $params = array_merge([$table], $values, [$count]);
+        $rows = DatabaseManager::connection()->select($sql, $params);
+        $entityIds = !empty($rows) ? array_column($rows, 'entity_id') : [];
+
+        if (empty($entityIds)) {
+            return $this->where("{$table}.id", -1);
+        }
+
+        return $this->whereIn("{$table}.id", $entityIds);
+    }
 }

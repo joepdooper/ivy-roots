@@ -3,58 +3,54 @@ namespace Ivy\Trait;
 
 trait HasQueryBuilder
 {
+    protected int $bindingCounter = 0;
+
     public static function query(): static
     {
         return new static();
     }
 
+    public function initQueryBuilder(string $table): void
+    {
+        $this->table = $table;
+        $this->query = "SELECT * FROM `$table`";
+        $this->bindings = [];
+        $this->bindingCounter = 0;
+    }
+
     public function select(string|array $columns): static
     {
-        $cols = [];
-        foreach ((array)$columns as $column) {
-            $cols[] = $column === '*' ? '*' : $this->qualifyColumn($column)['qualified'];
-        }
-        $this->query = 'SELECT ' . implode(', ', $cols) . ' FROM `' . $this->table . '`';
+        $cols = array_map(fn($c) => $c === '*' ? '*' : "`$this->table`.`$c`", (array)$columns);
+        $this->query = 'SELECT ' . implode(', ', $cols) . " FROM `$this->table`";
         return $this;
     }
 
-    public function where(string $column, $value = null, string $operator = '=', string $boolean = 'AND'): static
+    public function where(string $column, mixed $value, string $operator = '=', string $boolean = 'AND'): static
     {
         $col = $this->qualifyColumn($column);
-
-        $condition = is_null($value)
-            ? "{$col['qualified']} IS NULL"
-            : "{$col['qualified']} $operator :{$col['binding']}";
-
+        $cond = is_null($value) ? "{$col['qualified']} IS NULL" : "{$col['qualified']} $operator :{$col['binding']}";
         $prefix = str_contains($this->query, 'WHERE') ? " $boolean " : " WHERE ";
-        $this->query .= $prefix . $condition;
-
-        if (!is_null($value)) {
-            $this->bindings[$col['binding']] = $value;
-        }
-
+        $this->query .= $prefix . $cond;
+        if (!is_null($value)) $this->bindings[$col['binding']] = $value;
         return $this;
     }
 
-    public function orWhere(string $column, $value = null, string $operator = '='): static
+    public function orWhere(string $column, mixed $value, string $operator = '='): static
     {
         return $this->where($column, $value, $operator, 'OR');
     }
 
-    public function whereNot(string $column, $value, string $boolean = 'AND'): static
+    public function whereNot(string $column, mixed $value, string $boolean = 'AND'): static
     {
         $col = $this->qualifyColumn($column);
-
-        $this->query .= str_contains($this->query, 'WHERE')
-            ? " $boolean {$col['qualified']} != :{$col['binding']}"
-            : " WHERE {$col['qualified']} != :{$col['binding']}";
-
+        $cond = "{$col['qualified']} != :{$col['binding']}";
+        $prefix = str_contains($this->query, 'WHERE') ? " $boolean " : " WHERE ";
+        $this->query .= $prefix . $cond;
         $this->bindings[$col['binding']] = $value;
-
         return $this;
     }
 
-    public function orWhereNot(string $column, $value): static
+    public function orWhereNot(string $column, mixed $value): static
     {
         return $this->whereNot($column, $value, 'OR');
     }
@@ -62,22 +58,21 @@ trait HasQueryBuilder
     public function whereIn(string $column, array $values, string $boolean = 'AND'): static
     {
         if (empty($values)) {
-            $this->query .= str_contains($this->query, 'WHERE') ? " $boolean 1 = 0" : " WHERE 1 = 0";
+            $this->query .= str_contains($this->query, 'WHERE') ? " $boolean 1=0" : " WHERE 1=0";
             return $this;
         }
 
         $col = $this->qualifyColumn($column);
         $placeholders = [];
-        foreach ($values as $i => $value) {
-            $key = "{$col['binding']}_{$i}";
+        foreach ($values as $v) {
+            $key = "{$col['binding']}_{$this->bindingCounter}";
+            $this->bindingCounter++;
             $placeholders[] = ":$key";
-            $this->bindings[$key] = $value;
+            $this->bindings[$key] = $v;
         }
 
-        $this->query .= str_contains($this->query, 'WHERE')
-            ? " $boolean {$col['qualified']} IN (" . implode(', ', $placeholders) . ")"
-            : " WHERE {$col['qualified']} IN (" . implode(', ', $placeholders) . ")";
-
+        $prefix = str_contains($this->query, 'WHERE') ? " $boolean " : " WHERE ";
+        $this->query .= $prefix . "{$col['qualified']} IN (" . implode(', ', $placeholders) . ")";
         return $this;
     }
 
@@ -92,12 +87,12 @@ trait HasQueryBuilder
         return $this;
     }
 
-    public function sortBy($columns, string $direction = 'asc'): static
+    public function sortBy(array|string $columns, string $direction = 'asc'): static
     {
-        $orderByString = is_array($columns)
-            ? implode(', ', array_map(fn($col) => "`$this->table`.`$col` $direction", $columns))
+        $order = is_array($columns)
+            ? implode(', ', array_map(fn($c) => "`$this->table`.`$c` $direction", $columns))
             : "`$this->table`.`$columns` $direction";
-        $this->query .= " ORDER BY $orderByString";
+        $this->query .= " ORDER BY $order";
         return $this;
     }
 
@@ -107,18 +102,13 @@ trait HasQueryBuilder
         return $this;
     }
 
-    public function initQueryBuilder(string $table): void
-    {
-        $this->query = "SELECT * FROM `$table`";
-        $this->bindings = [];
-    }
-
     private function qualifyColumn(string $column): array
     {
+        $suffix = $this->bindingCounter++;
         if (strpos($column, '.') !== false) {
             [$table, $col] = explode('.', $column, 2);
-            return ['qualified' => "`$table`.`$col`", 'binding' => "{$table}_{$col}"];
+            return ['qualified' => "`$table`.`$col`", 'binding' => "{$table}_{$col}_$suffix"];
         }
-        return ['qualified' => "`$this->table`.`$column`", 'binding' => $column];
+        return ['qualified' => "`$this->table`.`$column`", 'binding' => "{$column}_$suffix"];
     }
 }
