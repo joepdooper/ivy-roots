@@ -46,7 +46,6 @@ class ProfileController extends Controller
             'username' => $this->request->get('username'),
             'email' => $this->request->get('email'),
             'avatar' => $this->request->get('avatar') ?? $this->request->files->get('avatar'),
-            'birthday' => empty($this->request->get('birthday')) ? null : $this->request->get('birthday')
         ];
 
 //        GUMP::add_validator("image_or_delete", function($field, $input, $param = null) {
