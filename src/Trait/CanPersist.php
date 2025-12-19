@@ -61,7 +61,7 @@ trait CanPersist
         return $this;
     }
 
-    public function hydrate(array $data = null): static
+    public function hydrate(?array $data = null): static
     {
         /** @phpstan-ignore-next-line */
         $instance = new static();

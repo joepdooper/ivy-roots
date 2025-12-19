@@ -48,7 +48,7 @@ trait HasRelationships
     protected function getPivotRelatedIds(
         string $pivotTable,
         string $relatedPivotKey,
-        string $foreignPivotKey = null,
+        ?string $foreignPivotKey = null,
         ?string $morphType = null,
         ?string $morphId = null,
         string $localKey = 'id'
