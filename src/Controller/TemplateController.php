@@ -2,7 +2,6 @@
 
 namespace Ivy\Controller;
 
-use GUMP;
 use Ivy\Abstract\Controller;
 use Ivy\Manager\TemplateManager;
 use Ivy\Model\Profile;
@@ -11,6 +10,8 @@ use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Core\Path;
 use Ivy\View\View;
+use BlakvGhost\PHPValidator\Validator;
+use BlakvGhost\PHPValidator\ValidatorException;
 
 class TemplateController extends Controller
 {
@@ -47,7 +48,7 @@ class TemplateController extends Controller
 
         foreach ($this->request->get('template') as $data) {
             try {
-                $validated = GUMP::is_valid($data, [
+                $validated = new Validator($data, [
                     'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/'
                 ]);
 

@@ -7,7 +7,6 @@ use Delight\Auth\InvalidEmailException;
 use Delight\Auth\NotLoggedInException;
 use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UserAlreadyExistsException;
-use GUMP;
 use Items\Collection\Image\ImageFile;
 use Items\Collection\Image\ImageFileService;
 use Ivy\Abstract\Controller;
@@ -19,6 +18,8 @@ use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Service\Mail;
 use Ivy\View\View;
+use BlakvGhost\PHPValidator\Validator;
+use BlakvGhost\PHPValidator\ValidatorException;
 
 class ProfileController extends Controller
 {
@@ -48,23 +49,23 @@ class ProfileController extends Controller
             'birthday' => empty($this->request->get('birthday')) ? null : $this->request->get('birthday')
         ];
 
-        GUMP::add_validator("image_or_delete", function($field, $input, $param = null) {
-            if (!isset($input[$field])) {
-                return false;
-            }
-            if ($input[$field] === "delete") {
-                return true;
-            }
-            if (isset($_FILES[$field]) && is_uploaded_file($_FILES[$field]['tmp_name'])) {
-                $allowedExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
-                $fileExtension = pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION);
+//        GUMP::add_validator("image_or_delete", function($field, $input, $param = null) {
+//            if (!isset($input[$field])) {
+//                return false;
+//            }
+//            if ($input[$field] === "delete") {
+//                return true;
+//            }
+//            if (isset($_FILES[$field]) && is_uploaded_file($_FILES[$field]['tmp_name'])) {
+//                $allowedExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
+//                $fileExtension = pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION);
+//
+//                return in_array(strtolower($fileExtension), $allowedExtensions, true);
+//            }
+//            return false;
+//        }, "The {field} must be an image.");
 
-                return in_array(strtolower($fileExtension), $allowedExtensions, true);
-            }
-            return false;
-        }, "The {field} must be an image.");
-
-        $validated = GUMP::is_valid($data, [
+        $validated = new Validator($data, [
             'username' => 'required|alpha_numeric_dash',
             'email' => 'required|valid_email',
             'avatar' => 'image_or_delete',

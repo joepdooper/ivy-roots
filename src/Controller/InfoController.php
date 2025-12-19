@@ -2,13 +2,15 @@
 
 namespace Ivy\Controller;
 
-use GUMP;
 use Ivy\Abstract\Controller;
 use Ivy\Model\Info;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\View\View;
+use BlakvGhost\PHPValidator\Validator;
+use BlakvGhost\PHPValidator\ValidatorException;
+
 
 class InfoController extends SettingController
 {
@@ -29,7 +31,7 @@ class InfoController extends SettingController
         foreach ($this->request->get('info') as $data) {
 
             try {
-                $validated = \GUMP::is_valid($data, [
+                $validated = new Validator($data, [
                     'name' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
                     'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
                     'plugin_id' => 'numeric'

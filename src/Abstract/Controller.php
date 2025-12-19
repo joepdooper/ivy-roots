@@ -76,17 +76,6 @@ abstract class Controller
         }
     }
 
-    protected function validate(array $rules): bool
-    {
-        $result = \GUMP::is_valid($this->request->request->all(), $rules);
-        if ($result !== true) {
-            foreach ($result as $error) {
-                $this->flashBag->add('error', $error);
-            }
-        }
-        return $result === true;
-    }
-
     protected function redirect(string $url = '', int $statusCode = 302): void
     {
         (new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode))->send();

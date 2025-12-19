@@ -7,6 +7,7 @@ trait HasQueryBuilder
 
     public static function query(): static
     {
+        /** @phpstan-ignore-next-line */
         return new static();
     }
 

@@ -3,6 +3,7 @@
 namespace Ivy\Manager;
 
 use Ivy\Config\Environment;
+use Ivy\Model\Info;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;

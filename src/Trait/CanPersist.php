@@ -21,6 +21,8 @@ trait CanPersist
     public function fetchAll(): array
     {
         $rows = $this->fetchAllRaw();
+
+        /** @phpstan-ignore-next-line */
         $models = array_map(fn($row) => (new static())->populate($row), $rows);
 
         if (!empty($this->with)) {
@@ -61,7 +63,9 @@ trait CanPersist
 
     public function hydrate(array $data = null): static
     {
+        /** @phpstan-ignore-next-line */
         $instance = new static();
+
         if ($data !== null) {
             $instance->populate($data);
         }
