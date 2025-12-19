@@ -2,7 +2,6 @@
 
 namespace Ivy\View;
 
-use Carbon\Carbon;
 use Ivy\Core\Language;
 use Ivy\Manager\HookManager;
 use Ivy\Manager\SecurityManager;
@@ -94,7 +93,7 @@ class View
         self::$latte->addFunction('canEditAsSuperAdmin', fn() => User::canEditAsSuperAdmin());
         self::$latte->addFunction('hook', fn($key) => HookManager::do($key));
         self::$latte->addFunction('csp', fn() => SecurityManager::getNonce());
-        self::$latte->addFunction('datetime', fn() => Carbon::class);
+        self::$latte->addFunction('datetime', fn() => \Carbon\Carbon::class);
 
         self::$latte->addExtension(new \Ivy\Tag\ButtonTag());
         self::$latte->addProvider('customButtonRender', function ($args) {
