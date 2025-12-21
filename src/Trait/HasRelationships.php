@@ -107,14 +107,14 @@ trait HasRelationships
     protected function deletePivotRow(string $pivotTable, array $conditions): void
     {
         $where = [];
-        $params = [];
+        $bindings = [];
         foreach ($conditions as $col => $val) {
             $where[] = "`$col` = ?";
-            $params[] = $val;
+            $bindings[] = $val;
         }
         DatabaseManager::connection()->exec(
             "DELETE FROM `$pivotTable` WHERE " . implode(' AND ', $where),
-            $params
+            $bindings
         );
     }
 

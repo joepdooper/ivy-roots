@@ -3,7 +3,9 @@ namespace Ivy\Trait;
 
 trait HasQueryBuilder
 {
-    protected int $bindingCounter = 0;
+    protected string $table;
+    protected string $query;
+    protected array $bindings = [];
 
     public static function query(): static
     {
@@ -11,85 +13,87 @@ trait HasQueryBuilder
         return new static();
     }
 
-    public function initQueryBuilder(string $table): void
+    protected function ensureQuery(): void
     {
-        $this->table = $table;
-        $this->query = "SELECT * FROM `$table`";
-        $this->bindings = [];
-        $this->bindingCounter = 0;
+        if (!isset($this->table) || empty($this->table)) {
+            throw new \RuntimeException('Model must define a $table property.');
+        }
+        $this->query ??= "SELECT * FROM `{$this->table}`";
+        $this->bindings ??= [];
     }
 
     public function select(string|array $columns): static
     {
+        $this->ensureQuery();
         $cols = array_map(fn($c) => $c === '*' ? '*' : "`$this->table`.`$c`", (array)$columns);
         $this->query = 'SELECT ' . implode(', ', $cols) . " FROM `$this->table`";
         return $this;
     }
 
-    public function where(string $column, mixed $value, string $operator = '=', string $boolean = 'AND'): static
+    protected function addCondition(string $column, mixed $value, string $operator = '=', string $boolean = 'AND'): static
     {
-        $col = $this->qualifyColumn($column);
-        $cond = is_null($value) ? "{$col['qualified']} IS NULL" : "{$col['qualified']} $operator :{$col['binding']}";
+        $this->ensureQuery();
+
         $prefix = str_contains($this->query, 'WHERE') ? " $boolean " : " WHERE ";
-        $this->query .= $prefix . $cond;
-        if (!is_null($value)) $this->bindings[$col['binding']] = $value;
+
+        if (is_null($value)) {
+            $this->query .= "{$prefix}`$this->table`.`$column` IS NULL";
+        } elseif (is_array($value)) {
+            if (empty($value)) {
+                $this->query .= "{$prefix}1=0"; // ensures empty result
+            } else {
+                $placeholders = implode(',', array_fill(0, count($value), '?'));
+                $this->query .= "{$prefix}`$this->table`.`$column` IN ($placeholders)";
+                $this->bindings = array_merge($this->bindings, $value);
+            }
+        } else {
+            $this->query .= "{$prefix}`$this->table`.`$column` $operator ?";
+            $this->bindings[] = $value;
+        }
+
         return $this;
+    }
+
+    public function where(string $column, mixed $value, string $operator = '='): static
+    {
+        return $this->addCondition($column, $value, $operator, 'AND');
     }
 
     public function orWhere(string $column, mixed $value, string $operator = '='): static
     {
-        return $this->where($column, $value, $operator, 'OR');
+        return $this->addCondition($column, $value, $operator, 'OR');
     }
 
-    public function whereNot(string $column, mixed $value, string $boolean = 'AND'): static
+    public function whereNot(string $column, mixed $value): static
     {
-        $col = $this->qualifyColumn($column);
-        $cond = "{$col['qualified']} != :{$col['binding']}";
-        $prefix = str_contains($this->query, 'WHERE') ? " $boolean " : " WHERE ";
-        $this->query .= $prefix . $cond;
-        $this->bindings[$col['binding']] = $value;
-        return $this;
+        return $this->where($column, $value, '!=');
     }
 
     public function orWhereNot(string $column, mixed $value): static
     {
-        return $this->whereNot($column, $value, 'OR');
+        return $this->orWhere($column, $value, '!=');
     }
 
-    public function whereIn(string $column, array $values, string $boolean = 'AND'): static
+    public function whereIn(string $column, array $values): static
     {
-        if (empty($values)) {
-            $this->query .= str_contains($this->query, 'WHERE') ? " $boolean 1=0" : " WHERE 1=0";
-            return $this;
-        }
-
-        $col = $this->qualifyColumn($column);
-        $placeholders = [];
-        foreach ($values as $v) {
-            $key = "{$col['binding']}_{$this->bindingCounter}";
-            $this->bindingCounter++;
-            $placeholders[] = ":$key";
-            $this->bindings[$key] = $v;
-        }
-
-        $prefix = str_contains($this->query, 'WHERE') ? " $boolean " : " WHERE ";
-        $this->query .= $prefix . "{$col['qualified']} IN (" . implode(', ', $placeholders) . ")";
-        return $this;
+        return $this->addCondition($column, $values, '=', 'AND');
     }
 
     public function orWhereIn(string $column, array $values): static
     {
-        return $this->whereIn($column, $values, 'OR');
+        return $this->addCondition($column, $values, '=', 'OR');
     }
 
     public function addJoin(string $table, string $firstColumn, string $operator, string $secondColumn, string $type = 'INNER'): static
     {
+        $this->ensureQuery();
         $this->query .= " $type JOIN `$table` ON `$this->table`.`$firstColumn` $operator `$table`.`$secondColumn`";
         return $this;
     }
 
     public function sortBy(array|string $columns, string $direction = 'asc'): static
     {
+        $this->ensureQuery();
         $order = is_array($columns)
             ? implode(', ', array_map(fn($c) => "`$this->table`.`$c` $direction", $columns))
             : "`$this->table`.`$columns` $direction";
@@ -99,17 +103,15 @@ trait HasQueryBuilder
 
     public function limit(int $limit, int $offset = 0): static
     {
+        $this->ensureQuery();
         $this->query .= " LIMIT $limit OFFSET $offset";
         return $this;
     }
 
-    private function qualifyColumn(string $column): array
+    protected function resetQuery(): void
     {
-        $suffix = $this->bindingCounter++;
-        if (strpos($column, '.') !== false) {
-            [$table, $col] = explode('.', $column, 2);
-            return ['qualified' => "`$table`.`$col`", 'binding' => "{$table}_{$col}_$suffix"];
-        }
-        return ['qualified' => "`$this->table`.`$column`", 'binding' => "{$column}_$suffix"];
+        $this->ensureQuery();
+        $this->query = "SELECT * FROM `{$this->table}`";
+        $this->bindings = [];
     }
 }

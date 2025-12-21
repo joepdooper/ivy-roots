@@ -7,6 +7,7 @@ use Ivy\Model\Info;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
+use Ivy\Rule\AllowedCharsRule;
 use Ivy\View\View;
 use BlakvGhost\PHPValidator\Validator;
 use BlakvGhost\PHPValidator\ValidatorException;
@@ -32,13 +33,13 @@ class InfoController extends SettingController
 
             try {
                 $validated = new Validator($data, [
-                    'name' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
-                    'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
+                    'name' => new AllowedCharsRule(),
+                    'value' => new AllowedCharsRule(),
                     'plugin_id' => 'numeric'
                 ]);
 
-                if ($validated !== true) {
-                    foreach ($validated as $msg) $this->flashBag->add('error', $msg);
+                if (!$validated->isValid()) {
+                    foreach ($validated->getErrors() as $msg) $this->flashBag->add('error', $msg);
                     continue;
                 }
 

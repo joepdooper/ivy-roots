@@ -46,10 +46,4 @@ trait HasUtilities
         $countQuery = preg_replace('/SELECT.*?FROM/', 'SELECT COUNT(*) FROM', $this->query);
         return (int)\Ivy\Manager\DatabaseManager::connection()->selectValue($countQuery, $this->bindings);
     }
-
-    protected function resetQuery(): void
-    {
-        $this->query = "SELECT * FROM `{$this->table}`";
-        $this->bindings = [];
-    }
 }

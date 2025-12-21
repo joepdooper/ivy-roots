@@ -9,10 +9,21 @@ trait CanPersist
     public function fetchAllRaw(): array
     {
         $db = DatabaseManager::connection();
-        $query = $this->query ?? "SELECT * FROM `{$this->table}`";
-        $bindings = $this->bindings ?? [];
 
-        $rows = $db->select($query, $bindings) ?: [];
+        // Ensure table and query are set
+        if (!isset($this->table) || empty($this->table)) {
+            throw new \RuntimeException('Model must define a $table property.');
+        }
+
+        if (!isset($this->query)) {
+            $this->query = "SELECT * FROM `{$this->table}`";
+        }
+
+        if (!isset($this->bindings)) {
+            $this->bindings = [];
+        }
+
+        $rows = $db->select($this->query, $this->bindings) ?: [];
 
         $this->resetQuery();
         return $rows;

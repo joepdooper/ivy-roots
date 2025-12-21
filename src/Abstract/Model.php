@@ -19,11 +19,6 @@ abstract class Model
     protected ?int $id = null;
     protected array $relationCache = [];
 
-    public function __construct()
-    {
-        $this->initQueryBuilder($this->table);
-    }
-
     public function getId(): ?int
     {
         return $this->id;
