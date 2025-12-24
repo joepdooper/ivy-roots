@@ -7,7 +7,7 @@ use Ivy\Model\Info;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
-use Ivy\Rule\AllowedCharsRule;
+use Ivy\Rule\InfoSettingRule;
 use Ivy\View\View;
 use BlakvGhost\PHPValidator\Validator;
 use BlakvGhost\PHPValidator\ValidatorException;
@@ -33,8 +33,8 @@ class InfoController extends SettingController
 
             try {
                 $validated = new Validator($data, [
-                    'name' => new AllowedCharsRule(),
-                    'value' => new AllowedCharsRule(),
+                    'name' => new InfoSettingRule(),
+                    'value' => new InfoSettingRule(),
                     'plugin_id' => 'numeric'
                 ]);
 

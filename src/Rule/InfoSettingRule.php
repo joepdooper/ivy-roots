@@ -4,9 +4,9 @@ namespace Ivy\Rule;
 
 use BlakvGhost\PHPValidator\Contracts\Rule;
 
-class AllowedCharsRule implements Rule
+class InfoSettingRule implements Rule
 {
-    protected $field;
+    protected string $field;
 
     public function __construct(protected array $parameters = [])
     {
@@ -16,7 +16,6 @@ class AllowedCharsRule implements Rule
     {
         $this->field = $field;
 
-        // Regex: letters, digits, dash, underscore, space, comma, slash, colon, dot
         return preg_match('/^[a-zA-Z0-9\-_ \x2C\/:.]+$/', $value) === 1;
     }
 

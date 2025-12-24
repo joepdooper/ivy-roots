@@ -16,6 +16,8 @@ use Ivy\Manager\SessionManager;
 use Ivy\Model\Profile;
 use Ivy\Model\Template;
 use Ivy\Model\User;
+use Ivy\Rule\UserImageRule;
+use Ivy\Rule\UserNameRule;
 use Ivy\Service\Mail;
 use Ivy\View\View;
 use BlakvGhost\PHPValidator\Validator;
@@ -42,50 +44,26 @@ class ProfileController extends Controller
     {
         $this->profile->authorize('post');
 
-        $data = [
-            'username' => $this->request->get('username'),
-            'email' => $this->request->get('email'),
-            'avatar' => $this->request->get('avatar') ?? $this->request->files->get('avatar'),
-        ];
-
-//        GUMP::add_validator("image_or_delete", function($field, $input, $param = null) {
-//            if (!isset($input[$field])) {
-//                return false;
-//            }
-//            if ($input[$field] === "delete") {
-//                return true;
-//            }
-//            if (isset($_FILES[$field]) && is_uploaded_file($_FILES[$field]['tmp_name'])) {
-//                $allowedExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
-//                $fileExtension = pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION);
-//
-//                return in_array(strtolower($fileExtension), $allowedExtensions, true);
-//            }
-//            return false;
-//        }, "The {field} must be an image.");
-
-        $validated = new Validator($data, [
-            'username' => 'required|alpha_numeric_dash',
-            'email' => 'required|valid_email',
-            'avatar' => 'image_or_delete',
-            'birthday' => 'date'
+        $validated = new Validator($this->request->request->all(), [
+            'username' => ['required', 'not_nullable', new UserNameRule()],
+            'email' => 'required|not_nullable|email',
+            'delete_user_image' => 'bool',
+            'user_image' => ['file', new UserImageRule()]
         ]);
 
-        if ($validated === true) {
+        if ($validated->isValid()) {
+            $data = $validated->validated();
 
-            $this->profile = (new Profile)->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
-
-            $this->profile->populate([
-                'birthday' => $data['birthday']
-            ])->update();
+            $this->profile = (new Profile)->with(['user'])->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
 
             if(User::getAuth()->getUsername() !== $data['username']) {
-                (new User)->where('id', $_SESSION['auth_user_id'])->populate(
+                $this->profile->user->populate(
                     [
                         'username' => $data['username']
                     ]
                 )->update();
             }
+
             if (User::getAuth()->getEmail() !== $data['email']) {
                 try {
                     User::getAuth()->changeEmail($data['email'], function ($selector, $token) use($data) {
@@ -125,12 +103,12 @@ class ProfileController extends Controller
                 if ($this->request->get('avatar') === 'delete') {
                     $file = new ImageFile();
                     $file->setUploadPath('profile')->remove($this->profile->user_image);
-                    $this->profile->user_image = '';
+                    $this->profile->user_image = null;
                     $this->profile->update();
                 }
             }
         } else {
-            foreach ($validated as $string) {
+            foreach ($validated->getErrors() as $string) {
                 $this->flashBag->add('error', $string);
             }
         }

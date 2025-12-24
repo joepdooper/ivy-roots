@@ -9,6 +9,7 @@ use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Core\Path;
+use Ivy\Rule\InfoSettingRule;
 use Ivy\View\View;
 use BlakvGhost\PHPValidator\Validator;
 use BlakvGhost\PHPValidator\ValidatorException;
@@ -49,11 +50,11 @@ class TemplateController extends Controller
         foreach ($this->request->get('template') as $data) {
             try {
                 $validated = new Validator($data, [
-                    'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/'
+                    'value' => new InfoSettingRule()
                 ]);
 
-                if ($validated !== true) {
-                    foreach ($validated as $msg) $this->flashBag->add('error', $msg);
+                if (!$validated->isValid()) {
+                    foreach ($validated->getErrors() as $msg) $this->flashBag->add('error', $msg);
                     continue;
                 }
 

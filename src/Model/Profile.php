@@ -24,32 +24,6 @@ class Profile extends Model
         return $this->hasOne(User::class, 'id', 'user_id');
     }
 
-    public function update(): static
-    {
-        $set = $this->toAssocArray();
-
-        unset($set['username']);
-        unset($set['email']);
-
-        if(empty($set)){
-            return false;
-        }
-
-        if (!empty($this->columns)) {
-            $set = array_intersect_key($set, array_flip($this->columns));
-        }
-
-        if (empty($this->bindings) && isset($this->id)) {
-            $this->bindings['id'] = $this->id;
-        }
-
-        DatabaseManager::connection()->update($this->table, $set, $this->bindings);
-
-        $this->resetQuery();
-
-        return DatabaseManager::connection()->getLastInsertId();
-    }
-
     public static function getUserProfile(): ?self
     {
         if (self::$currentProfile === null) {

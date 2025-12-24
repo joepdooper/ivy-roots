@@ -6,6 +6,7 @@ use Ivy\Abstract\Controller;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
+use Ivy\Rule\InfoSettingRule;
 use Ivy\View\View;
 use BlakvGhost\PHPValidator\Validator;
 use BlakvGhost\PHPValidator\ValidatorException;
@@ -29,13 +30,13 @@ class SettingController extends Controller
         foreach ($this->request->get('setting') ?? [] as $data) {
             try {
                 $validated = new Validator($data, [
-                    'name' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
-                    'value' => 'regex,/^[a-zA-Z0-9\-_ \x2C\/:.]+$/',
+                    'name' => new InfoSettingRule(),
+                    'value' => new InfoSettingRule(),
                     'plugin_id' => 'numeric'
                 ]);
 
-                if ($validated !== true) {
-                    foreach ($validated as $msg) $this->flashBag->add('error', $msg);
+                if (!$validated->isValid()) {
+                    foreach ($validated->getErrors() as $msg) $this->flashBag->add('error', $msg);
                     continue;
                 }
 
