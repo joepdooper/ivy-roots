@@ -12,6 +12,7 @@ use Items\Collection\Image\ImageFileService;
 use Ivy\Abstract\Controller;
 use Ivy\Core\Language;
 use Ivy\Core\Path;
+use Ivy\Form\ProfileForm;
 use Ivy\Manager\SessionManager;
 use Ivy\Model\Profile;
 use Ivy\Model\Template;
@@ -44,15 +45,16 @@ class ProfileController extends Controller
     {
         $this->profile->authorize('post');
 
-        $validated = new Validator($this->request->request->all(), [
-            'username' => ['required', 'not_nullable', new UserNameRule()],
-            'email' => 'required|not_nullable|email',
-            'delete_user_image' => 'bool',
-            'user_image' => ['file', new UserImageRule()]
-        ]);
+        $form = new ProfileForm(
+            $this->request->request->all()
+        );
 
-        if ($validated->isValid()) {
-            $data = $validated->validated();
+        if (!$form->passes()) {
+            foreach ($form->errors() as $msg) {
+                $this->flashBag->add('error', $msg);
+            }
+        } else {
+            $data = $form->validated();
 
             $this->profile = (new Profile)->with(['user'])->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
 
@@ -106,10 +108,6 @@ class ProfileController extends Controller
                     $this->profile->user_image = null;
                     $this->profile->update();
                 }
-            }
-        } else {
-            foreach ($validated->getErrors() as $string) {
-                $this->flashBag->add('error', $string);
             }
         }
 
