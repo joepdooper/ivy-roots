@@ -22,7 +22,6 @@ abstract class Form
             return new ValidationResult(
                 valid: false,
                 errors: $this->validator->getErrors(),
-                old: $this->input
             );
         }
 
