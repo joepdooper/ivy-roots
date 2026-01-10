@@ -10,19 +10,13 @@ use Delight\Auth\UserAlreadyExistsException;
 use Items\Collection\Image\ImageFile;
 use Items\Collection\Image\ImageFileService;
 use Ivy\Abstract\Controller;
-use Ivy\Core\Language;
 use Ivy\Core\Path;
 use Ivy\Form\ProfileForm;
 use Ivy\Manager\SessionManager;
 use Ivy\Model\Profile;
-use Ivy\Model\Template;
 use Ivy\Model\User;
-use Ivy\Rule\UserImageRule;
-use Ivy\Rule\UserNameRule;
 use Ivy\Service\Mail;
 use Ivy\View\View;
-use BlakvGhost\PHPValidator\Validator;
-use BlakvGhost\PHPValidator\ValidatorException;
 
 class ProfileController extends Controller
 {
@@ -45,40 +39,32 @@ class ProfileController extends Controller
     {
         $this->profile->authorize('post');
 
-        $form = new ProfileForm(
-            $this->request->request->all()
-        );
+        $result = (new ProfileForm)->validate($this->request->request->all());
 
-        if (!$form->passes()) {
-            foreach ($form->errors() as $msg) {
-                $this->flashBag->add('error', $msg);
-            }
+        if (!$result->valid) {
+            $this->flashBag->set('errors', $result->errors);
+            $this->flashBag->set('old', $result->old);
+            $this->redirect('admin/profile');
         } else {
-            $data = $form->validated();
-
             $this->profile = (new Profile)->with(['user'])->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
 
-            if(User::getAuth()->getUsername() !== $data['username']) {
-                $this->profile->user->populate(
-                    [
-                        'username' => $data['username']
-                    ]
-                )->update();
+            if(User::getAuth()->getUsername() !== $result->data['username']) {
+                $this->profile->user->populate(['username' => $result->data['username']])->update();
             }
 
-            if (User::getAuth()->getEmail() !== $data['email']) {
+            if (User::getAuth()->getEmail() !== $result->data['email']) {
                 try {
-                    User::getAuth()->changeEmail($data['email'], function ($selector, $token) use($data) {
+                    User::getAuth()->changeEmail($result->data['email'], function ($selector, $token) use($result) {
                         $url = Path::get('PUBLIC_URL') . 'admin/profile/' . urlencode($selector) . '/' . urlencode($token);
                         // send email
                         $mail = new Mail();
-                        $mail->addAddress($data['email'], $data['username']);
+                        $mail->addAddress($result->data['email'], $result->data['username']);
                         $mail->setSubject('Reset email address');
                         $mail->setBody('Reset your email address with this link: ' . $url);
                         $mail->setAltBody('Reset your email address with this link: ' . $url);
                         $mail->send();
                     });
-                    $this->flashBag->add('success', 'An email has been sent to ' . $data['email'] . ' with a link to confirm the email address');
+                    $this->flashBag->add('success', 'An email has been sent to ' . $result->data['email'] . ' with a link to confirm the email address');
                 } catch (InvalidEmailException) {
                     $this->flashBag->add('error', 'Invalid email address');
                 } catch (UserAlreadyExistsException) {

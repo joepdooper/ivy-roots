@@ -3,13 +3,9 @@
 namespace Ivy\Controller;
 
 use Ivy\Abstract\Controller;
-use Ivy\Model\Plugin;
+use Ivy\Form\SettingForm;
 use Ivy\Model\Setting;
-use Ivy\Model\Template;
-use Ivy\Rule\InfoSettingRule;
 use Ivy\View\View;
-use BlakvGhost\PHPValidator\Validator;
-use BlakvGhost\PHPValidator\ValidatorException;
 
 class SettingController extends Controller
 {
@@ -21,52 +17,45 @@ class SettingController extends Controller
         $this->setting = new Setting;
     }
 
-    public function post(): void
-    {
-        $this->setting->authorize('post');
-
-        $redirect = $this->resolveRefererContext();
-
-        foreach ($this->request->get('setting') ?? [] as $data) {
-            try {
-                $validated = new Validator($data, [
-                    'name' => new InfoSettingRule(),
-                    'value' => new InfoSettingRule(),
-                    'plugin_id' => 'numeric'
-                ]);
-
-                if (!$validated->isValid()) {
-                    foreach ($validated->getErrors() as $msg) $this->flashBag->add('error', $msg);
-                    continue;
-                }
-
-                if (empty($data['name'])) continue;
-
-                $setting = !empty($data['id'])
-                    ? (new Setting)->where('id', $data['id'])->fetchOne()
-                    : new Setting();
-
-                if (isset($data['delete']) && !empty($data['id'])) {
-                    $setting?->delete();
-                } else {
-                    $setting->populate($data)->save();
-                }
-
-            } catch (\Exception $e) {
-                $this->flashBag->add('error', $e->getMessage());
-            }
-        }
-
-        $this->flashBag->add('success', 'Settings updated successfully.');
-        $this->redirect($redirect);
-    }
-
     public function index($id = null): void
     {
         $this->setting->authorize('index');
         $plugin_id = $id ? (new Plugin)->where('url', $id)->fetchOne()?->getId() : null;
         $settings = $this->setting->where('plugin_id', $plugin_id)->fetchAll();
         View::set('admin/setting.latte', ['settings' => $settings]);
+    }
+
+    public function post(): void
+    {
+        $this->setting->authorize('post');
+
+        $redirect = $this->resolveRefererContext();
+
+        foreach ($this->request->get('setting') as $data) {
+
+            if (empty($data['name'])) continue;
+
+            $result = (new SettingForm)->validate($data);
+
+            if (!$result->valid) {
+                $this->flashBag->set('errors', $result->errors);
+                $this->flashBag->set('old', $result->old);
+                $this->redirect($redirect);
+            } else {
+                $info = !empty($data['id'])
+                    ? (new Setting)->where('id', $data['id'])->fetchOne()
+                    : new Setting();
+
+                if (isset($data['delete']) && !empty($data['id'])) {
+                    $info?->delete();
+                } else {
+                    $info->populate($data)->save();
+                }
+            }
+        }
+
+        $this->flashBag->add('success', 'Settings updated successfully.');
+        $this->redirect($redirect);
     }
 
     protected function resolveRefererContext(string $url = '', int $statusCode = 302)

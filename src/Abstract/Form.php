@@ -9,15 +9,12 @@ abstract class Form
 {
     protected Validator $validator;
 
-    public function __construct(protected array $data)
-    {
-        $this->validator = new Validator($this->data, $this->rules());
-    }
-
     abstract protected function rules(): array;
 
-    public function validate(): ValidationResult
+    public function validate($data): ValidationResult
     {
+        $this->validator = new Validator($data, $this->rules());
+
         if (!$this->validator->isValid()) {
             return new ValidationResult(
                 valid: false,
