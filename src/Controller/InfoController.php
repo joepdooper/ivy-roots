@@ -5,6 +5,7 @@ namespace Ivy\Controller;
 use Ivy\Abstract\Controller;
 use Ivy\Form\InfoForm;
 use Ivy\Model\Info;
+use Ivy\Model\Plugin;
 use Ivy\View\View;
 
 class InfoController extends SettingController

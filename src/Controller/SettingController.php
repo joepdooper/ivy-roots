@@ -4,6 +4,7 @@ namespace Ivy\Controller;
 
 use Ivy\Abstract\Controller;
 use Ivy\Form\SettingForm;
+use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\View\View;
 
@@ -20,6 +21,7 @@ class SettingController extends Controller
     public function index($id = null): void
     {
         $this->setting->authorize('index');
+
         $plugin_id = $id ? (new Plugin)->where('url', $id)->fetchOne()?->getId() : null;
         $settings = $this->setting->where('plugin_id', $plugin_id)->fetchAll();
         View::set('admin/setting.latte', ['settings' => $settings]);
