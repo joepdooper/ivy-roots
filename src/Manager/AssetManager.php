@@ -8,11 +8,13 @@ use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Core\Path;
+use Tags\Tag;
 
 class AssetManager
 {
     protected static array $css  = [];
     protected static array $js   = [];
+    protected static array $module   = [];
     protected static array $vite = [];
 
     /**
@@ -32,6 +34,14 @@ class AssetManager
     }
 
     /**
+     * Register a JS module asset.
+     */
+    public static function addModule(string $path): void
+    {
+        self::addAsset($path, self::$module);
+    }
+
+    /**
      * Register a Vite entry module.
      */
     public static function addViteEntry(string $entry): void
@@ -45,7 +55,7 @@ class AssetManager
     /**
      * Get compiled CSS assets.
      */
-    public static function getCss(): array
+    public static function getCSS(): array
     {
         return self::processAssets(self::$css, 'css', Setting::stashGet('minify_css')->bool);
     }
@@ -53,7 +63,15 @@ class AssetManager
     /**
      * Get compiled JS assets.
      */
-    public static function getJs(): array
+    public static function getJS(): array
+    {
+        return self::processAssets(self::$js, 'js', Setting::stashGet('minify_js')->bool);
+    }
+
+    /**
+     * Get compiled JS module assets.
+     */
+    public static function getModules(): array
     {
         return self::processAssets(self::$js, 'js', Setting::stashGet('minify_js')->bool);
     }
@@ -63,33 +81,16 @@ class AssetManager
      */
     public static function getViteEntry(): array
     {
-        $isDev = Environment::isDev();
+        $files = [];
 
-        if ($isDev) {
+        if (Environment::isDev()) {
             self::generatePluginsEntry();
             $viteHost = Path::get('PROTOCOL') . '://' . $_ENV['VITE_FRONTEND_HOST'] . ':' . $_ENV['VITE_PORT'] . '/';
 
             $files = [
                 $viteHost . '@vite/client',
-                $viteHost . 'vite.base.js'
+                $viteHost . 'vite.modules.js'
             ];
-
-            if (User::getAuth()->isLoggedIn()) {
-                if (User::canEditAsEditor()) $files[] = $viteHost . 'vite.editor.js';
-                if (User::canEditAsAdmin())  $files[] = $viteHost . 'vite.admin.js';
-            }
-
-            return $files;
-        }
-
-        $version = Info::stashGet('updated')->value ?? time();
-        $public  = Path::get('PUBLIC_URL') . 'js/';
-
-        $files = [$public . 'vite.base.js?d=' . $version];
-
-        if (User::getAuth()->isLoggedIn()) {
-            if (User::canEditAsEditor()) $files[] = $public . 'vite.editor.js?d=' . $version;
-            if (User::canEditAsAdmin())  $files[] = $public . 'vite.admin.js?d=' . $version;
         }
 
         return $files;
@@ -154,20 +155,15 @@ class AssetManager
      */
     private static function addAsset(string $path, array &$collection): void
     {
+        $host = '/';
         $path = ltrim($path, '/');
 
         if (Environment::isDev()) {
-            $src = TemplateManager::file($path);
-            $dest = Path::get('PUBLIC_PATH') . $path;
-
-            if (file_exists($src)) {
-                if (!is_dir(dirname($dest))) mkdir(dirname($dest), 0755, true);
-                if (file_exists($dest)) unlink($dest);
-                copy($src, $dest);
-            }
+            $host = Path::get('PROTOCOL') . '://' . $_ENV['VITE_FRONTEND_HOST'] . ':' . $_ENV['VITE_PORT'];
+            $path = TemplateManager::file($path);
         }
 
-        $collection[] = '/' . $path;
+        $collection[] = $host . $path;
     }
 
     /**
@@ -192,7 +188,6 @@ class AssetManager
             return [$minifiedUrl];
         }
 
-        // Cleanup old minified file in dev mode
         if (Environment::isDev() && file_exists($minifiedPath)) {
             unlink($minifiedPath);
         }
@@ -200,3 +195,12 @@ class AssetManager
         return $assets;
     }
 }
+
+//            $src = TemplateManager::file($path);
+//            $dest = Path::get('PUBLIC_PATH') . $path;
+//
+//            if (file_exists($src)) {
+//                if (!is_dir(dirname($dest))) mkdir(dirname($dest), 0755, true);
+//                if (file_exists($dest)) unlink($dest);
+//                copy($src, $dest);
+//            }
