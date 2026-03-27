@@ -42,17 +42,6 @@ class AssetManager
     }
 
     /**
-     * Register a Vite entry module.
-     */
-    public static function addViteEntry(string $entry): void
-    {
-        $entry = ltrim($entry, '/');
-        if (!in_array($entry, self::$vite, true)) {
-            self::$vite[] = $entry;
-        }
-    }
-
-    /**
      * Get compiled CSS assets.
      */
     public static function getCSS(): array
@@ -74,26 +63,6 @@ class AssetManager
     public static function getModules(): array
     {
         return self::processAssets(self::$js, 'js', Setting::stashGet('minify_js')->bool);
-    }
-
-    /**
-     * Get active Vite entry files depending on environment.
-     */
-    public static function getViteEntry(): array
-    {
-        $files = [];
-
-        if (Environment::isDev()) {
-            self::generatePluginsEntry();
-            $viteHost = Path::get('PROTOCOL') . '://' . $_ENV['VITE_FRONTEND_HOST'] . ':' . $_ENV['VITE_PORT'] . '/';
-
-            $files = [
-                $viteHost . '@vite/client',
-                $viteHost . 'vite.modules.js'
-            ];
-        }
-
-        return $files;
     }
 
     /**
@@ -171,8 +140,8 @@ class AssetManager
      */
     private static function processAssets(array $assets, string $type, bool $shouldMinify): array
     {
-        $minifiedPath = Path::get('PUBLIC_PATH') . "{$type}/minified.{$type}";
         $minifiedUrl  = "/{$type}/minified.{$type}";
+        $minifiedPath = Path::get('PUBLIC_PATH') . $minifiedUrl;
 
         if ($shouldMinify) {
             if (Environment::isDev() && !file_exists($minifiedPath)) {
