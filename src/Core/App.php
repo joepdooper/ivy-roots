@@ -32,10 +32,8 @@ class App
 
     private function loadRoutes(): void
     {
-        $router = RouterManager::instance();
+        $router = RouterManager::router();
         $router->setBasePath(Path::get('SUBFOLDER'));
-
-        require Path::get('PROJECT_PATH') . 'routes/middleware.php';
 
         $this->loadPluginRoutesAssets();
         require TemplateManager::file('template.php');
