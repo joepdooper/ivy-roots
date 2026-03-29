@@ -3,16 +3,16 @@
 namespace Ivy\Controller;
 
 use Ivy\Abstract\Controller;
+use Ivy\Core\Path;
 use Ivy\Manager\PluginManager;
 use Ivy\Model\Plugin;
-use Ivy\Model\Template;
 use Ivy\Model\User;
-use Ivy\Core\Path;
 use Ivy\View\View;
 
 class PluginController extends Controller
 {
     private Plugin $plugin;
+
     private PluginManager $pluginManager;
 
     public function __construct()
@@ -24,7 +24,7 @@ class PluginController extends Controller
     public function before(): void
     {
         if (User::getAuth()->isLoggedIn()) {
-            if (!User::canEditAsSuperAdmin()) {
+            if (! User::canEditAsSuperAdmin()) {
                 $this->redirect();
             }
         } else {
@@ -43,7 +43,7 @@ class PluginController extends Controller
 
             $this->plugin = (new Plugin)->populate($plugin_data);
 
-            if (!$this->plugin->hasId()) {
+            if (! $this->plugin->hasId()) {
                 $this->pluginManager = new PluginManager($this->plugin);
                 $responses[] = $this->pluginManager->install();
             } else {
@@ -58,7 +58,7 @@ class PluginController extends Controller
 
         }
 
-        foreach ($responses as $response){
+        foreach ($responses as $response) {
             $this->flashBag->add($response['status'], $response['message']);
         }
 
@@ -70,7 +70,7 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('index');
 
-        if($id) {
+        if ($id) {
             $parent_id = (new Plugin)->where('url', $id)->fetchOne()->getId();
             $uninstalled_plugins = null;
         } else {
@@ -85,18 +85,17 @@ class PluginController extends Controller
             $values_to_remove_from_uninstalled_plugins[] = $plugin->url;
         }
         $uninstalled_plugins = [];
-        if(!$id && is_dir(Path::get('PLUGINS_PATH'))) {
+        if (! $id && is_dir(Path::get('PLUGINS_PATH'))) {
             $uninstalled_plugins = array_filter(scandir(Path::get('PLUGINS_PATH')), function ($plugin) use ($values_to_remove_from_uninstalled_plugins) {
-                return !in_array($plugin, $values_to_remove_from_uninstalled_plugins);
+                return ! in_array($plugin, $values_to_remove_from_uninstalled_plugins);
             });
             $uninstalled_plugins_info = [];
             foreach ($uninstalled_plugins as $key => $plugin) {
-                $uninstalled_plugins_info[$key] = json_decode(file_get_contents(Path::get('PLUGINS_PATH') . $plugin . '/info.json'));
+                $uninstalled_plugins_info[$key] = json_decode(file_get_contents(Path::get('PLUGINS_PATH').$plugin.'/info.json'));
                 $uninstalled_plugins_info[$key]->url = $plugin;
             }
             $uninstalled_plugins = $uninstalled_plugins_info;
         }
         View::set('admin/plugin.latte', ['installed_plugins' => $installed_plugins, 'uninstalled_plugins' => $uninstalled_plugins]);
     }
-
 }

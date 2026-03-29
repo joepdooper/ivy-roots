@@ -2,10 +2,10 @@
 
 namespace Ivy\Tag;
 
-use Latte\Compiler\PrintContext;
-use Latte\Compiler\Nodes\StatementNode;
-use Latte\Compiler\Tag;
 use Latte\Compiler\Nodes\Php\Expression\ArrayNode;
+use Latte\Compiler\Nodes\StatementNode;
+use Latte\Compiler\PrintContext;
+use Latte\Compiler\Tag;
 
 class ButtonNode extends StatementNode
 {
@@ -15,6 +15,7 @@ class ButtonNode extends StatementNode
     {
         $node = new self;
         $node->args = $tag->parser->parseArguments();
+
         return $node;
     }
 

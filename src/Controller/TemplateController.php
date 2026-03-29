@@ -2,18 +2,16 @@
 
 namespace Ivy\Controller;
 
+use BlakvGhost\PHPValidator\Validator;
 use Ivy\Abstract\Controller;
+use Ivy\Core\Path;
 use Ivy\Manager\TemplateManager;
-use Ivy\Model\Profile;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
-use Ivy\Core\Path;
 use Ivy\Rule\InfoSettingRule;
 use Ivy\Service\AssetPublisher;
 use Ivy\View\View;
-use BlakvGhost\PHPValidator\Validator;
-use BlakvGhost\PHPValidator\ValidatorException;
 
 class TemplateController extends Controller
 {
@@ -27,8 +25,8 @@ class TemplateController extends Controller
 
     public function before(): void
     {
-        if (!User::getAuth()->isLoggedIn() && Setting::stashGet('private')->bool) {
-            if (!$this->isAlwaysPublicPath(Path::get('CURRENT_PAGE'))) {
+        if (! User::getAuth()->isLoggedIn() && Setting::stashGet('private')->bool) {
+            if (! $this->isAlwaysPublicPath(Path::get('CURRENT_PAGE'))) {
                 $this->redirect('user/login');
             }
         }
@@ -40,7 +38,7 @@ class TemplateController extends Controller
 
         View::set('admin/template.latte', [
             'templateBase' => basename(TemplateManager::getTemplateBase()),
-            'templateSub' => basename(TemplateManager::getTemplateSub())
+            'templateSub' => basename(TemplateManager::getTemplateSub()),
         ]);
     }
 
@@ -51,18 +49,21 @@ class TemplateController extends Controller
         foreach ($this->request->get('template') as $data) {
             try {
                 $validated = new Validator($data, [
-                    'value' => new InfoSettingRule()
+                    'value' => new InfoSettingRule,
                 ]);
 
-                if (!$validated->isValid()) {
-                    foreach ($validated->getErrors() as $msg) $this->flashBag->add('error', $msg);
+                if (! $validated->isValid()) {
+                    foreach ($validated->getErrors() as $msg) {
+                        $this->flashBag->add('error', $msg);
+                    }
+
                     continue;
                 }
 
                 $template = (new Template)->where('id', $data['id'])->fetchOne();
                 $template->populate($data)->update();
 
-                $publisher = new AssetPublisher();
+                $publisher = new AssetPublisher;
                 $publisher->publish('templates', $template->value);
 
             } catch (\Exception $e) {
@@ -79,13 +80,13 @@ class TemplateController extends Controller
     private function isAlwaysPublicPath(string $current): bool
     {
         $allowed = [
-            Path::get('PUBLIC_URL') . 'user/login',
-            Path::get('PUBLIC_URL') . 'user/reset',
-            Path::get('PUBLIC_URL') . 'user/register',
+            Path::get('PUBLIC_URL').'user/login',
+            Path::get('PUBLIC_URL').'user/reset',
+            Path::get('PUBLIC_URL').'user/register',
         ];
 
         foreach ($allowed as $prefix) {
-            if ($current === $prefix || str_starts_with($current, $prefix . '/')) {
+            if ($current === $prefix || str_starts_with($current, $prefix.'/')) {
                 return true;
             }
         }

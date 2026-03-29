@@ -1,4 +1,5 @@
 <?php
+
 namespace Ivy\Routing;
 
 use Ivy\Manager\RouterManager;
@@ -6,6 +7,7 @@ use Ivy\Manager\RouterManager;
 class Route
 {
     protected string $method;
+
     protected string $pattern;
 
     protected function __construct(string $method, string $pattern)
@@ -34,6 +36,7 @@ class Route
     public function before(string|callable $handler): self
     {
         RouterManager::before($this->method, $this->pattern, $handler);
+
         return $this;
     }
 

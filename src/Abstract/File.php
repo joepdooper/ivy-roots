@@ -2,14 +2,15 @@
 
 namespace Ivy\Abstract;
 
-use Items\Collection\Image\ImageSize;
 use Ivy\Core\Path;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 abstract class File
 {
     protected ?UploadedFile $uploadFile;
+
     protected ?string $extension;
+
     protected ?string $mimeType;
 
     protected string $uploadPath;
@@ -18,7 +19,7 @@ abstract class File
 
     public function __construct(?UploadedFile $uploadedFile = null)
     {
-        if($uploadedFile){
+        if ($uploadedFile) {
             $this->uploadFile = $uploadedFile;
             $this->extension = strtolower($uploadedFile->getClientOriginalExtension());
             $this->mimeType = $uploadedFile->getMimeType();
@@ -66,7 +67,7 @@ abstract class File
 
     public function generateFileName(): string
     {
-        $this->fileName = bin2hex(random_bytes(16)) . '.' . $this->extension;
+        $this->fileName = bin2hex(random_bytes(16)).'.'.$this->extension;
 
         return $this->fileName;
     }
@@ -76,15 +77,15 @@ abstract class File
      */
     public function validate(): static
     {
-        if (!$this->uploadFile->isValid()) {
-            throw new \RuntimeException("Upload failed with error: " . $this->uploadFile->getError());
+        if (! $this->uploadFile->isValid()) {
+            throw new \RuntimeException('Upload failed with error: '.$this->uploadFile->getError());
         }
 
-        if (!$this->isMimeAllowed()) {
+        if (! $this->isMimeAllowed()) {
             throw new \RuntimeException("File type not allowed: $this->mimeType");
         }
 
-        if (!in_array($this->extension, $this->getAllowedExtensions(), true)) {
+        if (! in_array($this->extension, $this->getAllowedExtensions(), true)) {
             throw new \RuntimeException("File extension not allowed: .$this->extension");
         }
 
@@ -94,7 +95,7 @@ abstract class File
     protected function isMimeAllowed(): bool
     {
         foreach ($this->getAllowedMimeTypes() as $allowed) {
-            if ($allowed === $this->mimeType || (str_ends_with($allowed, '/*') && str_starts_with($this->mimeType, substr($allowed, 0, strpos($allowed, '/')) . '/'))) {
+            if ($allowed === $this->mimeType || (str_ends_with($allowed, '/*') && str_starts_with($this->mimeType, substr($allowed, 0, strpos($allowed, '/')).'/'))) {
                 return true;
             }
         }
@@ -104,11 +105,12 @@ abstract class File
 
     public function remove(?string $fileName = null): void
     {
-        if($fileName){
-            unlink(Path::get('MEDIA_PATH') . trim($this->getUploadPath(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName);
+        if ($fileName) {
+            unlink(Path::get('MEDIA_PATH').trim($this->getUploadPath(), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$fileName);
         }
     }
 
     abstract public function getAllowedMimeTypes(): array;
+
     abstract public function getAllowedExtensions(): array;
 }

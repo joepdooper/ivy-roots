@@ -3,7 +3,6 @@
 namespace Ivy\Controller;
 
 use Delight\Auth\AttemptCancelledException;
-use Delight\Auth\Auth;
 use Delight\Auth\AuthError;
 use Delight\Auth\EmailNotVerifiedException;
 use Delight\Auth\InvalidEmailException;
@@ -18,13 +17,10 @@ use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
 use Ivy\Abstract\Controller;
-use Ivy\Manager\DatabaseManager;
-use Ivy\Model\Info;
-use Ivy\Model\Profile;
-use Ivy\Model\Setting;
-use Ivy\Model\Template;
-use Ivy\Model\User;
 use Ivy\Core\Path;
+use Ivy\Manager\DatabaseManager;
+use Ivy\Model\Setting;
+use Ivy\Model\User;
 use Ivy\Service\Mail;
 use Ivy\View\View;
 
@@ -43,7 +39,7 @@ class UserController extends Controller
         if (User::getAuth()->isLoggedIn()) {
             $this->redirect('admin/profile');
         } else {
-            if (Path::get('CURRENT_PAGE') != Path::get('BASE_PATH') . 'user/login') {
+            if (Path::get('CURRENT_PAGE') != Path::get('BASE_PATH').'user/login') {
                 $this->redirect('user/login');
             }
         }
@@ -62,11 +58,11 @@ class UserController extends Controller
                 try {
                     $this->user::getAuth()->admin()->deleteUserById($this->user->id);
                 } catch (UnknownIdException|AuthError $e) {
-                    $this->flashBag->add('error', 'Something went wrong: ' . $e);
+                    $this->flashBag->add('error', 'Something went wrong: '.$e);
                 }
             } else {
                 try {
-                    if($this->user->id){
+                    if ($this->user->id) {
                         if ($user_data['editor']) {
                             $this->user::getAuth()->admin()->addRoleForUserById($this->user->id, Role::EDITOR);
                         } else {
@@ -119,12 +115,12 @@ class UserController extends Controller
 
         try {
             $userId = User::getAuth()->register($this->request->get('email'), $this->request->get('password'), $this->request->get('username'), function ($selector, $token) {
-                $url = Path::get('PUBLIC_URL') . 'user/login/' . urlencode($selector) . '/' . urlencode($token);
+                $url = Path::get('PUBLIC_URL').'user/login/'.urlencode($selector).'/'.urlencode($token);
                 // send email
-                $mail = new Mail();
+                $mail = new Mail;
                 $mail->addAddress($this->request->get('email'), $this->request->get('username'));
                 $mail->setSubject('Activate account');
-                $mail->setBody('Activate your account with this link: ' . $url);
+                $mail->setBody('Activate your account with this link: '.$url);
                 $mail->send();
             });
             DatabaseManager::connection()->insert('profiles', ['user_id' => $userId]);
@@ -150,7 +146,7 @@ class UserController extends Controller
             $this->redirect('user/register');
         }
 
-        $this->flashBag->add('success', 'An email has been sent to ' . $this->request->get('email') . ' with a link to activate your account');
+        $this->flashBag->add('success', 'An email has been sent to '.$this->request->get('email').' with a link to activate your account');
         $this->redirect('user/login');
     }
 
@@ -176,7 +172,7 @@ class UserController extends Controller
 
         try {
             User::getAuth()->login($this->request->get('email'), $this->request->get('password'));
-            $this->flashBag->add('success', 'Welcome ' . User::getAuth()->getUsername());
+            $this->flashBag->add('success', 'Welcome '.User::getAuth()->getUsername());
             $this->redirect('admin/profile');
         } catch (InvalidEmailException) {
             $this->flashBag->add('error', 'Wrong email address');
@@ -223,7 +219,7 @@ class UserController extends Controller
 
     public function beforeLogout(): void
     {
-        if (!User::getAuth()->isLoggedIn()) {
+        if (! User::getAuth()->isLoggedIn()) {
             $this->redirect('user/login');
         }
     }
@@ -262,12 +258,12 @@ class UserController extends Controller
         if ($this->request->get('email')) {
             try {
                 User::getAuth()->forgotPassword($this->request->get('email'), function ($selector, $token) {
-                    $url = Path::get('PUBLIC_URL') . 'user/reset/' . urlencode($selector) . '/' . urlencode($token);
+                    $url = Path::get('PUBLIC_URL').'user/reset/'.urlencode($selector).'/'.urlencode($token);
                     // send email
-                    $mail = new Mail();
+                    $mail = new Mail;
                     $mail->addAddress($this->request->get('email'));
                     $mail->setSubject('Reset password');
-                    $mail->setBody('Reset password with this link: ' . $url);
+                    $mail->setBody('Reset password with this link: '.$url);
                     $mail->send();
                 });
             } catch (InvalidEmailException) {
@@ -283,7 +279,7 @@ class UserController extends Controller
                 $this->flashBag->add('error', 'Too many requests');
                 $this->redirect('user/reset');
             }
-            $this->flashBag->add('success', 'An email has been sent to ' . $this->request->get('email') . ' with a link to reset your password');
+            $this->flashBag->add('success', 'An email has been sent to '.$this->request->get('email').' with a link to reset your password');
             $this->redirect('user/reset');
         }
 
@@ -336,5 +332,4 @@ class UserController extends Controller
         }
         View::set('user/reset.latte', ['selector' => $selector, 'token' => $token]);
     }
-
 }

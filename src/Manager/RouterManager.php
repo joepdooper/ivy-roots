@@ -1,4 +1,5 @@
 <?php
+
 namespace Ivy\Manager;
 
 use Bramus\Router\Router;
@@ -9,9 +10,10 @@ class RouterManager
 
     public static function router(): Router
     {
-        if (!self::$router) {
-            self::$router = new Router();
+        if (! self::$router) {
+            self::$router = new Router;
         }
+
         return self::$router;
     }
 
@@ -32,12 +34,15 @@ class RouterManager
 
     protected static function resolve(string|callable $handler): callable
     {
-        if (is_callable($handler)) return $handler;
+        if (is_callable($handler)) {
+            return $handler;
+        }
 
         if (is_string($handler) && str_contains($handler, '@')) {
             [$class, $method] = explode('@', $handler);
+
             return function (...$params) use ($class, $method) {
-                return (new $class())->$method(...$params);
+                return (new $class)->$method(...$params);
             };
         }
 

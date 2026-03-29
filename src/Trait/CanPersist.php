@@ -11,21 +11,22 @@ trait CanPersist
         $db = DatabaseManager::connection();
 
         // Ensure table and query are set
-        if (!isset($this->table) || empty($this->table)) {
+        if (! isset($this->table) || empty($this->table)) {
             throw new \RuntimeException('Model must define a $table property.');
         }
 
-        if (!isset($this->query)) {
+        if (! isset($this->query)) {
             $this->query = "SELECT * FROM `{$this->table}`";
         }
 
-        if (!isset($this->bindings)) {
+        if (! isset($this->bindings)) {
             $this->bindings = [];
         }
 
         $rows = $db->select($this->query, $this->bindings) ?: [];
 
         $this->resetQuery();
+
         return $rows;
     }
 
@@ -34,9 +35,9 @@ trait CanPersist
         $rows = $this->fetchAllRaw();
 
         /** @phpstan-ignore-next-line */
-        $models = array_map(fn($row) => (new static())->populate($row), $rows);
+        $models = array_map(fn ($row) => (new static)->populate($row), $rows);
 
-        if (!empty($this->with)) {
+        if (! empty($this->with)) {
             foreach ($models as $model) {
                 foreach ($this->with as $relation) {
                     if (method_exists($model, $relation)) {
@@ -54,6 +55,7 @@ trait CanPersist
     {
         $result = $this->limit(1)->fetchAll();
         $this->resetQuery();
+
         return $result[0] ?? null;
     }
 
@@ -75,11 +77,12 @@ trait CanPersist
     public function hydrate(?array $data = null): static
     {
         /** @phpstan-ignore-next-line */
-        $instance = new static();
+        $instance = new static;
 
         if ($data !== null) {
             $instance->populate($data);
         }
+
         return $instance;
     }
 }

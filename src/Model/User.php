@@ -9,9 +9,10 @@ use Ivy\Manager\DatabaseManager;
 
 class User extends Model
 {
-
     protected string $table = 'users';
+
     protected string $path = 'admin/user';
+
     protected array $columns = [
         'email',
         'username',
@@ -20,48 +21,58 @@ class User extends Model
         'resettable',
         'roles_mask',
         'registered',
-        'last_login'
+        'last_login',
     ];
 
     private static Auth $auth;
 
     protected string $email;
+
     protected string $username;
+
     protected int $status;
+
     protected int $verified;
+
     protected int $resettable;
+
     protected int $roles_mask;
+
     protected int $registered;
+
     protected ?int $last_login;
 
-    static function canEditAsEditor(): bool
+    public static function canEditAsEditor(): bool
     {
         $roles = [
             Role::EDITOR,
             Role::ADMIN,
-            Role::SUPER_ADMIN
+            Role::SUPER_ADMIN,
         ];
+
         return self::$auth->hasAnyRole(...$roles);
     }
 
-    static function canEditAsAdmin(): bool
+    public static function canEditAsAdmin(): bool
     {
         $roles = [
             Role::ADMIN,
-            Role::SUPER_ADMIN
+            Role::SUPER_ADMIN,
         ];
+
         return self::$auth->hasAnyRole(...$roles);
     }
 
-    static function canEditAsSuperAdmin(): bool
+    public static function canEditAsSuperAdmin(): bool
     {
         $roles = [
-            Role::SUPER_ADMIN
+            Role::SUPER_ADMIN,
         ];
+
         return self::$auth->hasAnyRole(...$roles);
     }
 
-    static function setAuth(): void
+    public static function setAuth(): void
     {
         self::$auth = new Auth(DatabaseManager::connection(), true);
     }

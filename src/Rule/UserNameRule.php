@@ -8,9 +8,7 @@ class UserNameRule implements Rule
 {
     protected string $field;
 
-    public function __construct(protected array $parameters = [])
-    {
-    }
+    public function __construct(protected array $parameters = []) {}
 
     public function passes(string $field, $value, array $data): bool
     {
@@ -23,5 +21,4 @@ class UserNameRule implements Rule
     {
         return "The {$this->field} must be 3–20 characters long, start with a letter, and may only contain letters, numbers, dots, underscores, or dashes.";
     }
-
 }

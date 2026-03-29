@@ -1,5 +1,8 @@
 <?php
+
 namespace Ivy\Trait;
+
+use Ivy\Manager\DatabaseManager;
 
 trait HasUtilities
 {
@@ -12,6 +15,7 @@ trait HasUtilities
                 $assocArray[$column] = $this->$column;
             }
         }
+
         return $assocArray;
     }
 
@@ -23,6 +27,7 @@ trait HasUtilities
     public function setId(int $id): static
     {
         $this->id = $id;
+
         return $this;
     }
 
@@ -44,6 +49,7 @@ trait HasUtilities
     public function count(): int
     {
         $countQuery = preg_replace('/SELECT.*?FROM/', 'SELECT COUNT(*) FROM', $this->query);
-        return (int)\Ivy\Manager\DatabaseManager::connection()->selectValue($countQuery, $this->bindings);
+
+        return (int) DatabaseManager::connection()->selectValue($countQuery, $this->bindings);
     }
 }

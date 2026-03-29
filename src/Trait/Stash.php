@@ -10,7 +10,7 @@ trait Stash
     {
         $type = static::class;
 
-        $instance = new $type();
+        $instance = new $type;
         $instances = $instance->fetchAll();
 
         self::$stashData[$type] = $instances;
@@ -22,13 +22,13 @@ trait Stash
     {
         $type = static::class;
 
-        if (!isset(self::$stashData[$type])) {
-            throw new \RuntimeException("No data available to stash. Call stash() first.");
+        if (! isset(self::$stashData[$type])) {
+            throw new \RuntimeException('No data available to stash. Call stash() first.');
         }
 
         $stashData = [];
         foreach (self::$stashData[$type] as $instance) {
-            $getter = 'get' . str_replace('_', '', ucwords($column, '_'));
+            $getter = 'get'.str_replace('_', '', ucwords($column, '_'));
 
             if (method_exists($instance, $getter)) {
                 $key = strtolower(str_replace(' ', '_', $instance->$getter()));

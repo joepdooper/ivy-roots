@@ -6,25 +6,25 @@ trait Factory
 {
     public static function factory(): object
     {
-        $factoryClass = static::class . 'Factory';
+        $factoryClass = static::class.'Factory';
 
-        if (!class_exists($factoryClass)) {
-            throw new \RuntimeException("Factory not found for " . static::class);
+        if (! class_exists($factoryClass)) {
+            throw new \RuntimeException('Factory not found for '.static::class);
         }
 
-        return new $factoryClass();
+        return new $factoryClass;
     }
 
     public function createFromRequest(array $data = []): static
     {
         $factory = static::factory();
 
-        if (!method_exists($factory, 'defaults')) {
-            throw new \RuntimeException("Factory for " . static::class . " must define defaults()");
+        if (! method_exists($factory, 'defaults')) {
+            throw new \RuntimeException('Factory for '.static::class.' must define defaults()');
         }
 
         $defaults = $factory->defaults();
-        $columns  = $this->getColumns();
+        $columns = $this->getColumns();
 
         foreach ($defaults as $key => &$value) {
             if (is_object($value) && method_exists($value, 'createFromRequest')) {

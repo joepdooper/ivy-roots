@@ -2,19 +2,20 @@
 
 namespace Ivy\Abstract;
 
-use Ivy\Manager\SessionManager;
 use Ivy\Core\Path;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
-use Ivy\Middleware\RequestNormalizer;
+use Ivy\Manager\SessionManager;
 use Ivy\Middleware\CsrfVerifier;
 use Ivy\Middleware\MiddlewarePipeline;
+use Ivy\Middleware\RequestNormalizer;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 
 abstract class Controller
 {
     protected Request $request;
+
     protected FlashBag $flashBag;
 
     public function __construct()
@@ -27,15 +28,15 @@ abstract class Controller
 
     protected function runMiddlewares(): void
     {
-        $pipeline = new MiddlewarePipeline();
-        $pipeline->add(new RequestNormalizer());
-        $pipeline->add(new CsrfVerifier());
-        $pipeline->handle($this->request, fn(Request $req) => null);
+        $pipeline = new MiddlewarePipeline;
+        $pipeline->add(new RequestNormalizer);
+        $pipeline->add(new CsrfVerifier);
+        $pipeline->handle($this->request, fn (Request $req) => null);
     }
 
     protected function requirePost(): void
     {
-        if (!$this->request->isMethod('POST')) {
+        if (! $this->request->isMethod('POST')) {
             $this->flashBag->add('error', 'Invalid request method.');
             $this->redirect();
             exit;
@@ -44,7 +45,7 @@ abstract class Controller
 
     protected function requirePatch(): void
     {
-        if (!$this->request->isMethod('PATCH')) {
+        if (! $this->request->isMethod('PATCH')) {
             $this->flashBag->add('error', 'Invalid request method.');
             $this->redirect();
             exit;
@@ -53,7 +54,7 @@ abstract class Controller
 
     protected function requireGet(): void
     {
-        if (!$this->request->isMethod('GET')) {
+        if (! $this->request->isMethod('GET')) {
             $this->flashBag->add('error', 'Invalid request method.');
             $this->redirect();
             exit;
@@ -78,7 +79,7 @@ abstract class Controller
 
     protected function redirect(string $url = '', int $statusCode = 302): void
     {
-        (new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode))->send();
+        (new RedirectResponse(Path::get('BASE_PATH').$url, $statusCode))->send();
         exit;
     }
 
@@ -98,7 +99,7 @@ abstract class Controller
         $basePath = $this->request->getBasePath();
         $path = parse_url($referer, PHP_URL_PATH);
 
-        if (!$path || !str_starts_with($path, $basePath)) {
+        if (! $path || ! str_starts_with($path, $basePath)) {
             return null;
         }
 

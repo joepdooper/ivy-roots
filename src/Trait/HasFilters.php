@@ -1,4 +1,5 @@
 <?php
+
 namespace Ivy\Trait;
 
 trait HasFilters
@@ -6,8 +7,9 @@ trait HasFilters
     public function filter(array $filters): static
     {
         foreach ($filters as $column => $condition) {
-            if (!is_array($condition)) {
+            if (! is_array($condition)) {
                 $this->where($column, $condition);
+
                 continue;
             }
 
@@ -33,6 +35,7 @@ trait HasFilters
         foreach ($this->filterable as $column) {
             $this->orWhere($column, "%{$term}%", 'LIKE');
         }
+
         return $this;
     }
 
@@ -41,6 +44,7 @@ trait HasFilters
         if ($condition) {
             $callback($this);
         }
+
         return $this;
     }
 }

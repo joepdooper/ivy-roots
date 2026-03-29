@@ -3,7 +3,6 @@
 namespace Ivy\Policy;
 
 use Ivy\Model\Info;
-use Ivy\Model\Setting;
 use Ivy\Model\User;
 
 class InfoPolicy
@@ -20,9 +19,10 @@ class InfoPolicy
 
     public static function delete(Info $info): bool
     {
-        if(!$info->is_default && User::canEditAsAdmin()){
+        if (! $info->is_default && User::canEditAsAdmin()) {
             return true;
         }
+
         return false;
     }
 }

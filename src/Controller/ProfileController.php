@@ -4,7 +4,9 @@ namespace Ivy\Controller;
 
 use Delight\Auth\EmailNotVerifiedException;
 use Delight\Auth\InvalidEmailException;
+use Delight\Auth\InvalidSelectorTokenPairException;
 use Delight\Auth\NotLoggedInException;
+use Delight\Auth\TokenExpiredException;
 use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UserAlreadyExistsException;
 use Items\Collection\Image\ImageFile;
@@ -30,7 +32,7 @@ class ProfileController extends Controller
 
     public function before(): void
     {
-        if (!User::getAuth()->isLoggedIn()) {
+        if (! User::getAuth()->isLoggedIn()) {
             $this->redirect('user/login');
         }
     }
@@ -41,30 +43,30 @@ class ProfileController extends Controller
 
         $result = (new ProfileForm)->validate($this->request->request->all());
 
-        if (!$result->valid) {
+        if (! $result->valid) {
             $this->flashBag->set('errors', $result->errors);
             $this->flashBag->set('old', $result->old);
             $this->redirect('admin/profile');
         } else {
             $this->profile = (new Profile)->with(['user'])->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
 
-            if(User::getAuth()->getUsername() !== $result->data['username']) {
+            if (User::getAuth()->getUsername() !== $result->data['username']) {
                 $this->profile->user->populate(['username' => $result->data['username']])->update();
             }
 
             if (User::getAuth()->getEmail() !== $result->data['email']) {
                 try {
-                    User::getAuth()->changeEmail($result->data['email'], function ($selector, $token) use($result) {
-                        $url = Path::get('PUBLIC_URL') . 'admin/profile/' . urlencode($selector) . '/' . urlencode($token);
+                    User::getAuth()->changeEmail($result->data['email'], function ($selector, $token) use ($result) {
+                        $url = Path::get('PUBLIC_URL').'admin/profile/'.urlencode($selector).'/'.urlencode($token);
                         // send email
-                        $mail = new Mail();
+                        $mail = new Mail;
                         $mail->addAddress($result->data['email'], $result->data['username']);
                         $mail->setSubject('Reset email address');
-                        $mail->setBody('Reset your email address with this link: ' . $url);
-                        $mail->setAltBody('Reset your email address with this link: ' . $url);
+                        $mail->setBody('Reset your email address with this link: '.$url);
+                        $mail->setAltBody('Reset your email address with this link: '.$url);
                         $mail->send();
                     });
-                    $this->flashBag->add('success', 'An email has been sent to ' . $result->data['email'] . ' with a link to confirm the email address');
+                    $this->flashBag->add('success', 'An email has been sent to '.$result->data['email'].' with a link to confirm the email address');
                 } catch (InvalidEmailException) {
                     $this->flashBag->add('error', 'Invalid email address');
                 } catch (UserAlreadyExistsException) {
@@ -78,7 +80,7 @@ class ProfileController extends Controller
                 }
             }
 
-            if(in_array("Image", SessionManager::get('plugin_actives'))) {
+            if (in_array('Image', SessionManager::get('plugin_actives'))) {
                 if ($this->request->files->get('avatar')) {
                     $file = new ImageFile($this->request->files->get('avatar'));
                     $this->profile->user_image = $file
@@ -89,7 +91,7 @@ class ProfileController extends Controller
                     $this->profile->update();
                 }
                 if ($this->request->get('avatar') === 'delete') {
-                    $file = new ImageFile();
+                    $file = new ImageFile;
                     $file->setUploadPath('profile')->remove($this->profile->user_image);
                     $this->profile->user_image = null;
                     $this->profile->update();
@@ -113,18 +115,19 @@ class ProfileController extends Controller
         View::set('include/profile.latte', ['profile' => $profile]);
     }
 
-    public function verify($selector = null, $token = null) {
+    public function verify($selector = null, $token = null)
+    {
         if (isset($selector) && isset($token)) {
             try {
                 User::getAuth()->confirmEmail($selector, $token);
                 $this->flashBag->add('success', 'Email address has been verified');
-            } catch (\Delight\Auth\InvalidSelectorTokenPairException $e) {
+            } catch (InvalidSelectorTokenPairException $e) {
                 $this->flashBag->add('error', 'Invalid token');
-            } catch (\Delight\Auth\TokenExpiredException $e) {
+            } catch (TokenExpiredException $e) {
                 $this->flashBag->add('error', 'Token expired');
-            } catch (\Delight\Auth\UserAlreadyExistsException $e) {
+            } catch (UserAlreadyExistsException $e) {
                 $this->flashBag->add('warning', 'Email address already exists');
-            } catch (\Delight\Auth\TooManyRequestsException $e) {
+            } catch (TooManyRequestsException $e) {
                 $this->flashBag->add('error', 'Invalid token');
             }
         }

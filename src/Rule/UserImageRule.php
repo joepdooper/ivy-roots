@@ -8,9 +8,7 @@ class UserImageRule implements Rule
 {
     protected string $field;
 
-    public function __construct(protected array $parameters = [])
-    {
-    }
+    public function __construct(protected array $parameters = []) {}
 
     public function passes(string $field, $value, array $data): bool
     {
@@ -30,5 +28,4 @@ class UserImageRule implements Rule
     {
         return "The field '{$this->field}' contains invalid characters.";
     }
-
 }

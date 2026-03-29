@@ -8,7 +8,9 @@ use Ivy\Helper\PluginInfo;
 class Plugin extends Model
 {
     protected string $table = 'plugins';
+
     protected string $path = 'admin/plugin';
+
     protected array $columns = [
         'name',
         'url',
@@ -16,24 +18,28 @@ class Plugin extends Model
         'description',
         'type',
         'active',
-        'parent_id'
+        'parent_id',
     ];
 
     protected string $name;
+
     protected string $url;
+
     protected string $version;
+
     protected ?string $description = null;
+
     protected ?string $type = null;
+
     protected ?int $active = null;
+
     protected ?int $parent_id = null;
+
     protected PluginInfo $info;
 
-    /**
-     * @return Plugin
-     */
     public function setInfo(): Plugin
     {
-        if (!isset($this->url) && $this->id) {
+        if (! isset($this->url) && $this->id) {
             $plugin = $this->select(['url'])->where('id', $this->id)->fetchOne();
             if ($plugin) {
                 $this->url = $plugin->url;
@@ -47,7 +53,7 @@ class Plugin extends Model
         $this->info = new PluginInfo($this->url);
 
         foreach ($this->columns as $property) {
-            $getter = 'get' . ucfirst($property);
+            $getter = 'get'.ucfirst($property);
             if (method_exists($this->info, $getter)) {
                 $value = $this->info->$getter();
                 if ($value !== null) {
@@ -58,7 +64,6 @@ class Plugin extends Model
 
         return $this;
     }
-
 
     public function getInfo(): PluginInfo
     {

@@ -10,9 +10,9 @@ class SettingForm extends Form
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'not_nullable', new InfoSettingRule()],
-            'value' => new InfoSettingRule(),
-            'plugin_id' => 'numeric'
+            'name' => ['required', 'not_nullable', new InfoSettingRule],
+            'value' => new InfoSettingRule,
+            'plugin_id' => 'numeric',
         ];
     }
 }

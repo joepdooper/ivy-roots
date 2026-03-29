@@ -15,7 +15,7 @@ abstract class Form
     {
         $this->validator = new Validator($data, $this->rules());
 
-        if (!$this->validator->isValid()) {
+        if (! $this->validator->isValid()) {
             return new ValidationResult(
                 valid: false,
                 errors: $this->validator->getErrors(),

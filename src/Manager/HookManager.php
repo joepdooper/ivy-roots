@@ -10,7 +10,7 @@ class HookManager
 
     public static function instance(): Hooks
     {
-        return self::$hooks ??= new Hooks();
+        return self::$hooks ??= new Hooks;
     }
 
     public static function add(string $tag, callable $function_to_add, int $priority = 10, int $accepted_args = 1): void

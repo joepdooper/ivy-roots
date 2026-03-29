@@ -19,8 +19,7 @@ class MiddlewarePipeline
     {
         $next = array_reduce(
             array_reverse($this->middlewares),
-            fn($next, MiddlewareInterface $middleware) =>
-            fn(Request $req) => $middleware->handle($req, $next),
+            fn ($next, MiddlewareInterface $middleware) => fn (Request $req) => $middleware->handle($req, $next),
             $controller
         );
 

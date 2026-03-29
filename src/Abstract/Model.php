@@ -2,21 +2,26 @@
 
 namespace Ivy\Abstract;
 
-use Ivy\Trait\HasQueryBuilder;
+use Ivy\Manager\DatabaseManager;
 use Ivy\Trait\CanPersist;
-use Ivy\Trait\HasRelationships;
-use Ivy\Trait\HasPolicies;
-use Ivy\Trait\HasUtilities;
 use Ivy\Trait\HasMagicProperties;
+use Ivy\Trait\HasPolicies;
+use Ivy\Trait\HasQueryBuilder;
+use Ivy\Trait\HasRelationships;
+use Ivy\Trait\HasUtilities;
 
 abstract class Model
 {
-    use HasQueryBuilder, CanPersist, HasRelationships, HasPolicies, HasUtilities, HasMagicProperties;
+    use CanPersist, HasMagicProperties, HasPolicies, HasQueryBuilder, HasRelationships, HasUtilities;
 
     protected string $table;
+
     protected string $path;
+
     protected array $columns = [];
+
     protected ?int $id = null;
+
     protected array $relationCache = [];
 
     public function getId(): ?int
@@ -36,7 +41,7 @@ abstract class Model
 
     public function insert(): static
     {
-        $db = \Ivy\Manager\DatabaseManager::connection();
+        $db = DatabaseManager::connection();
         $data = [];
         foreach ($this->columns as $column) {
             if (property_exists($this, $column)) {
@@ -53,11 +58,11 @@ abstract class Model
 
     public function update(): static
     {
-        if (!$this->id) {
-            throw new \RuntimeException("Cannot update model without ID.");
+        if (! $this->id) {
+            throw new \RuntimeException('Cannot update model without ID.');
         }
 
-        $db = \Ivy\Manager\DatabaseManager::connection();
+        $db = DatabaseManager::connection();
 
         $data = [];
         foreach ($this->columns as $column) {
@@ -74,23 +79,25 @@ abstract class Model
 
     public function delete(): bool
     {
-        if (!$this->id) {
-            throw new \RuntimeException("Cannot delete model without ID.");
+        if (! $this->id) {
+            throw new \RuntimeException('Cannot delete model without ID.');
         }
 
-        $db = \Ivy\Manager\DatabaseManager::connection();
+        $db = DatabaseManager::connection();
 
         $deleted = $db->delete($this->table, ['id' => $this->id]);
         $this->resetQuery();
 
         $this->id = null;
-        return (bool)$deleted;
+
+        return (bool) $deleted;
     }
 
     public function deleteAll(): int
     {
-        $db = \Ivy\Manager\DatabaseManager::connection();
-        $query = preg_replace('/SELECT \* FROM/', "DELETE FROM", $this->query, 1);
+        $db = DatabaseManager::connection();
+        $query = preg_replace('/SELECT \* FROM/', 'DELETE FROM', $this->query, 1);
+
         return $db->exec($query, $this->bindings ?? []);
     }
 

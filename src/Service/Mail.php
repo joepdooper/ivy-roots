@@ -3,24 +3,22 @@
 namespace Ivy\Service;
 
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
 
 class Mail
 {
     private PHPMailer $mailer;
 
-    function __construct()
+    public function __construct()
     {
         $this->mailer = new PHPMailer(true);
 
         $this->mailer->isSMTP();
         $this->mailer->Host = $_ENV['MAIL_HOST'];
         $this->mailer->Port = $_ENV['MAIL_PORT'];
-        $this->mailer->SMTPAuth = $_ENV['MAIL_SMTP_AUTH'] === "false" ? false : true;
-        if($_ENV['MAIL_SMTP_SECURE'] === 'ssl') {
+        $this->mailer->SMTPAuth = $_ENV['MAIL_SMTP_AUTH'] === 'false' ? false : true;
+        if ($_ENV['MAIL_SMTP_SECURE'] === 'ssl') {
             $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        } elseif($_ENV['MAIL_SMTP_SECURE'] === 'tls') {
+        } elseif ($_ENV['MAIL_SMTP_SECURE'] === 'tls') {
             $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         } else {
             $this->mailer->SMTPSecure = false;
@@ -33,7 +31,7 @@ class Mail
         $this->mailer->addReplyTo($_ENV['MAIL_SENDER_ADDRESS'], $_ENV['MAIL_SENDER_NAME']);
     }
 
-    function send()
+    public function send()
     {
         $this->mailer->send();
     }

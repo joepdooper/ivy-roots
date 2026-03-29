@@ -2,7 +2,6 @@
 
 namespace Ivy\Controller;
 
-use Ivy\Abstract\Controller;
 use Ivy\Form\InfoForm;
 use Ivy\Model\Info;
 use Ivy\Model\Plugin;
@@ -35,20 +34,22 @@ class InfoController extends SettingController
 
         foreach ($this->request->get('info') as $data) {
 
-            if (empty($data['name'])) continue;
+            if (empty($data['name'])) {
+                continue;
+            }
 
             $result = (new InfoForm)->validate($data);
 
-            if (!$result->valid) {
+            if (! $result->valid) {
                 $this->flashBag->set('errors', $result->errors);
                 $this->flashBag->set('old', $result->old);
                 $this->redirect($redirect);
             } else {
-                $info = !empty($data['id'])
+                $info = ! empty($data['id'])
                     ? (new Info)->where('id', $data['id'])->fetchOne()
-                    : new Info();
+                    : new Info;
 
-                if (isset($data['delete']) && !empty($data['id'])) {
+                if (isset($data['delete']) && ! empty($data['id'])) {
                     $info?->delete();
                 } else {
                     $info->populate($data)->save();

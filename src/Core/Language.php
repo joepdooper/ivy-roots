@@ -7,12 +7,14 @@ use Ivy\Manager\TemplateManager;
 class Language
 {
     protected static string $defaultLang = 'en';
+
     protected static array $translations = [];
+
     protected static array $loadedFiles = [];
 
     public static function load($lang = null): void
     {
-        if (!$lang) {
+        if (! $lang) {
             $lang = self::$defaultLang;
         }
 
@@ -24,25 +26,25 @@ class Language
         $keys = explode('.', $key);
         $firstKey = array_shift($keys);
 
-        if (!isset(self::$loadedFiles[$firstKey])) {
+        if (! isset(self::$loadedFiles[$firstKey])) {
             self::loadFile($firstKey);
         }
 
-        if(self::$translations[$firstKey]){
+        if (self::$translations[$firstKey]) {
             $translation = self::getNestedTranslation(self::$translations[$firstKey], $keys);
         } else {
             $secondKey = array_shift($keys);
 
-            if (!isset(self::$loadedFiles[$firstKey.'_'.$secondKey])) {
+            if (! isset(self::$loadedFiles[$firstKey.'_'.$secondKey])) {
                 self::loadPluginFile($firstKey, $secondKey);
             }
 
-            if(self::$translations[$firstKey.'_'.$secondKey]){
+            if (self::$translations[$firstKey.'_'.$secondKey]) {
                 $translation = self::getNestedTranslation(self::$translations[$firstKey.'_'.$secondKey], $keys);
             }
         }
 
-        if (!empty($translation) && is_string($translation) && !empty($variables)) {
+        if (! empty($translation) && is_string($translation) && ! empty($variables)) {
             foreach ($variables as $placeholder => $value) {
                 $translation = str_replace(":{$placeholder}", $value, $translation);
             }
@@ -53,7 +55,7 @@ class Language
 
     private static function loadFile($firstKey): void
     {
-        $langPath = Path::get('PROJECT_PATH') . 'language' . DIRECTORY_SEPARATOR . self::$defaultLang . DIRECTORY_SEPARATOR . $firstKey . '.php';
+        $langPath = Path::get('PROJECT_PATH').'language'.DIRECTORY_SEPARATOR.self::$defaultLang.DIRECTORY_SEPARATOR.$firstKey.'.php';
 
         if (file_exists($langPath)) {
             self::$translations[$firstKey] = include $langPath;
@@ -66,7 +68,7 @@ class Language
 
     private static function loadPluginFile($firstKey, $secondKey): void
     {
-        $langPath = TemplateManager::file(Path::get('PLUGINS_FOLDER') . $firstKey . DIRECTORY_SEPARATOR . 'language' . DIRECTORY_SEPARATOR . self::$defaultLang . DIRECTORY_SEPARATOR . $secondKey . '.php');
+        $langPath = TemplateManager::file(Path::get('PLUGINS_FOLDER').$firstKey.DIRECTORY_SEPARATOR.'language'.DIRECTORY_SEPARATOR.self::$defaultLang.DIRECTORY_SEPARATOR.$secondKey.'.php');
 
         if (file_exists($langPath)) {
             self::$translations[$firstKey.'_'.$secondKey] = include $langPath;
@@ -80,11 +82,12 @@ class Language
     private static function getNestedTranslation(array $translations, array $keys)
     {
         foreach ($keys as $k) {
-            if (!is_array($translations) || !isset($translations[$k])) {
+            if (! is_array($translations) || ! isset($translations[$k])) {
                 return null;
             }
             $translations = $translations[$k];
         }
+
         return $translations;
     }
 

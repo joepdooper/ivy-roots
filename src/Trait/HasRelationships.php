@@ -1,4 +1,5 @@
 <?php
+
 namespace Ivy\Trait;
 
 use Ivy\Manager\DatabaseManager;
@@ -6,6 +7,7 @@ use Ivy\Manager\DatabaseManager;
 trait HasRelationships
 {
     protected array $relations = [];
+
     protected array $with = [];
 
     protected function resolveRelation(string $relatedClass, string $foreignKey, string $localKey = 'id', bool $single = false): mixed
@@ -13,7 +15,7 @@ trait HasRelationships
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
         $relationName = $trace[2]['function'] ?? null; // caller of hasOne/hasMany
 
-        if (!$relationName) {
+        if (! $relationName) {
             throw new \RuntimeException('Cannot determine relation name.');
         }
 
@@ -26,7 +28,7 @@ trait HasRelationships
             return $this->relations[$relationName] = $single ? null : [];
         }
 
-        $instance = new $relatedClass();
+        $instance = new $relatedClass;
         $instance->resetQuery();
 
         $result = $instance->where($foreignKey, $localValue)
@@ -54,13 +56,15 @@ trait HasRelationships
         string $localKey = 'id'
     ): array {
         $localValue = $this->{$localKey} ?? null;
-        if (!$localValue) return [];
+        if (! $localValue) {
+            return [];
+        }
 
         $db = DatabaseManager::connection();
         $query = "SELECT `$relatedPivotKey` FROM `$pivotTable` WHERE 1=1";
         $params = [];
 
-        if ($foreignPivotKey && !$morphType && !$morphId) {
+        if ($foreignPivotKey && ! $morphType && ! $morphId) {
             $query .= " AND `$foreignPivotKey` = ?";
             $params[] = $localValue;
         } elseif ($morphType && $morphId) {
@@ -70,6 +74,7 @@ trait HasRelationships
         }
 
         $rows = $db->select($query, $params);
+
         return $rows ? array_column($rows, $relatedPivotKey) : [];
     }
 
@@ -89,9 +94,11 @@ trait HasRelationships
         }
 
         $relatedIds = $this->getPivotRelatedIds($pivotTable, $relatedPivotKey, $foreignPivotKey, $morphType, $morphId, $localKey);
-        if (!$relatedIds) return $this->relations[$relationName] = [];
+        if (! $relatedIds) {
+            return $this->relations[$relationName] = [];
+        }
 
-        $related = new $relatedClass();
+        $related = new $relatedClass;
         $related->resetQuery();
 
         return $this->relations[$relationName] = $related
@@ -113,7 +120,7 @@ trait HasRelationships
             $bindings[] = $val;
         }
         DatabaseManager::connection()->exec(
-            "DELETE FROM `$pivotTable` WHERE " . implode(' AND ', $where),
+            "DELETE FROM `$pivotTable` WHERE ".implode(' AND ', $where),
             $bindings
         );
     }
@@ -126,7 +133,9 @@ trait HasRelationships
         string $localKey = 'id'
     ): void {
         $localValue = $this->{$localKey} ?? null;
-        if (!$localValue) return;
+        if (! $localValue) {
+            return;
+        }
         $this->insertPivotRow($pivotTable, [$foreignPivotKey => $localValue, $relatedPivotKey => $relatedId]);
     }
 
@@ -138,7 +147,9 @@ trait HasRelationships
         string $localKey = 'id'
     ): void {
         $localValue = $this->{$localKey} ?? null;
-        if (!$localValue) return;
+        if (! $localValue) {
+            return;
+        }
         $this->deletePivotRow($pivotTable, [$foreignPivotKey => $localValue, $relatedPivotKey => $relatedId]);
     }
 
@@ -153,7 +164,9 @@ trait HasRelationships
     ): void {
         $relatedIds = array_unique(array_map('intval', $relatedIds));
         $localValue = $this->{$localKey} ?? null;
-        if (!$localValue) return;
+        if (! $localValue) {
+            return;
+        }
 
         $existing = $this->getPivotRelatedIds($pivotTable, $relatedPivotKey, $foreignPivotKey, $morphType, $morphId, $localKey);
 
@@ -188,6 +201,7 @@ trait HasRelationships
     public function with(array $relations): static
     {
         $this->with = $relations;
+
         return $this;
     }
 
@@ -216,7 +230,7 @@ trait HasRelationships
 
         $params = array_merge([$table], $values, [$count]);
         $rows = DatabaseManager::connection()->select($sql, $params);
-        $entityIds = !empty($rows) ? array_column($rows, 'entity_id') : [];
+        $entityIds = ! empty($rows) ? array_column($rows, 'entity_id') : [];
 
         if (empty($entityIds)) {
             return $this->where("{$table}.id", -1);

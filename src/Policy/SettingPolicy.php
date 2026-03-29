@@ -19,9 +19,10 @@ class SettingPolicy
 
     public static function delete(Setting $setting): bool
     {
-        if(!$setting->is_default && User::canEditAsAdmin()){
+        if (! $setting->is_default && User::canEditAsAdmin()) {
             return true;
         }
+
         return false;
     }
 }

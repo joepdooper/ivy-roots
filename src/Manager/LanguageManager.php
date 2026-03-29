@@ -1,9 +1,9 @@
 <?php
+
 namespace Ivy\Manager;
 
-use Ivy\Model\Info;
-use Ivy\Model\Setting;
 use Ivy\Core\Language;
+use Ivy\Model\Info;
 
 class LanguageManager
 {

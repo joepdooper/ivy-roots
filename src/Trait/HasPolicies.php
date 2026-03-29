@@ -1,5 +1,8 @@
 <?php
+
 namespace Ivy\Trait;
+
+use Ivy\Exceptions\AuthorizationException;
 
 trait HasPolicies
 {
@@ -10,7 +13,7 @@ trait HasPolicies
         $namespace = str_replace('Model', 'Policy', (new \ReflectionClass($modelClass))->getNamespaceName());
         $policyClass = "{$namespace}\\{$modelName}Policy";
 
-        if (!class_exists($policyClass) || !method_exists($policyClass, $action)) {
+        if (! class_exists($policyClass) || ! method_exists($policyClass, $action)) {
             return false;
         }
 
@@ -19,9 +22,9 @@ trait HasPolicies
 
     public function authorize(string $action): void
     {
-        if (!$this->policy($action)) {
-            throw new \Ivy\Exceptions\AuthorizationException(
-                "Not authorized to perform [{$action}] on " . static::class
+        if (! $this->policy($action)) {
+            throw new AuthorizationException(
+                "Not authorized to perform [{$action}] on ".static::class
             );
         }
     }

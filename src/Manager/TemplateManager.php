@@ -2,18 +2,14 @@
 
 namespace Ivy\Manager;
 
-use Ivy\Config\Environment;
 use Ivy\Core\Path;
 
 class TemplateManager
 {
-    /** @var string|null */
     private static ?string $templateBase = null;
 
-    /** @var string|null */
     private static ?string $templateSub = null;
 
-    /** @var bool */
     private static bool $initialized = false;
 
     /** @var array<string, string> */
@@ -32,22 +28,22 @@ class TemplateManager
     /**
      * Initialize template paths.
      *
-     * @param bool $forceRefresh If true, reloads template paths from DB
+     * @param  bool  $forceRefresh  If true, reloads template paths from DB
      */
     public static function init(bool $forceRefresh = false): void
     {
-        if (self::$initialized && !$forceRefresh) {
+        if (self::$initialized && ! $forceRefresh) {
             return;
         }
 
-        $sql = "SELECT `value` FROM `templates` WHERE `type` = :type";
+        $sql = 'SELECT `value` FROM `templates` WHERE `type` = :type';
         $db = DatabaseManager::connection();
 
         $templateBase = $db->selectValue($sql, ['base']);
         $templateSub = $db->selectValue($sql, ['sub']);
 
-        self::$templateBase = Path::get('TEMPLATES_PATH') . $templateBase . DIRECTORY_SEPARATOR;
-        self::$templateSub = Path::get('TEMPLATES_PATH') . $templateSub . DIRECTORY_SEPARATOR;
+        self::$templateBase = Path::get('TEMPLATES_PATH').$templateBase.DIRECTORY_SEPARATOR;
+        self::$templateSub = Path::get('TEMPLATES_PATH').$templateSub.DIRECTORY_SEPARATOR;
 
         if ($forceRefresh) {
             self::$cache = [];
@@ -58,9 +54,6 @@ class TemplateManager
 
     /**
      * Get the full path of a template file
-     *
-     * @param string $filename
-     * @return string
      */
     public static function file(string $filename): string
     {
@@ -71,16 +64,18 @@ class TemplateManager
         $paths = [self::$templateSub, self::$templateBase];
         foreach ($paths as $path) {
 
-            if (!$path) continue;
+            if (! $path) {
+                continue;
+            }
 
-            $fullPath = $path . $filename;
+            $fullPath = $path.$filename;
 
             if (file_exists($fullPath)) {
                 return self::$cache[$filename] = $fullPath;
             }
         }
 
-        $projectPath = Path::get('PROJECT_PATH') . $filename;
+        $projectPath = Path::get('PROJECT_PATH').$filename;
         if (file_exists($projectPath)) {
             return self::$cache[$filename] = $projectPath;
         }

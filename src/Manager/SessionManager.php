@@ -2,9 +2,10 @@
 
 namespace Ivy\Manager;
 
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 class SessionManager
 {
@@ -13,7 +14,7 @@ class SessionManager
     public static function getSession(): Session
     {
         if (self::$session === null) {
-            $storage = new NativeSessionStorage([], new NativeFileSessionHandler());
+            $storage = new NativeSessionStorage([], new NativeFileSessionHandler);
             self::$session = new Session($storage);
         }
 
@@ -40,7 +41,7 @@ class SessionManager
         return self::getSession()->has($key);
     }
 
-    public static function getFlashBag(): \Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface
+    public static function getFlashBag(): FlashBagInterface
     {
         return self::getSession()->getFlashBag();
     }

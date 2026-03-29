@@ -1,21 +1,24 @@
 <?php
+
 namespace Ivy\Trait;
 
 trait HasQueryBuilder
 {
     protected string $table;
+
     protected string $query;
+
     protected array $bindings = [];
 
     public static function query(): static
     {
         /** @phpstan-ignore-next-line */
-        return new static();
+        return new static;
     }
 
     protected function ensureQuery(): void
     {
-        if (!isset($this->table) || empty($this->table)) {
+        if (! isset($this->table) || empty($this->table)) {
             throw new \RuntimeException('Model must define a $table property.');
         }
         $this->query ??= "SELECT * FROM `{$this->table}`";
@@ -25,8 +28,9 @@ trait HasQueryBuilder
     public function select(string|array $columns): static
     {
         $this->ensureQuery();
-        $cols = array_map(fn($c) => $c === '*' ? '*' : "`$this->table`.`$c`", (array)$columns);
-        $this->query = 'SELECT ' . implode(', ', $cols) . " FROM `$this->table`";
+        $cols = array_map(fn ($c) => $c === '*' ? '*' : "`$this->table`.`$c`", (array) $columns);
+        $this->query = 'SELECT '.implode(', ', $cols)." FROM `$this->table`";
+
         return $this;
     }
 
@@ -34,7 +38,7 @@ trait HasQueryBuilder
     {
         $this->ensureQuery();
 
-        $prefix = str_contains($this->query, 'WHERE') ? " $boolean " : " WHERE ";
+        $prefix = str_contains($this->query, 'WHERE') ? " $boolean " : ' WHERE ';
 
         if (is_null($value)) {
             $this->query .= "{$prefix}`$this->table`.`$column` IS NULL";
@@ -88,6 +92,7 @@ trait HasQueryBuilder
     {
         $this->ensureQuery();
         $this->query .= " $type JOIN `$table` ON `$this->table`.`$firstColumn` $operator `$table`.`$secondColumn`";
+
         return $this;
     }
 
@@ -95,9 +100,10 @@ trait HasQueryBuilder
     {
         $this->ensureQuery();
         $order = is_array($columns)
-            ? implode(', ', array_map(fn($c) => "`$this->table`.`$c` $direction", $columns))
+            ? implode(', ', array_map(fn ($c) => "`$this->table`.`$c` $direction", $columns))
             : "`$this->table`.`$columns` $direction";
         $this->query .= " ORDER BY $order";
+
         return $this;
     }
 
@@ -105,6 +111,7 @@ trait HasQueryBuilder
     {
         $this->ensureQuery();
         $this->query .= " LIMIT $limit OFFSET $offset";
+
         return $this;
     }
 

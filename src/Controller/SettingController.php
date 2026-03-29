@@ -35,20 +35,22 @@ class SettingController extends Controller
 
         foreach ($this->request->get('setting') as $data) {
 
-            if (empty($data['name'])) continue;
+            if (empty($data['name'])) {
+                continue;
+            }
 
             $result = (new SettingForm)->validate($data);
 
-            if (!$result->valid) {
+            if (! $result->valid) {
                 $this->flashBag->set('errors', $result->errors);
                 $this->flashBag->set('old', $result->old);
                 $this->redirect($redirect);
             } else {
-                $info = !empty($data['id'])
+                $info = ! empty($data['id'])
                     ? (new Setting)->where('id', $data['id'])->fetchOne()
-                    : new Setting();
+                    : new Setting;
 
-                if (isset($data['delete']) && !empty($data['id'])) {
+                if (isset($data['delete']) && ! empty($data['id'])) {
                     $info?->delete();
                 } else {
                     $info->populate($data)->save();
@@ -63,12 +65,13 @@ class SettingController extends Controller
     protected function resolveRefererContext(string $url = '', int $statusCode = 302)
     {
         $refererPath = $this->getRefererPath();
-        if ($refererPath != $this->setting->getPath()){
-            $segments = explode('/',$refererPath);
-            if($segments[0] === 'plugin') {
-                $this->setting->plugin_id = (new \Ivy\Model\Plugin)->where('url', $segments[1])->fetchOne()->getId();
+        if ($refererPath != $this->setting->getPath()) {
+            $segments = explode('/', $refererPath);
+            if ($segments[0] === 'plugin') {
+                $this->setting->plugin_id = (new Plugin)->where('url', $segments[1])->fetchOne()->getId();
             }
         }
+
         return $refererPath;
     }
 }

@@ -2,7 +2,8 @@
 
 namespace Ivy\Core;
 
-use Ivy\Manager\DatabaseManager;
+use Dotenv\Dotenv;
+use Ivy\Exceptions\AuthorizationException;
 use Ivy\Manager\ErrorManager;
 use Ivy\Manager\LanguageManager;
 use Ivy\Manager\RouterManager;
@@ -20,10 +21,10 @@ class App
     private function loadPluginRoutesAssets(): void
     {
         $plugins = (new Plugin)->where('active', 1)->fetchAll();
-        if (!empty($plugins)) {
-            SessionManager::set('plugin_actives', array_map(fn($plugin) => $plugin->name, $plugins));
+        if (! empty($plugins)) {
+            SessionManager::set('plugin_actives', array_map(fn ($plugin) => $plugin->name, $plugins));
             foreach ($plugins as $plugin) {
-                require Path::get('PLUGINS_PATH') . $plugin->url . DIRECTORY_SEPARATOR . 'plugin.php';
+                require Path::get('PLUGINS_PATH').$plugin->url.DIRECTORY_SEPARATOR.'plugin.php';
             }
         } else {
             SessionManager::set('plugin_actives', []);
@@ -38,17 +39,17 @@ class App
         $this->loadPluginRoutesAssets();
         require TemplateManager::file('template.php');
 
-        require Path::get('PROJECT_PATH') . 'routes/web.php';
-        require Path::get('PROJECT_PATH') . 'routes/user.php';
-        require Path::get('PROJECT_PATH') . 'routes/admin.php';
-        require Path::get('PROJECT_PATH') . 'routes/error.php';
+        require Path::get('PROJECT_PATH').'routes/web.php';
+        require Path::get('PROJECT_PATH').'routes/user.php';
+        require Path::get('PROJECT_PATH').'routes/admin.php';
+        require Path::get('PROJECT_PATH').'routes/error.php';
 
         try {
             $router->run();
-        } catch (\Ivy\Exceptions\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             http_response_code(403);
             View::set('errors/forbidden.latte', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
             // exit;
         }
@@ -65,7 +66,7 @@ class App
 
     public function run(): void
     {
-        (\Dotenv\Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
+        (Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
         ErrorManager::setErrorReporting();
         SecurityManager::setSecurityHeaders();
         $this->bootstrap();

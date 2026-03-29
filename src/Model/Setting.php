@@ -10,7 +10,9 @@ class Setting extends Model
     use Stash;
 
     protected string $table = 'settings';
+
     protected string $path = 'admin/setting';
+
     protected array $columns = [
         'name',
         'bool',
@@ -18,14 +20,20 @@ class Setting extends Model
         'info',
         'plugin_id',
         'is_default',
-        'token'
+        'token',
     ];
 
     protected string $name;
+
     protected int $bool = 0;
+
     protected ?string $value = null;
+
     protected ?string $info = null;
+
     protected ?int $plugin_id = null;
+
     protected int $is_default = 0;
+
     protected ?string $token = null;
 }
