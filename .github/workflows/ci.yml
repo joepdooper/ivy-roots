@@ -50,11 +50,11 @@ jobs:
         run: composer check-platform-reqs
 
       # Run PHPStan
-      - name: Setup PHPStan
-        uses: shivammathur/setup-php@v2
+      - name: Run PHPStan
+        uses: php-actions/phpstan@v3
         with:
-          php-version: '8.4'
-          tools: phpstan
+          php_version: 8.4
+          level: 8
       
       - name: Run PHPStan
         run: phpstan analyse src/ --level=1
