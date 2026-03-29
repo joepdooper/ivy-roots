@@ -10,6 +10,7 @@ use Ivy\Model\Template;
 use Ivy\Model\User;
 use Ivy\Core\Path;
 use Ivy\Rule\InfoSettingRule;
+use Ivy\Service\AssetPublisher;
 use Ivy\View\View;
 use BlakvGhost\PHPValidator\Validator;
 use BlakvGhost\PHPValidator\ValidatorException;
@@ -60,6 +61,9 @@ class TemplateController extends Controller
 
                 $template = (new Template)->where('id', $data['id'])->fetchOne();
                 $template->populate($data)->update();
+
+                $publisher = new AssetPublisher();
+                $publisher->publish('templates', $template->value);
 
             } catch (\Exception $e) {
                 $this->flashBag->add('error', $e->getMessage());
