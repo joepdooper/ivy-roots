@@ -10,13 +10,13 @@ use Ivy\Middleware\RequestNormalizer;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 
 abstract class Controller
 {
     protected Request $request;
 
-    protected FlashBag $flashBag;
+    protected FlashBagInterface $flashBag;
 
     public function __construct()
     {
@@ -83,7 +83,7 @@ abstract class Controller
         exit;
     }
 
-    protected function json(array $data, int $status = 200): JsonResponse
+    protected function json(mixed $data, int $status = 200): JsonResponse
     {
         return new JsonResponse($data, $status);
     }
@@ -97,6 +97,11 @@ abstract class Controller
     {
         $referer = $this->request->headers->get('referer');
         $basePath = $this->request->getBasePath();
+
+        if (! $referer) {
+            return null;
+        }
+
         $path = parse_url($referer, PHP_URL_PATH);
 
         if (! $path || ! str_starts_with($path, $basePath)) {

@@ -18,11 +18,10 @@ abstract class Model
 
     protected string $path;
 
+    /** @var string[] */
     protected array $columns = [];
 
     protected ?int $id = null;
-
-    protected array $relationCache = [];
 
     public function getId(): ?int
     {
@@ -34,9 +33,10 @@ abstract class Model
         $this->id = $id;
     }
 
+    /** @return string[] */
     public function getColumns(): array
     {
-        return $this->columns ?? [];
+        return $this->columns;
     }
 
     public function insert(): static
@@ -96,9 +96,9 @@ abstract class Model
     public function deleteAll(): int
     {
         $db = DatabaseManager::connection();
-        $query = preg_replace('/SELECT \* FROM/', 'DELETE FROM', $this->query, 1);
+        $query = (string) preg_replace('/SELECT \* FROM/', 'DELETE FROM', $this->query, 1);
 
-        return $db->exec($query, $this->bindings ?? []);
+        return $db->exec($query, $this->bindings);
     }
 
     public function save(): static
