@@ -10,6 +10,7 @@ class Profile extends Model
 
     protected string $path = 'admin/profile';
 
+    /** @var string[] */
     protected array $columns = [
         'user_id',
         'user_image',
@@ -35,7 +36,7 @@ class Profile extends Model
         return self::$currentProfile;
     }
 
-    public static function lastSeen($last_login): string
+    public static function lastSeen(int $last_login): string
     {
         $seconds_ago = time() - $last_login;
         if ($seconds_ago >= 31536000) {

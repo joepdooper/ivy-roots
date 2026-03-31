@@ -11,6 +11,7 @@ class Plugin extends Model
 
     protected string $path = 'admin/plugin';
 
+    /** @var string[] */
     protected array $columns = [
         'name',
         'url',

@@ -13,6 +13,7 @@ class User extends Model
 
     protected string $path = 'admin/user';
 
+    /** @var string[] */
     protected array $columns = [
         'email',
         'username',
@@ -74,10 +75,10 @@ class User extends Model
 
     public static function setAuth(): void
     {
-        self::$auth = new Auth(DatabaseManager::connection(), true);
+        self::$auth = new Auth(DatabaseManager::connection());
     }
 
-    public static function getAuth(): ?Auth
+    public static function getAuth(): Auth
     {
         return self::$auth;
     }

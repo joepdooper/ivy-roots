@@ -13,6 +13,7 @@ class Setting extends Model
 
     protected string $path = 'admin/setting';
 
+    /** @var string[] */
     protected array $columns = [
         'name',
         'bool',

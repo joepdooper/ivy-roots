@@ -13,6 +13,7 @@ class Info extends Model
 
     protected string $path = 'admin/info';
 
+    /** @var string[] */
     protected array $columns = [
         'name',
         'value',

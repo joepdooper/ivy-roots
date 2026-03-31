@@ -10,6 +10,7 @@ class Template extends Model
 
     protected string $path = 'admin/template';
 
+    /** @var string[] */
     protected array $columns = [
         'type',
         'value',
