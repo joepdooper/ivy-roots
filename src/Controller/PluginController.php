@@ -47,12 +47,14 @@ class PluginController extends Controller
                 $this->pluginManager = new PluginManager($this->plugin);
                 $responses[] = $this->pluginManager->install();
             } else {
-                $plugin = $this->plugin->where('id', $plugin_data['id'])->fetchOne()->populate($plugin_data);
-                if (isset($plugin_data['delete'])) {
-                    $this->pluginManager = new PluginManager($plugin);
-                    $responses[] = $this->pluginManager->uninstall();
-                } else {
-                    $plugin->update();
+                $plugin = $this->plugin->where('id', $plugin_data['id'])->fetchOne()?->populate($plugin_data);
+                if ($plugin) {
+                    if (isset($plugin_data['delete'])) {
+                        $this->pluginManager = new PluginManager($plugin);
+                        $responses[] = $this->pluginManager->uninstall();
+                    } else {
+                        $plugin->update();
+                    }
                 }
             }
 
@@ -66,12 +68,12 @@ class PluginController extends Controller
         $this->redirect('admin/plugin');
     }
 
-    public function index($id = null): void
+    public function index(?int $id = null): void
     {
         $this->plugin->authorize('index');
 
         if ($id) {
-            $parent_id = (new Plugin)->where('url', $id)->fetchOne()->getId();
+            $parent_id = (new Plugin)->where('url', $id)->fetchOne()?->getId();
             $uninstalled_plugins = null;
         } else {
             $parent_id = null;
@@ -91,7 +93,7 @@ class PluginController extends Controller
             });
             $uninstalled_plugins_info = [];
             foreach ($uninstalled_plugins as $key => $plugin) {
-                $uninstalled_plugins_info[$key] = json_decode(file_get_contents(Path::get('PLUGINS_PATH').$plugin.'/info.json'));
+                $uninstalled_plugins_info[$key] = json_decode((string) file_get_contents(Path::get('PLUGINS_PATH').$plugin.'/info.json'));
                 $uninstalled_plugins_info[$key]->url = $plugin;
             }
             $uninstalled_plugins = $uninstalled_plugins_info;

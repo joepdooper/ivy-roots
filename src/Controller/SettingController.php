@@ -18,7 +18,7 @@ class SettingController extends Controller
         $this->setting = new Setting;
     }
 
-    public function index($id = null): void
+    public function index(?int $id = null): void
     {
         $this->setting->authorize('index');
 

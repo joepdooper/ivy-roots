@@ -17,7 +17,7 @@ class InfoController extends SettingController
         $this->info = new Info;
     }
 
-    public function index($id = null): void
+    public function index(?int $id = null): void
     {
         $this->info->authorize('index');
 
@@ -52,7 +52,7 @@ class InfoController extends SettingController
                 if (isset($data['delete']) && ! empty($data['id'])) {
                     $info?->delete();
                 } else {
-                    $info->populate($data)->save();
+                    $info?->populate($data)->save();
                 }
             }
         }
