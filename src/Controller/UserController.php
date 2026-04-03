@@ -52,35 +52,35 @@ class UserController extends Controller
         $users_data = $this->request->get('user');
 
         foreach ($users_data as $user_data) {
-            $this->user = (new User)->where('id', $user_data['id'])->fetchOne();
+            $user = (new User)->where('id', $user_data['id'])->fetchOne();
 
-            if (isset($user_data['delete'])) {
-                try {
-                    $this->user::getAuth()->admin()->deleteUserById($this->user->id);
-                } catch (UnknownIdException|AuthError $e) {
-                    $this->flashBag->add('error', 'Something went wrong: '.$e);
-                }
-            } else {
-                try {
-                    if ($this->user->id) {
+            if ($user && $user->getId()) {
+                if (isset($user_data['delete'])) {
+                    try {
+                        $user::getAuth()->admin()->deleteUserById($user->getId());
+                    } catch (UnknownIdException|AuthError $e) {
+                        $this->flashBag->add('error', 'Something went wrong: ' . $e);
+                    }
+                } else {
+                    try {
                         if ($user_data['editor']) {
-                            $this->user::getAuth()->admin()->addRoleForUserById($this->user->id, Role::EDITOR);
+                            $user::getAuth()->admin()->addRoleForUserById($user->getId(), Role::EDITOR);
                         } else {
-                            $this->user::getAuth()->admin()->removeRoleForUserById($this->user->id, Role::EDITOR);
+                            $user::getAuth()->admin()->removeRoleForUserById($user->getId(), Role::EDITOR);
                         }
                         if ($user_data['admin']) {
-                            $this->user::getAuth()->admin()->addRoleForUserById($this->user->id, Role::ADMIN);
+                            $user::getAuth()->admin()->addRoleForUserById($user->getId(), Role::ADMIN);
                         } else {
-                            $this->user::getAuth()->admin()->removeRoleForUserById($this->user->id, Role::ADMIN);
+                            $user::getAuth()->admin()->removeRoleForUserById($user->getId(), Role::ADMIN);
                         }
                         if ($user_data['super_admin']) {
-                            $this->user::getAuth()->admin()->addRoleForUserById($this->user->id, Role::SUPER_ADMIN);
+                            $user::getAuth()->admin()->addRoleForUserById($user->getId(), Role::SUPER_ADMIN);
                         } else {
-                            $this->user::getAuth()->admin()->removeRoleForUserById($this->user->id, Role::SUPER_ADMIN);
+                            $user::getAuth()->admin()->removeRoleForUserById($user->getId(), Role::SUPER_ADMIN);
                         }
+                    } catch (UnknownIdException) {
+                        $this->flashBag->add('error', 'Unknown ID');
                     }
-                } catch (UnknownIdException) {
-                    $this->flashBag->add('error', 'Unknown ID');
                 }
             }
         }
@@ -189,7 +189,7 @@ class UserController extends Controller
         }
     }
 
-    public function viewLogin($selector = null, $token = null): void
+    public function viewLogin(?string $selector = null, ?string $token = null): void
     {
         if (isset($selector) && isset($token)) {
             try {
@@ -307,7 +307,7 @@ class UserController extends Controller
         }
     }
 
-    public function viewReset($selector = null, $token = null): void
+    public function viewReset(?string $selector = null, ?string $token = null): void
     {
         if (isset($selector) && isset($token)) {
             try {

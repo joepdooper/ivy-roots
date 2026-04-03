@@ -6,6 +6,7 @@ use Ivy\Config\Environment;
 
 final class Path
 {
+    /** @var array<string, string|false|null> */
     private static array $paths = [];
 
     private static bool $initialized = false;

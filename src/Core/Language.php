@@ -8,11 +8,13 @@ class Language
 {
     protected static string $defaultLang = 'en';
 
+    /** @var mixed[] */
     protected static array $translations = [];
 
+    /** @var mixed[] */
     protected static array $loadedFiles = [];
 
-    public static function load($lang = null): void
+    public static function load(?string $lang = null): void
     {
         if (! $lang) {
             $lang = self::$defaultLang;
@@ -21,7 +23,8 @@ class Language
         self::$defaultLang = $lang;
     }
 
-    public static function translate($key, $variables = [])
+    /* @param array<string> $variables */
+    public static function translate(string $key, ?array $variables = []): string
     {
         $keys = explode('.', $key);
         $firstKey = array_shift($keys);
@@ -35,12 +38,13 @@ class Language
         } else {
             $secondKey = array_shift($keys);
 
-            if (! isset(self::$loadedFiles[$firstKey.'_'.$secondKey])) {
-                self::loadPluginFile($firstKey, $secondKey);
-            }
-
-            if (self::$translations[$firstKey.'_'.$secondKey]) {
-                $translation = self::getNestedTranslation(self::$translations[$firstKey.'_'.$secondKey], $keys);
+            if($secondKey){
+                if (! isset(self::$loadedFiles[$firstKey.'_'.$secondKey])) {
+                    self::loadPluginFile($firstKey, $secondKey);
+                }
+                if (self::$translations[$firstKey.'_'.$secondKey]) {
+                    $translation = self::getNestedTranslation(self::$translations[$firstKey.'_'.$secondKey], $keys);
+                }
             }
         }
 
@@ -50,10 +54,10 @@ class Language
             }
         }
 
-        return $translation ?? ($key ?? '…');
+        return $translation;
     }
 
-    private static function loadFile($firstKey): void
+    private static function loadFile(string $firstKey): void
     {
         $langPath = Path::get('PROJECT_PATH').'language'.DIRECTORY_SEPARATOR.self::$defaultLang.DIRECTORY_SEPARATOR.$firstKey.'.php';
 
@@ -66,7 +70,7 @@ class Language
         }
     }
 
-    private static function loadPluginFile($firstKey, $secondKey): void
+    private static function loadPluginFile(string $firstKey, string $secondKey): void
     {
         $langPath = TemplateManager::file(Path::get('PLUGINS_FOLDER').$firstKey.DIRECTORY_SEPARATOR.'language'.DIRECTORY_SEPARATOR.self::$defaultLang.DIRECTORY_SEPARATOR.$secondKey.'.php');
 
@@ -79,7 +83,11 @@ class Language
         }
     }
 
-    private static function getNestedTranslation(array $translations, array $keys)
+    /**
+     * @param string[] $translations
+     * @param string[] $keys
+     */
+    private static function getNestedTranslation(array $translations, array $keys): ?array
     {
         foreach ($keys as $k) {
             if (! is_array($translations) || ! isset($translations[$k])) {
@@ -91,7 +99,7 @@ class Language
         return $translations;
     }
 
-    public static function setDefaultLang($lang): void
+    public static function setDefaultLang(string $lang): void
     {
         self::$defaultLang = $lang;
     }

@@ -4,8 +4,10 @@ namespace Ivy\Core;
 
 class Container
 {
+    /** @var array<(callable)|string> */
     protected array $bindings = [];
 
+    /** @var string[] */
     protected array $instances = [];
 
     public function bind(string $abstract, callable $concrete): void
@@ -18,7 +20,7 @@ class Container
         $this->instances[$abstract] = $concrete($this);
     }
 
-    public function get(string $abstract)
+    public function get(string $abstract): string
     {
         if (isset($this->instances[$abstract])) {
             return $this->instances[$abstract];

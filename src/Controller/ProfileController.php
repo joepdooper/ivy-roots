@@ -48,53 +48,55 @@ class ProfileController extends Controller
             $this->flashBag->set('old', $result->old);
             $this->redirect('admin/profile');
         } else {
-            $this->profile = (new Profile)->with(['user'])->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
+            $profile = (new Profile)->with(['user'])->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
 
-            if (User::getAuth()->getUsername() !== $result->data['username']) {
-                $this->profile->user->populate(['username' => $result->data['username']])->update();
-            }
-
-            if (User::getAuth()->getEmail() !== $result->data['email']) {
-                try {
-                    User::getAuth()->changeEmail($result->data['email'], function ($selector, $token) use ($result) {
-                        $url = Path::get('PUBLIC_URL').'admin/profile/'.urlencode($selector).'/'.urlencode($token);
-                        // send email
-                        $mail = new Mail;
-                        $mail->addAddress($result->data['email'], $result->data['username']);
-                        $mail->setSubject('Reset email address');
-                        $mail->setBody('Reset your email address with this link: '.$url);
-                        $mail->setAltBody('Reset your email address with this link: '.$url);
-                        $mail->send();
-                    });
-                    $this->flashBag->add('success', 'An email has been sent to '.$result->data['email'].' with a link to confirm the email address');
-                } catch (InvalidEmailException) {
-                    $this->flashBag->add('error', 'Invalid email address');
-                } catch (UserAlreadyExistsException) {
-                    $this->flashBag->add('error', 'Email address already exists');
-                } catch (EmailNotVerifiedException) {
-                    $this->flashBag->add('error', 'Account not verified');
-                } catch (NotLoggedInException) {
-                    $this->flashBag->add('error', 'Not logged in');
-                } catch (TooManyRequestsException $e) {
-                    $this->flashBag->add('error', 'Too many requests');
+            if($profile){
+                if ($profile->user && (User::getAuth()->getUsername() !== $result->data['username'])) {
+                    $profile->user->populate(['username' => $result->data['username']])->update();
                 }
-            }
 
-            if (in_array('Image', SessionManager::get('plugin_actives'))) {
-                if ($this->request->files->get('avatar')) {
-                    $file = new ImageFile($this->request->files->get('avatar'));
-                    $this->profile->user_image = $file
-                        ->setUploadPath('profile')
-                        ->setImageWidth(120)
-                        ->generateFileName();
-                    (new ImageFileService)->add($file)->upload();
-                    $this->profile->update();
+                if (User::getAuth()->getEmail() !== $result->data['email']) {
+                    try {
+                        User::getAuth()->changeEmail($result->data['email'], function ($selector, $token) use ($result) {
+                            $url = Path::get('PUBLIC_URL').'admin/profile/'.urlencode($selector).'/'.urlencode($token);
+                            // send email
+                            $mail = new Mail;
+                            $mail->addAddress($result->data['email'], $result->data['username']);
+                            $mail->setSubject('Reset email address');
+                            $mail->setBody('Reset your email address with this link: '.$url);
+                            $mail->setAltBody('Reset your email address with this link: '.$url);
+                            $mail->send();
+                        });
+                        $this->flashBag->add('success', 'An email has been sent to '.$result->data['email'].' with a link to confirm the email address');
+                    } catch (InvalidEmailException) {
+                        $this->flashBag->add('error', 'Invalid email address');
+                    } catch (UserAlreadyExistsException) {
+                        $this->flashBag->add('error', 'Email address already exists');
+                    } catch (EmailNotVerifiedException) {
+                        $this->flashBag->add('error', 'Account not verified');
+                    } catch (NotLoggedInException) {
+                        $this->flashBag->add('error', 'Not logged in');
+                    } catch (TooManyRequestsException $e) {
+                        $this->flashBag->add('error', 'Too many requests');
+                    }
                 }
-                if ($this->request->get('avatar') === 'delete') {
-                    $file = new ImageFile;
-                    $file->setUploadPath('profile')->remove($this->profile->user_image);
-                    $this->profile->user_image = null;
-                    $this->profile->update();
+
+                if (in_array('Image', SessionManager::get('plugin_actives'))) {
+                    if ($this->request->files->get('avatar')) {
+                        $file = new ImageFile($this->request->files->get('avatar'));
+                        $profile->user_image = $file
+                            ->setUploadPath('profile')
+                            ->setImageWidth(120)
+                            ->generateFileName();
+                        (new ImageFileService)->add($file)->upload();
+                        $profile->update();
+                    }
+                    if ($this->request->get('avatar') === 'delete') {
+                        $file = new ImageFile;
+                        $file->setUploadPath('profile')->remove($profile->user_image);
+                        $profile->user_image = null;
+                        $profile->update();
+                    }
                 }
             }
         }
@@ -109,13 +111,13 @@ class ProfileController extends Controller
         View::set('admin/profile.latte', ['profile' => $profile]);
     }
 
-    public function public($id): void
+    public function public(int $id): void
     {
         $profile = (new Profile)->where('id', $id)->fetchOne();
         View::set('include/profile.latte', ['profile' => $profile]);
     }
 
-    public function verify($selector = null, $token = null)
+    public function verify(?string $selector = null, ?string $token = null): void
     {
         if (isset($selector) && isset($token)) {
             try {

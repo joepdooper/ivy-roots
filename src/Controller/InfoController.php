@@ -43,7 +43,7 @@ class InfoController extends SettingController
             if (! $result->valid) {
                 $this->flashBag->set('errors', $result->errors);
                 $this->flashBag->set('old', $result->old);
-                $this->redirect($redirect);
+                $this->redirect($redirect ?? '');
             } else {
                 $info = ! empty($data['id'])
                     ? (new Info)->where('id', $data['id'])->fetchOne()
@@ -58,6 +58,6 @@ class InfoController extends SettingController
         }
 
         $this->flashBag->add('success', 'Update successfully');
-        $this->redirect($redirect);
+        $this->redirect($redirect ?? '');
     }
 }

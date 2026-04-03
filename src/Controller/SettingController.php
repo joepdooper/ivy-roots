@@ -44,31 +44,31 @@ class SettingController extends Controller
             if (! $result->valid) {
                 $this->flashBag->set('errors', $result->errors);
                 $this->flashBag->set('old', $result->old);
-                $this->redirect($redirect);
+                $this->redirect($redirect ?? '');
             } else {
-                $info = ! empty($data['id'])
+                $setting = ! empty($data['id'])
                     ? (new Setting)->where('id', $data['id'])->fetchOne()
                     : new Setting;
 
                 if (isset($data['delete']) && ! empty($data['id'])) {
-                    $info?->delete();
+                    $setting?->delete();
                 } else {
-                    $info->populate($data)->save();
+                    $setting?->populate($data)->save();
                 }
             }
         }
 
         $this->flashBag->add('success', 'Settings updated successfully.');
-        $this->redirect($redirect);
+        $this->redirect($redirect ?? '');
     }
 
-    protected function resolveRefererContext(string $url = '', int $statusCode = 302)
+    protected function resolveRefererContext(string $url = '', int $statusCode = 302): ?string
     {
         $refererPath = $this->getRefererPath();
         if ($refererPath != $this->setting->getPath()) {
-            $segments = explode('/', $refererPath);
+            $segments = explode('/', (string) $refererPath);
             if ($segments[0] === 'plugin') {
-                $this->setting->plugin_id = (new Plugin)->where('url', $segments[1])->fetchOne()->getId();
+                $this->setting->plugin_id = (new Plugin)->where('url', $segments[1])->fetchOne()?->getId();
             }
         }
 

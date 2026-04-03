@@ -37,8 +37,8 @@ class TemplateController extends Controller
         $this->template->authorize('index');
 
         View::set('admin/template.latte', [
-            'templateBase' => basename(TemplateManager::getTemplateBase()),
-            'templateSub' => basename(TemplateManager::getTemplateSub()),
+            'templateBase' => basename((string) TemplateManager::getTemplateBase()),
+            'templateSub' => basename((string) TemplateManager::getTemplateSub()),
         ]);
     }
 
@@ -61,10 +61,10 @@ class TemplateController extends Controller
                 }
 
                 $template = (new Template)->where('id', $data['id'])->fetchOne();
-                $template->populate($data)->update();
+                $template?->populate($data)->update();
 
                 $publisher = new AssetPublisher;
-                $publisher->publish('templates', $template->value);
+                $publisher->publish('templates', (string) $template?->value);
 
             } catch (\Exception $e) {
                 $this->flashBag->add('error', $e->getMessage());
