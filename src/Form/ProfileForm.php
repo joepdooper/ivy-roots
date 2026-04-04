@@ -8,6 +8,9 @@ use Ivy\Rule\UserNameRule;
 
 class ProfileForm extends Form
 {
+    /**
+     * @return array<string, mixed>
+     */
     protected function rules(): array
     {
         return [

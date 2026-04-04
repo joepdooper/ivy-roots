@@ -8,20 +8,34 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class PluginHelper
 {
+    /**
+     * @return null|mixed[]
+     */
     public static function parseJson(string $path): ?array
     {
         $file = self::getRealPath(Path::get('PLUGINS_PATH').$path);
-        $content = json_decode(file_get_contents($file), true);
+
+        if(!$file) {
+            throw new \Exception('No JSON file found: '.$path);
+        }
+
+        $content = file_get_contents($file);
+
+        if(!$content) {
+            throw new \Exception('JSON file could not be read: '.$path);
+        }
+
+        $decoded = json_decode($content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             return null;
         }
 
-        if (! $content) {
+        if (! $decoded) {
             throw new \Exception('Invalid JSON: '.$path);
         }
 
-        return $content;
+        return $decoded;
     }
 
     public static function getRealPath(string $path): ?string
@@ -50,6 +64,10 @@ class PluginHelper
         return Path::get('PLUGINS_PATH').basename($pluginUrl).DIRECTORY_SEPARATOR.'collection'.DIRECTORY_SEPARATOR;
     }
 
+    /**
+     * @param array<string>|null $dependencies
+     * @return array<string>
+     */
     public static function getMissingDependencies(?array $dependencies = []): array
     {
         return array_filter($dependencies ?? [], function ($dependency) {

@@ -8,12 +8,16 @@ use Ivy\Model\Setting;
 
 class AssetManager
 {
+    /** @var array<string> */
     protected static array $css = [];
 
+    /** @var array<string> */
     protected static array $js = [];
 
+    /** @var array<string> */
     protected static array $module = [];
 
+    /** @var array<string> */
     protected static array $vite = [];
 
     /**

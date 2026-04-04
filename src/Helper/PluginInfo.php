@@ -10,18 +10,23 @@ class PluginInfo
 
     private ?string $description;
 
-    private ?string $url;
+    private string $url;
 
     private ?string $type;
 
+    /** @var array<string> */
     private array $collection = [];
 
+    /** @var array<string, string> */
     private array $settings = [];
 
+    /** @var array<string, string> */
     private array $actions = [];
 
+    /** @var null|array<string, string> */
     private ?array $database;
 
+    /** @var null|array<string> */
     private ?array $dependencies;
 
     public function __construct(string $url)
@@ -71,6 +76,9 @@ class PluginInfo
         return ! empty($this->collection);
     }
 
+    /**
+     * @return array<string>
+     */
     public function getCollection(): array
     {
         return $this->collection;
@@ -81,6 +89,9 @@ class PluginInfo
         return ! empty($this->settings);
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getSettings(): array
     {
         return $this->settings;
@@ -91,16 +102,25 @@ class PluginInfo
         return ! empty($this->actions);
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getActions(): array
     {
         return $this->actions;
     }
 
+    /**
+     * @return null|array<string, string>
+     */
     public function getDatabase(): ?array
     {
         return $this->database;
     }
 
+    /**
+     * @return null|array<string>
+     */
     public function getDependencies(): ?array
     {
         return $this->dependencies;

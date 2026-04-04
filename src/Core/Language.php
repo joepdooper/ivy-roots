@@ -23,9 +23,13 @@ class Language
         self::$defaultLang = $lang;
     }
 
-    /* @param array<string> $variables */
+    /**
+     * @param array<string, string>|null $variables
+     */
     public static function translate(string $key, ?array $variables = []): string
     {
+        $translation = $key;
+
         $keys = explode('.', $key);
         $firstKey = array_shift($keys);
 
@@ -44,6 +48,7 @@ class Language
                 }
                 if (self::$translations[$firstKey.'_'.$secondKey]) {
                     $translation = self::getNestedTranslation(self::$translations[$firstKey.'_'.$secondKey], $keys);
+                    d($translation);die;
                 }
             }
         }
@@ -86,12 +91,13 @@ class Language
     /**
      * @param string[] $translations
      * @param string[] $keys
+     * @return string
      */
-    private static function getNestedTranslation(array $translations, array $keys): ?array
+    private static function getNestedTranslation(array $translations, array $keys): string
     {
         foreach ($keys as $k) {
             if (! is_array($translations) || ! isset($translations[$k])) {
-                return null;
+                return $translations;
             }
             $translations = $translations[$k];
         }

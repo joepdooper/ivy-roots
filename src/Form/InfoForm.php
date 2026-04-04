@@ -7,6 +7,9 @@ use Ivy\Rule\InfoSettingRule;
 
 class InfoForm extends Form
 {
+    /**
+     * @return array<string, mixed>
+     */
     protected function rules(): array
     {
         return [
