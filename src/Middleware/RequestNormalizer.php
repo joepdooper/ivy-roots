@@ -21,7 +21,7 @@ class RequestNormalizer implements MiddlewareInterface
         return $next($request);
     }
 
-    private function sanitize(&$value): void
+    private function sanitize(?string &$value): void
     {
         if (is_string($value)) {
             $value = trim($value);
