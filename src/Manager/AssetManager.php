@@ -46,6 +46,7 @@ class AssetManager
 
     /**
      * Get compiled CSS assets.
+     * @return array<string>
      */
     public static function getCSS(): array
     {
@@ -54,6 +55,7 @@ class AssetManager
 
     /**
      * Get compiled JS assets.
+     * @return array<string>
      */
     public static function getJS(): array
     {
@@ -62,10 +64,11 @@ class AssetManager
 
     /**
      * Get compiled JS module assets.
+     * @return array<string>
      */
     public static function getModules(): array
     {
-        return self::processAssets(self::$js, 'js', Setting::stashGet('minify_js')->bool);
+        return self::processAssets(self::$module, 'js', Setting::stashGet('minify_js')->bool);
     }
 
     /**
@@ -83,8 +86,8 @@ class AssetManager
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_NOBODY => true,
-            CURLOPT_CONNECTTIMEOUT => 0.2,
-            CURLOPT_TIMEOUT => 0.5,
+            CURLOPT_CONNECTTIMEOUT => 1,
+            CURLOPT_TIMEOUT => 1,
         ]);
 
         curl_exec($ch);
@@ -130,6 +133,7 @@ class AssetManager
 
     /**
      * Handle adding and syncing asset in dev mode.
+     * @param array<string> $collection
      */
     private static function addAsset(string $path, array &$collection): void
     {
@@ -146,6 +150,8 @@ class AssetManager
 
     /**
      * Handle minification and dev cleanup.
+     * @param array<string> $assets
+     * @return array<string>
      */
     private static function processAssets(array $assets, string $type, bool $shouldMinify): array
     {

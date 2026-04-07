@@ -26,6 +26,10 @@ class View
 
     protected static array $params = [];
 
+    protected static array $errors = [];
+
+    protected static array $old = [];
+
     protected static ?string $block = null;
 
     public static function name(string $name, array $params = [], ?string $block = null): string
@@ -39,7 +43,14 @@ class View
 
     public static function set(string $name, array $params = [], ?string $block = null): void
     {
-        $params['flashes'] = SessionManager::getFlashBag()->all();
+        $flashBag = SessionManager::getFlashBag();
+        if($flashBag->has('errors')) {
+            self::$errors = $flashBag->get('errors');
+        }
+        if($flashBag->has('old')) {
+            self::$old = $flashBag->get('old');
+        }
+        $params['flashes'] = $flashBag->all();
         self::name($name, $params, $block);
     }
 
@@ -100,6 +111,8 @@ class View
         self::$latte->addFunction('hook', fn ($key) => HookManager::do($key));
         self::$latte->addFunction('csp', fn () => SecurityManager::getNonce());
         self::$latte->addFunction('datetime', fn () => Carbon::class);
+        self::$latte->addFunction('error', fn($key) => self::$errors[$key] ?? null);
+        self::$latte->addFunction('old', fn($key, $default = null) => self::$old[$key] ?? $default);
 
         self::$latte->addExtension(new ButtonTag);
         self::$latte->addProvider('customButtonRender', function ($args) {

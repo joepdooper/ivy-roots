@@ -3,6 +3,7 @@
 namespace Ivy\Controller;
 
 use Ivy\Abstract\Controller;
+use Ivy\Core\Path;
 use Ivy\Form\SettingForm;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
@@ -11,11 +12,13 @@ use Ivy\View\View;
 class SettingController extends Controller
 {
     private Setting $setting;
+    private SettingForm $settingForm;
 
     public function __construct()
     {
         parent::__construct();
         $this->setting = new Setting;
+        $this->settingForm = New SettingForm;
     }
 
     public function index(?int $id = null): void
@@ -27,24 +30,23 @@ class SettingController extends Controller
         View::set('admin/setting.latte', ['settings' => $settings]);
     }
 
-    public function post(): void
+    public function sync(): void
     {
-        $this->setting->authorize('post');
+        $this->setting->authorize('sync');
 
-        $redirect = $this->resolveRefererContext();
+        $errors = $old = [];
 
-        foreach ($this->request->get('setting') as $data) {
+        foreach ($this->request->get('setting') as $index => $data) {
 
             if (empty($data['name'])) {
                 continue;
             }
 
-            $result = (new SettingForm)->validate($data);
+            $result = $this->settingForm->validate($data);
 
             if (! $result->valid) {
-                $this->flashBag->set('errors', $result->errors);
-                $this->flashBag->set('old', $result->old);
-                $this->redirect($redirect ?? '');
+                $errors['setting'][$index] = $result->errors;
+                $old['setting'][$index] = $result->old;
             } else {
                 $setting = ! empty($data['id'])
                     ? (new Setting)->where('id', $data['id'])->fetchOne()
@@ -52,14 +54,21 @@ class SettingController extends Controller
 
                 if (isset($data['delete']) && ! empty($data['id'])) {
                     $setting?->delete();
+                    $this->flashBag->add('success', 'Setting ' . $setting->name . ' deleted successfully.');
                 } else {
                     $setting?->populate($data)->save();
                 }
             }
         }
 
-        $this->flashBag->add('success', 'Settings updated successfully.');
-        $this->redirect($redirect ?? '');
+        if (! empty($errors)) {
+            $this->flashBag->set('errors', $errors);
+            $this->flashBag->set('old', $old);
+        } else {
+            $this->flashBag->add('success', 'Settings updated successfully.');
+        }
+
+        $this->redirect($this->resolveRefererContext() ?? '');
     }
 
     protected function resolveRefererContext(string $url = '', int $statusCode = 302): ?string
