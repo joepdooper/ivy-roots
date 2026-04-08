@@ -7,12 +7,27 @@ use Ivy\Model\User;
 
 class SettingPolicy
 {
-    public static function post(Setting $setting): bool
+    public static function index(Setting $setting): bool
     {
         return User::canEditAsAdmin();
     }
 
-    public static function index(Setting $setting): bool
+    public static function sync(Setting $setting): bool
+    {
+        return User::canEditAsAdmin();
+    }
+
+    public static function save(Setting $setting): bool
+    {
+        return User::canEditAsAdmin();
+    }
+
+    public static function add(Setting $setting): bool
+    {
+        return User::canEditAsAdmin();
+    }
+
+    public static function update(Setting $setting): bool
     {
         return User::canEditAsAdmin();
     }

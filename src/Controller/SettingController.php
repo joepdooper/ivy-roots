@@ -30,6 +30,44 @@ class SettingController extends Controller
         View::set('admin/setting.latte', ['settings' => $settings]);
     }
 
+    public function add(mixed $data): void
+    {
+        $setting = new Setting();
+
+        $setting->authorize('add');
+
+        $setting->populate($data)->save();
+        $this->flashBag->add('success', 'Setting ' . $setting->name . ' added successfully.');
+    }
+
+    public function update(Setting|int $setting, mixed $data): void
+    {
+        if(is_int($setting)) {
+            $setting = (new Setting)->where('id', $setting)->fetchOne();
+        }
+
+        $setting?->authorize('update');
+
+        if($setting && $setting->isDirty($data)) {
+            $setting->populate($data)->update();
+            $this->flashBag->add('success', 'Setting ' . $setting->name . ' updated successfully.');
+        }
+    }
+
+    public function delete(Setting|int $setting): void
+    {
+        if(is_int($setting)) {
+            $setting = (new Setting)->where('id', $setting)->fetchOne();
+        }
+
+        $setting?->authorize('delete');
+
+        if($setting){
+            $setting->delete();
+            $this->flashBag->add('success', 'Setting ' . $setting->name . ' deleted successfully.');
+        }
+    }
+
     public function sync(): void
     {
         $this->setting->authorize('sync');
@@ -45,18 +83,15 @@ class SettingController extends Controller
             $result = $this->settingForm->validate($data);
 
             if (! $result->valid) {
-                $errors['setting'][$index] = $result->errors;
-                $old['setting'][$index] = $result->old;
+                $errors[$index] = $result->errors;
+                $old[$index] = $result->old;
             } else {
-                $setting = ! empty($data['id'])
-                    ? (new Setting)->where('id', $data['id'])->fetchOne()
-                    : new Setting;
-
-                if (isset($data['delete']) && ! empty($data['id'])) {
-                    $setting?->delete();
-                    $this->flashBag->add('success', 'Setting ' . $setting->name . ' deleted successfully.');
+                if(empty($data['id'])){
+                    $this->add($data);
+                } elseif(isset($data['delete'])) {
+                    $this->delete($data['id']);
                 } else {
-                    $setting?->populate($data)->save();
+                    $this->update($data['id'], $data);
                 }
             }
         }
@@ -64,8 +99,6 @@ class SettingController extends Controller
         if (! empty($errors)) {
             $this->flashBag->set('errors', $errors);
             $this->flashBag->set('old', $old);
-        } else {
-            $this->flashBag->add('success', 'Settings updated successfully.');
         }
 
         $this->redirect($this->resolveRefererContext() ?? '');

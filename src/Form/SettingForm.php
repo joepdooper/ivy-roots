@@ -15,6 +15,7 @@ class SettingForm extends Form
         return [
             'name' => ['required', 'not_nullable', new InfoSettingRule],
             'value' => new InfoSettingRule,
+            'info' => ['string', 'max:50'],
             'plugin_id' => 'numeric',
         ];
     }

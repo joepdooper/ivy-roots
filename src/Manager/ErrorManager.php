@@ -6,7 +6,7 @@ use Ivy\Core\Path;
 
 class ErrorManager
 {
-    public static function setErrorReporting()
+    public static function setErrorReporting(): void
     {
         $reporting = $_ENV['ERROR_REPORTING'] ?: 'E_ALL';
         $reporting = defined($reporting) ? constant($reporting) : E_ALL;
