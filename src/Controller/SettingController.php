@@ -82,10 +82,7 @@ class SettingController extends Controller
 
             $result = $this->settingForm->validate($data);
 
-            if (! $result->valid) {
-                $errors[$index] = $result->errors;
-                $old[$index] = $result->old;
-            } else {
+            if ($result->valid) {
                 if(empty($data['id'])){
                     $this->add($data);
                 } elseif(isset($data['delete'])) {
@@ -93,6 +90,9 @@ class SettingController extends Controller
                 } else {
                     $this->update($data['id'], $data);
                 }
+            } else {
+                $errors[$index] = $result->errors;
+                $old[$index] = $result->old;
             }
         }
 
