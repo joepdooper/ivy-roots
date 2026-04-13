@@ -2,6 +2,7 @@
 
 namespace Ivy\Abstract;
 
+use Curl\Curl;
 use Ivy\Core\Path;
 use Ivy\Manager\SessionManager;
 use Ivy\Middleware\CsrfVerifier;
@@ -10,20 +11,19 @@ use Ivy\Middleware\RequestNormalizer;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 
 abstract class Controller
 {
     protected Request $request;
 
-    protected FlashBagInterface $flashBag;
+    protected FlashBag $flashBag;
 
     public function __construct()
     {
         $this->request = Request::createFromGlobals();
         $this->flashBag = SessionManager::getFlashBag();
         $this->runMiddlewares();
-        $this->requirements();
     }
 
     protected function runMiddlewares(): void
@@ -34,56 +34,13 @@ abstract class Controller
         $pipeline->handle($this->request, fn (Request $req) => null);
     }
 
-    protected function requirePost(): void
-    {
-        if (! $this->request->isMethod('POST')) {
-            $this->flashBag->add('error', 'Invalid request method.');
-            $this->redirect();
-            exit;
-        }
-    }
-
-    protected function requirePatch(): void
-    {
-        if (! $this->request->isMethod('PATCH')) {
-            $this->flashBag->add('error', 'Invalid request method.');
-            $this->redirect();
-            exit;
-        }
-    }
-
-    protected function requireGet(): void
-    {
-        if (! $this->request->isMethod('GET')) {
-            $this->flashBag->add('error', 'Invalid request method.');
-            $this->redirect();
-            exit;
-        }
-    }
-
-    protected function requirements(): void
-    {
-        $method = $this->request->getMethod();
-        switch ($method) {
-            case 'POST':
-                $this->requirePost();
-                break;
-            case 'PATCH':
-                $this->requirePatch();
-                break;
-            case 'GET':
-                $this->requireGet();
-                break;
-        }
-    }
-
     protected function redirect(string $url = '', int $statusCode = 302): void
     {
         (new RedirectResponse(Path::get('BASE_PATH').$url, $statusCode))->send();
         exit;
     }
 
-    protected function json(mixed $data, int $status = 200): JsonResponse
+    protected function json(array $data, int $status = 200): JsonResponse
     {
         return new JsonResponse($data, $status);
     }
@@ -97,11 +54,6 @@ abstract class Controller
     {
         $referer = $this->request->headers->get('referer');
         $basePath = $this->request->getBasePath();
-
-        if (! $referer) {
-            return null;
-        }
-
         $path = parse_url($referer, PHP_URL_PATH);
 
         if (! $path || ! str_starts_with($path, $basePath)) {

@@ -2,25 +2,26 @@
 
 namespace Ivy\Controller;
 
-use BlakvGhost\PHPValidator\Validator;
 use Ivy\Abstract\Controller;
 use Ivy\Core\Path;
+use Ivy\Form\TemplateForm;
 use Ivy\Manager\TemplateManager;
 use Ivy\Model\Setting;
 use Ivy\Model\Template;
 use Ivy\Model\User;
-use Ivy\Rule\InfoSettingRule;
 use Ivy\Service\AssetPublisher;
 use Ivy\View\View;
 
 class TemplateController extends Controller
 {
     protected Template $template;
+    protected TemplateForm $templateForm;
 
     public function __construct()
     {
         parent::__construct();
         $this->template = new Template;
+        $this->templateForm = new TemplateForm;
     }
 
     public function before(): void
@@ -42,38 +43,44 @@ class TemplateController extends Controller
         ]);
     }
 
-    public function post(): void
+    public function update(Template|int $template, mixed $data): void
     {
-        $this->template->authorize('post');
+        if(is_int($template)) {
+            $template = (new Template)->where('id', $template)->fetchOne();
+        }
 
-        foreach ($this->request->get('template') as $data) {
-            try {
-                $validated = new Validator($data, [
-                    'value' => new InfoSettingRule,
-                ]);
+        if($template && $template->isDirty($data)) {
+            $template->authorize('update');
+            $template->populate($data)->update();
+            $publisher = new AssetPublisher;
+            $publisher->publish('templates', $template->value);
+            $this->flashBag->add('success', $template->type . '-template updated successfully.');
+        }
+    }
 
-                if (! $validated->isValid()) {
-                    foreach ($validated->getErrors() as $msg) {
-                        $this->flashBag->add('error', $msg);
-                    }
+    public function sync(): void
+    {
+        $this->template->authorize('sync');
 
-                    continue;
-                }
+        foreach ($this->request->get('template') as $index => $data) {
 
-                $template = (new Template)->where('id', $data['id'])->fetchOne();
-                $template?->populate($data)->update();
+            $result = $this->templateForm->validate($data);
 
-                $publisher = new AssetPublisher;
-                $publisher->publish('templates', (string) $template?->value);
-
-            } catch (\Exception $e) {
-                $this->flashBag->add('error', $e->getMessage());
+            if ($result->valid) {
+                $this->update($result->data['id'], $result->data);
+            } else {
+                $errors[$index] = $result->errors;
+                $old[$index] = $result->old;
             }
+        }
+
+        if (! empty($errors)) {
+            $this->flashBag->set('errors', $errors);
+            $this->flashBag->set('old', $old);
         }
 
         TemplateManager::init(true);
 
-        $this->flashBag->add('success', 'Update successfully');
         $this->redirect('admin/template');
     }
 

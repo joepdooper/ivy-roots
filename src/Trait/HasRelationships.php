@@ -37,7 +37,7 @@ trait HasRelationships
         return $this->relations[$relationName] = $result;
     }
 
-    public function hasOne(string $relatedClass, string $foreignKey, string $localKey = 'id'): ?object
+    public function hasOne(string $relatedClass, string $foreignKey, string $localKey = 'id'): ?self
     {
         return $this->resolveRelation($relatedClass, $foreignKey, $localKey, true);
     }

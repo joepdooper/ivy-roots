@@ -3,6 +3,8 @@
 namespace Ivy\Model;
 
 use Ivy\Abstract\Model;
+use Ivy\Trait\HasDirtyChecking;
+use Ivy\Trait\Stash;
 
 /**
  * @property string $type
@@ -10,6 +12,8 @@ use Ivy\Abstract\Model;
  */
 class Template extends Model
 {
+    use HasDirtyChecking;
+
     protected string $table = 'templates';
 
     protected string $path = 'admin/template';

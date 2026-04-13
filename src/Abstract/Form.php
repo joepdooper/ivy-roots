@@ -9,13 +9,9 @@ abstract class Form
 {
     protected Validator $validator;
 
-    /** @return array<string, mixed> */
     abstract protected function rules(): array;
 
-    /**
-     * @param  mixed[]  $data
-     */
-    public function validate(array $data): ValidationResult
+    public function validate($data): ValidationResult
     {
         $this->validator = new Validator($data, $this->rules());
 
@@ -23,6 +19,7 @@ abstract class Form
             return new ValidationResult(
                 valid: false,
                 errors: $this->validator->getErrors(),
+                old: $data
             );
         }
 

@@ -7,12 +7,27 @@ use Ivy\Model\User;
 
 class InfoPolicy
 {
-    public static function post(Info $info): bool
+    public static function index(Info $info): bool
     {
         return User::canEditAsAdmin();
     }
 
-    public static function index(Info $info): bool
+    public static function sync(Info $info): bool
+    {
+        return User::canEditAsAdmin();
+    }
+
+    public static function save(Info $info): bool
+    {
+        return User::canEditAsAdmin();
+    }
+
+    public static function add(Info $info): bool
+    {
+        return User::canEditAsAdmin();
+    }
+
+    public static function update(Info $info): bool
     {
         return User::canEditAsAdmin();
     }

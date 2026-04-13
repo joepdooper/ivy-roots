@@ -4,21 +4,26 @@ namespace Ivy\Controller;
 
 use Ivy\Abstract\Controller;
 use Ivy\Core\Path;
+use Ivy\Form\PluginForm;
 use Ivy\Manager\PluginManager;
 use Ivy\Model\Plugin;
+use Ivy\Model\Setting;
 use Ivy\Model\User;
 use Ivy\View\View;
 
 class PluginController extends Controller
 {
     private Plugin $plugin;
-
+    private PluginForm $pluginForm;
     private PluginManager $pluginManager;
+
+    private array $responses = [];
 
     public function __construct()
     {
         parent::__construct();
         $this->plugin = new Plugin;
+        $this->pluginForm = new PluginForm;
     }
 
     public function before(): void
@@ -32,39 +37,69 @@ class PluginController extends Controller
         }
     }
 
-    public function post(): void
+    public function install(mixed $data): void
     {
-        $this->plugin->authorize('post');
+        $plugin = new Plugin;
 
-        $plugins_data = $this->request->get('plugin') ?? '';
-        $responses = [];
+        $plugin->authorize('install');
+        $plugin->populate($data);
 
-        foreach ($plugins_data as $plugin_data) {
+        $this->pluginManager = new PluginManager($plugin);
+        $this->responses[] = $this->pluginManager->install();
+    }
 
-            $this->plugin = (new Plugin)->populate($plugin_data);
-
-            if (! $this->plugin->hasId()) {
-                $this->pluginManager = new PluginManager($this->plugin);
-                $responses[] = $this->pluginManager->install();
-            } else {
-                $plugin = $this->plugin->where('id', $plugin_data['id'])->fetchOne()?->populate($plugin_data);
-                if ($plugin) {
-                    if (isset($plugin_data['delete'])) {
-                        $this->pluginManager = new PluginManager($plugin);
-                        $responses[] = $this->pluginManager->uninstall();
-                    } else {
-                        $plugin->update();
-                    }
-                }
-            }
-
+    public function update(Plugin|int $plugin, mixed $data): void
+    {
+        if(is_int($plugin)) {
+            $plugin = (new Plugin)->where('id', $plugin)->fetchOne();
         }
 
-        foreach ($responses as $response) {
+        if($plugin && $plugin->isDirty($data)) {
+            $plugin->authorize('update');
+            $plugin->populate($data)->update();
+            $this->flashBag->add('success', 'Plugin ' . $plugin->name . ' updated successfully.');
+        }
+    }
+
+    public function uninstall(Plugin|int $plugin): void
+    {
+        if(is_int($plugin)) {
+            $plugin = (new Plugin)->where('id', $plugin)->fetchOne();
+        }
+
+        if($plugin){
+            $plugin->authorize('uninstall');
+            $this->pluginManager = new PluginManager($plugin);
+            $this->responses[] = $this->pluginManager->uninstall();
+        }
+    }
+
+    public function sync(): void
+    {
+        $this->plugin->authorize('sync');
+
+        foreach ($this->request->get('plugin') as $data) {
+
+            $result = $this->pluginForm->validate($data);
+
+            if ($result->valid) {
+                if(empty($result->data['id'])){
+                    $this->install($result->data);
+                } elseif(isset($result->data['delete'])) {
+                    $this->uninstall($result->data['id']);
+                } else {
+                    $this->update($result->data['id'], $result->data);
+                }
+            } else {
+                $errors[$index] = $result->errors;
+                $old[$index] = $result->old;
+            }
+        }
+
+        foreach ($this->responses as $response) {
             $this->flashBag->add($response['status'], $response['message']);
         }
 
-        $this->flashBag->add('success', 'Update successfully');
         $this->redirect('admin/plugin');
     }
 

@@ -174,5 +174,7 @@ class AssetPublisher
                 chmod($item->getRealPath(), 0444);
             }
         }
+
+        chmod(Path::get('MEDIA_PATH'), 0755);
     }
 }

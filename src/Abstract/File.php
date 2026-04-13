@@ -26,17 +26,17 @@ abstract class File
         }
     }
 
-    public function getUploadFile(): ?UploadedFile
+    public function getUploadFile(): UploadedFile
     {
         return $this->uploadFile;
     }
 
-    public function getExtension(): ?string
+    public function getExtension(): string
     {
         return $this->extension;
     }
 
-    public function getMimeType(): ?string
+    public function getMimeType(): string
     {
         return $this->mimeType;
     }
@@ -46,7 +46,7 @@ abstract class File
         return $this->uploadPath;
     }
 
-    public function setUploadPath(string $uploadPath): static
+    public function setUploadPath($uploadPath): static
     {
         $this->uploadPath = $uploadPath;
 
@@ -58,7 +58,7 @@ abstract class File
         return $this->fileName;
     }
 
-    public function setFileName(string $fileName): static
+    public function setFileName($fileName): static
     {
         $this->fileName = $fileName;
 
@@ -73,11 +73,11 @@ abstract class File
     }
 
     /**
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     public function validate(): static
     {
-        if ($this->uploadFile && ! $this->uploadFile->isValid()) {
+        if (! $this->uploadFile->isValid()) {
             throw new \RuntimeException('Upload failed with error: '.$this->uploadFile->getError());
         }
 
@@ -95,7 +95,7 @@ abstract class File
     protected function isMimeAllowed(): bool
     {
         foreach ($this->getAllowedMimeTypes() as $allowed) {
-            if ($this->mimeType && ($allowed === $this->mimeType || (str_ends_with($allowed, '/*') && str_starts_with($this->mimeType, substr($allowed, 0, (int) strpos($allowed, '/')).'/')))) {
+            if ($allowed === $this->mimeType || (str_ends_with($allowed, '/*') && str_starts_with($this->mimeType, substr($allowed, 0, strpos($allowed, '/')).'/'))) {
                 return true;
             }
         }
@@ -110,9 +110,7 @@ abstract class File
         }
     }
 
-    /** @return string[] */
     abstract public function getAllowedMimeTypes(): array;
 
-    /** @return string[] */
     abstract public function getAllowedExtensions(): array;
 }

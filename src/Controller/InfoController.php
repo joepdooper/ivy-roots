@@ -2,19 +2,22 @@
 
 namespace Ivy\Controller;
 
+use Ivy\Abstract\Controller;
 use Ivy\Form\InfoForm;
 use Ivy\Model\Info;
 use Ivy\Model\Plugin;
 use Ivy\View\View;
 
-class InfoController extends SettingController
+class InfoController extends Controller
 {
     private Info $info;
+    private InfoForm $infoForm;
 
     public function __construct()
     {
         parent::__construct();
         $this->info = new Info;
+        $this->infoForm = new InfoForm;
     }
 
     public function index(?int $id = null): void
@@ -26,13 +29,51 @@ class InfoController extends SettingController
         View::set('admin/info.latte', ['infos' => $infos]);
     }
 
-    public function post(): void
+    public function add(mixed $data): void
     {
-        $this->info->authorize('post');
+        $info = new Info();
 
-        $redirect = $this->resolveRefererContext();
+        $info->authorize('add');
 
-        foreach ($this->request->get('info') as $data) {
+        $info->populate($data)->save();
+        $this->flashBag->add('success', 'Info ' . $info->name . ' added successfully.');
+    }
+
+    public function update(Info|int $info, mixed $data): void
+    {
+        if(is_int($info)) {
+            $info = (new Info)->where('id', $info)->fetchOne();
+        }
+
+        $info?->authorize('update');
+
+        if($info && $info->isDirty($data)) {
+            $info->populate($data)->update();
+            $this->flashBag->add('success', 'Info ' . $info->name . ' updated successfully.');
+        }
+    }
+
+    public function delete(Info|int $info): void
+    {
+        if(is_int($info)) {
+            $info = (new Info)->where('id', $info)->fetchOne();
+        }
+
+        $info?->authorize('delete');
+
+        if($info){
+            $info->delete();
+            $this->flashBag->add('success', 'Info ' . $info->name . ' deleted successfully.');
+        }
+    }
+
+    public function sync(): void
+    {
+        $this->info->authorize('sync');
+
+        $errors = $old = [];
+
+        foreach ($this->request->get('info') as $index => $data) {
 
             if (empty($data['name'])) {
                 continue;
@@ -40,24 +81,38 @@ class InfoController extends SettingController
 
             $result = (new InfoForm)->validate($data);
 
-            if (! $result->valid) {
-                $this->flashBag->set('errors', $result->errors);
-                $this->flashBag->set('old', $result->old);
-                $this->redirect($redirect ?? '');
-            } else {
-                $info = ! empty($data['id'])
-                    ? (new Info)->where('id', $data['id'])->fetchOne()
-                    : new Info;
-
-                if (isset($data['delete']) && ! empty($data['id'])) {
-                    $info?->delete();
+            if ($result->valid) {
+                if(empty($data['id'])){
+                    $this->add($data);
+                } elseif(isset($data['delete'])) {
+                    $this->delete($data['id']);
                 } else {
-                    $info?->populate($data)->save();
+                    $this->update($data['id'], $data);
                 }
+            } else {
+                $errors[$index] = $result->errors;
+                $old[$index] = $result->old;
             }
         }
 
-        $this->flashBag->add('success', 'Update successfully');
-        $this->redirect($redirect ?? '');
+        if (! empty($errors)) {
+            $this->flashBag->set('errors', $errors);
+            $this->flashBag->set('old', $old);
+        }
+
+        $this->redirect($this->resolveRefererContext() ?? '');
+    }
+
+    protected function resolveRefererContext(string $url = '', int $statusCode = 302): ?string
+    {
+        $refererPath = $this->getRefererPath();
+        if ($refererPath != $this->info->getPath()) {
+            $segments = explode('/', (string) $refererPath);
+            if ($segments[0] === 'plugin') {
+                $this->info->plugin_id = (new Plugin)->where('url', $segments[1])->fetchOne()?->getId();
+            }
+        }
+
+        return $refererPath;
     }
 }

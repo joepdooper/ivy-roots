@@ -7,13 +7,18 @@ use Ivy\Model\User;
 
 class TemplatePolicy
 {
-    public static function post(Template $template): bool
+    public static function index(Template $template): bool
     {
         return User::canEditAsAdmin();
     }
 
-    public static function index(Template $template): bool
+    public static function sync(Template $template): bool
     {
-        return User::canEditAsAdmin();
+        return User::canEditAsSuperAdmin();
+    }
+
+    public static function update(Template $template): bool
+    {
+        return User::canEditAsSuperAdmin();
     }
 }

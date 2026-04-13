@@ -23,11 +23,13 @@ use Ivy\View\View;
 class ProfileController extends Controller
 {
     private Profile $profile;
+    private ProfileForm $profileForm;
 
     public function __construct()
     {
         parent::__construct();
         $this->profile = new Profile;
+        $this->profileForm = new ProfileForm;
     }
 
     public function before(): void
@@ -37,17 +39,13 @@ class ProfileController extends Controller
         }
     }
 
-    public function post(): void
+    public function save(): void
     {
-        $this->profile->authorize('post');
+        $this->profile->authorize('save');
 
-        $result = (new ProfileForm)->validate($this->request->request->all());
+        $result = $this->profileForm->validate($this->request->request->all());
 
-        if (! $result->valid) {
-            $this->flashBag->set('errors', $result->errors);
-            $this->flashBag->set('old', $result->old);
-            $this->redirect('admin/profile');
-        } else {
+        if ($result->valid) {
             $profile = (new Profile)->with(['user'])->where('user_id', $_SESSION['auth_user_id'])->fetchOne();
 
             if($profile){
@@ -99,9 +97,11 @@ class ProfileController extends Controller
                     }
                 }
             }
+        } else {
+            $this->flashBag->set('errors', $result->errors);
+            $this->flashBag->set('old', $result->old);
         }
 
-        $this->flashBag->add('success', 'Update successfully');
         $this->redirect('admin/profile');
     }
 

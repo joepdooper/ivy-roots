@@ -18,6 +18,7 @@ use Delight\Auth\UserAlreadyExistsException;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
 use Ivy\Abstract\Controller;
 use Ivy\Core\Path;
+use Ivy\Form\UserForm;
 use Ivy\Manager\DatabaseManager;
 use Ivy\Model\Setting;
 use Ivy\Model\User;
@@ -27,11 +28,13 @@ use Ivy\View\View;
 class UserController extends Controller
 {
     private User $user;
+    private UserForm $userForm;
 
     public function __construct()
     {
         parent::__construct();
         $this->user = new User;
+        $this->userForm = new UserForm;
     }
 
     public function before(): void
@@ -45,43 +48,44 @@ class UserController extends Controller
         }
     }
 
-    public function post(): void
+    public function sync(): void
     {
-        $this->user->authorize('post');
+        $this->user->authorize('sync');
 
-        $users_data = $this->request->get('user');
+        foreach ($this->request->get('user') as $index => $data) {
 
-        foreach ($users_data as $user_data) {
-            $user = (new User)->where('id', $user_data['id'])->fetchOne();
+            $result = $this->userForm->validate($data);
 
-            if ($user && $user->getId()) {
-                if (isset($user_data['delete'])) {
-                    try {
-                        $user::getAuth()->admin()->deleteUserById($user->getId());
-                    } catch (UnknownIdException|AuthError $e) {
-                        $this->flashBag->add('error', 'Something went wrong: ' . $e);
-                    }
-                } else {
-                    try {
-                        if ($user_data['editor']) {
+            if($result->valid){
+
+                $user = (new User)->where('id', $result->data['id'])->fetchOne();
+
+                if ($user) {
+                    if (isset($result->data['delete'])) {
+                        try {
+                            $user::getAuth()->admin()->deleteUserById($user->getId());
+                        } catch (UnknownIdException|AuthError $e) {
+                            $this->flashBag->add('error', 'Something went wrong: ' . $e);
+                        }
+                    } else {
+                        if ($result->data['editor']) {
                             $user::getAuth()->admin()->addRoleForUserById($user->getId(), Role::EDITOR);
                         } else {
                             $user::getAuth()->admin()->removeRoleForUserById($user->getId(), Role::EDITOR);
                         }
-                        if ($user_data['admin']) {
+                        if ($result->data['admin']) {
                             $user::getAuth()->admin()->addRoleForUserById($user->getId(), Role::ADMIN);
                         } else {
                             $user::getAuth()->admin()->removeRoleForUserById($user->getId(), Role::ADMIN);
                         }
-                        if ($user_data['super_admin']) {
+                        if ($result->data['super_admin']) {
                             $user::getAuth()->admin()->addRoleForUserById($user->getId(), Role::SUPER_ADMIN);
                         } else {
                             $user::getAuth()->admin()->removeRoleForUserById($user->getId(), Role::SUPER_ADMIN);
                         }
-                    } catch (UnknownIdException) {
-                        $this->flashBag->add('error', 'Unknown ID');
                     }
                 }
+
             }
         }
 
@@ -111,8 +115,6 @@ class UserController extends Controller
      */
     public function register(): void
     {
-        $this->requirePost();
-
         try {
             $userId = User::getAuth()->register($this->request->get('email'), $this->request->get('password'), $this->request->get('username'), function ($selector, $token) {
                 $url = Path::get('PUBLIC_URL').'user/login/'.urlencode($selector).'/'.urlencode($token);
@@ -168,8 +170,6 @@ class UserController extends Controller
      */
     public function login(): void
     {
-        $this->requirePost();
-
         try {
             User::getAuth()->login($this->request->get('email'), $this->request->get('password'));
             $this->flashBag->add('success', 'Welcome '.User::getAuth()->getUsername());
@@ -229,8 +229,6 @@ class UserController extends Controller
      */
     public function logout(): void
     {
-        $this->requirePost();
-
         User::getAuth()->logOut();
 
         $this->redirect();
@@ -253,8 +251,6 @@ class UserController extends Controller
      */
     public function reset(): void
     {
-        $this->requirePost();
-
         if ($this->request->get('email')) {
             try {
                 User::getAuth()->forgotPassword($this->request->get('email'), function ($selector, $token) {

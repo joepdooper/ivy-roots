@@ -3,11 +3,12 @@
 namespace Ivy\Model;
 
 use Ivy\Abstract\Model;
+use Ivy\Trait\HasDirtyChecking;
 use Ivy\Trait\Stash;
 
 class Info extends Model
 {
-    use Stash;
+    use Stash, HasDirtyChecking;
 
     protected string $table = 'infos';
 

@@ -4,9 +4,12 @@ namespace Ivy\Model;
 
 use Ivy\Abstract\Model;
 use Ivy\Helper\PluginInfo;
+use Ivy\Trait\HasDirtyChecking;
 
 class Plugin extends Model
 {
+    use HasDirtyChecking;
+
     protected string $table = 'plugins';
 
     protected string $path = 'admin/plugin';
