@@ -21,11 +21,11 @@ class SettingController extends Controller
         $this->settingForm = New SettingForm;
     }
 
-    public function index(?int $id = null): void
+    public function index(?string $url = null): void
     {
         $this->setting->authorize('index');
 
-        $plugin_id = $id ? (new Plugin)->where('url', $id)->fetchOne()?->getId() : null;
+        $plugin_id = $url ? (new Plugin)->where('url', $url)->fetchOne()?->getId() : null;
         $settings = $this->setting->where('plugin_id', $plugin_id)->fetchAll();
         View::set('admin/setting.latte', ['settings' => $settings]);
     }

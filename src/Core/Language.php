@@ -48,7 +48,6 @@ class Language
                 }
                 if (self::$translations[$firstKey.'_'.$secondKey]) {
                     $translation = self::getNestedTranslation(self::$translations[$firstKey.'_'.$secondKey], $keys);
-                    d($translation);die;
                 }
             }
         }

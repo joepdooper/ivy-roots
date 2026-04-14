@@ -37,6 +37,39 @@ class PluginController extends Controller
         }
     }
 
+    public function index(?string $id = null): void
+    {
+        $this->plugin->authorize('index');
+
+        if ($id) {
+            $parent_id = (new Plugin)->where('url', $id)->fetchOne()?->getId();
+            $uninstalled_plugins = null;
+        } else {
+            $parent_id = null;
+        }
+        // -- Installed plugins from database
+        $installed_plugins = (new Plugin)->where('parent_id', $parent_id)->fetchAll();
+        // -- Uninstalled plugins from directory
+        $values_to_remove_from_uninstalled_plugins = ['.', '..', '.DS_Store'];
+        foreach ($installed_plugins as $plugin) {
+            $plugin->setInfo();
+            $values_to_remove_from_uninstalled_plugins[] = $plugin->url;
+        }
+        $uninstalled_plugins = [];
+        if (! $id && is_dir(Path::get('PLUGINS_PATH'))) {
+            $uninstalled_plugins = array_filter(scandir(Path::get('PLUGINS_PATH')), function ($plugin) use ($values_to_remove_from_uninstalled_plugins) {
+                return ! in_array($plugin, $values_to_remove_from_uninstalled_plugins);
+            });
+            $uninstalled_plugins_info = [];
+            foreach ($uninstalled_plugins as $key => $plugin) {
+                $uninstalled_plugins_info[$key] = json_decode((string) file_get_contents(Path::get('PLUGINS_PATH').$plugin.'/info.json'));
+                $uninstalled_plugins_info[$key]->url = $plugin;
+            }
+            $uninstalled_plugins = $uninstalled_plugins_info;
+        }
+        View::set('admin/plugin.latte', ['installed_plugins' => $installed_plugins, 'uninstalled_plugins' => $uninstalled_plugins]);
+    }
+
     public function install(mixed $data): void
     {
         $plugin = new Plugin;
@@ -101,38 +134,5 @@ class PluginController extends Controller
         }
 
         $this->redirect('admin/plugin');
-    }
-
-    public function index(?int $id = null): void
-    {
-        $this->plugin->authorize('index');
-
-        if ($id) {
-            $parent_id = (new Plugin)->where('url', $id)->fetchOne()?->getId();
-            $uninstalled_plugins = null;
-        } else {
-            $parent_id = null;
-        }
-        // -- Installed plugins from database
-        $installed_plugins = (new Plugin)->where('parent_id', $parent_id)->fetchAll();
-        // -- Uninstalled plugins from directory
-        $values_to_remove_from_uninstalled_plugins = ['.', '..', '.DS_Store'];
-        foreach ($installed_plugins as $plugin) {
-            $plugin->setInfo();
-            $values_to_remove_from_uninstalled_plugins[] = $plugin->url;
-        }
-        $uninstalled_plugins = [];
-        if (! $id && is_dir(Path::get('PLUGINS_PATH'))) {
-            $uninstalled_plugins = array_filter(scandir(Path::get('PLUGINS_PATH')), function ($plugin) use ($values_to_remove_from_uninstalled_plugins) {
-                return ! in_array($plugin, $values_to_remove_from_uninstalled_plugins);
-            });
-            $uninstalled_plugins_info = [];
-            foreach ($uninstalled_plugins as $key => $plugin) {
-                $uninstalled_plugins_info[$key] = json_decode((string) file_get_contents(Path::get('PLUGINS_PATH').$plugin.'/info.json'));
-                $uninstalled_plugins_info[$key]->url = $plugin;
-            }
-            $uninstalled_plugins = $uninstalled_plugins_info;
-        }
-        View::set('admin/plugin.latte', ['installed_plugins' => $installed_plugins, 'uninstalled_plugins' => $uninstalled_plugins]);
     }
 }

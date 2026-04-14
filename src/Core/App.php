@@ -37,6 +37,7 @@ class App
         $router->setBasePath(Path::get('SUBFOLDER'));
 
         $this->loadPluginRoutesAssets();
+
         require TemplateManager::file('template.php');
 
         require Path::get('PROJECT_PATH').'routes/web.php';
