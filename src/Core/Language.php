@@ -26,10 +26,8 @@ class Language
     /**
      * @param array<string, string>|null $variables
      */
-    public static function translate(string $key, ?array $variables = []): string
+    public static function translate(string $key, ?array $variables = []): array|string
     {
-        $translation = $key;
-
         $keys = explode('.', $key);
         $firstKey = array_shift($keys);
 
@@ -58,7 +56,7 @@ class Language
             }
         }
 
-        return $translation;
+        return is_string($translation) ?  $translation : $key;
     }
 
     private static function loadFile(string $firstKey): void
@@ -92,7 +90,7 @@ class Language
      * @param string[] $keys
      * @return string
      */
-    private static function getNestedTranslation(array $translations, array $keys): string
+    private static function getNestedTranslation(array $translations, array $keys): array|string
     {
         foreach ($keys as $k) {
             if (! is_array($translations) || ! isset($translations[$k])) {

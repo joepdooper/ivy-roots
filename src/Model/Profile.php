@@ -6,7 +6,7 @@ use Ivy\Abstract\Model;
 
 /**
  * @property int $user_id
- * @property string|null $user_image
+ * @property ?string $user_image
  * @property ?User $user
  */
 class Profile extends Model

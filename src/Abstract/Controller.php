@@ -12,12 +12,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 
 abstract class Controller
 {
     protected Request $request;
 
-    protected FlashBag $flashBag;
+    protected FlashBagInterface $flashBag;
 
     public function __construct()
     {
