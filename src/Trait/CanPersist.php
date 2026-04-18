@@ -59,6 +59,21 @@ trait CanPersist
         return $result[0] ?? null;
     }
 
+    public function pluck(string $column): array
+    {
+        $this->ensureQuery();
+
+        $this->query = preg_replace(
+            '/^SELECT\s.+?\sFROM/i',
+            "SELECT `{$this->table}`.`{$column}` FROM",
+            $this->query
+        );
+
+        $rows = $this->fetchAllRaw();
+
+        return array_map(fn ($row) => $row[$column] ?? null, $rows);
+    }
+
     public function populate(array $data): static
     {
         if (isset($data['id'])) {

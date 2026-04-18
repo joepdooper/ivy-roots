@@ -41,19 +41,43 @@ trait HasQueryBuilder
         $prefix = str_contains($this->query, 'WHERE') ? " $boolean " : ' WHERE ';
 
         if (is_null($value)) {
-            $this->query .= "{$prefix}`$this->table`.`$column` IS NULL";
-        } elseif (is_array($value)) {
-            if (empty($value)) {
-                $this->query .= "{$prefix}1=0"; // ensures empty result
-            } else {
-                $placeholders = implode(',', array_fill(0, count($value), '?'));
-                $this->query .= "{$prefix}`$this->table`.`$column` IN ($placeholders)";
-                $this->bindings = array_merge($this->bindings, $value);
-            }
-        } else {
-            $this->query .= "{$prefix}`$this->table`.`$column` $operator ?";
-            $this->bindings[] = $value;
+            $this->query .= $operator === '!='
+                ? "{$prefix}`$this->table`.`$column` IS NOT NULL"
+                : "{$prefix}`$this->table`.`$column` IS NULL";
+
+            return $this;
         }
+
+        if (is_array($value)) {
+            $operator = strtoupper($operator);
+
+            if ($operator === '=' || $operator === 'IN') {
+                $operator = 'IN';
+            } elseif ($operator === '!=' || $operator === 'NOT IN') {
+                $operator = 'NOT IN';
+            } else {
+                throw new \InvalidArgumentException(
+                    "Array values only support IN or NOT IN operators."
+                );
+            }
+
+            if (empty($value)) {
+                if ($operator === 'IN') {
+                    $this->query .= "{$prefix}1=0";
+                }
+                return $this;
+            }
+
+            $placeholders = implode(',', array_fill(0, count($value), '?'));
+
+            $this->query .= "{$prefix}`$this->table`.`$column` $operator ($placeholders)";
+            $this->bindings = [...$this->bindings, ...$value];
+
+            return $this;
+        }
+
+        $this->query .= "{$prefix}`$this->table`.`$column` $operator ?";
+        $this->bindings[] = $value;
 
         return $this;
     }
@@ -70,22 +94,32 @@ trait HasQueryBuilder
 
     public function whereNot(string $column, mixed $value): static
     {
-        return $this->where($column, $value, '!=');
+        return $this->addCondition($column, $value, '!=', 'AND');
     }
 
     public function orWhereNot(string $column, mixed $value): static
     {
-        return $this->orWhere($column, $value, '!=');
+        return $this->addCondition($column, $value, '!=', 'OR');
     }
 
     public function whereIn(string $column, array $values): static
     {
-        return $this->addCondition($column, $values, '=', 'AND');
+        return $this->addCondition($column, $values, 'IN', 'AND');
     }
 
     public function orWhereIn(string $column, array $values): static
     {
-        return $this->addCondition($column, $values, '=', 'OR');
+        return $this->addCondition($column, $values, 'IN', 'OR');
+    }
+
+    public function whereNotIn(string $column, array $values): static
+    {
+        return $this->addCondition($column, $values, 'NOT IN', 'AND');
+    }
+
+    public function orWhereNotIn(string $column, array $values): static
+    {
+        return $this->addCondition($column, $values, 'NOT IN', 'OR');
     }
 
     public function addJoin(string $table, string $firstColumn, string $operator, string $secondColumn, string $type = 'INNER'): static
