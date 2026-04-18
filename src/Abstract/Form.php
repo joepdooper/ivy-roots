@@ -9,11 +9,23 @@ abstract class Form
 {
     protected Validator $validator;
 
+    protected function defaultRules(): array
+    {
+        return [
+            'id' => ['numeric'],
+        ];
+    }
+
     abstract protected function rules(): array;
 
     public function validate($data): ValidationResult
     {
-        $this->validator = new Validator($data, $this->rules());
+        $rules = array_merge(
+            $this->defaultRules(),
+            $this->rules()
+        );
+
+        $this->validator = new Validator($data, $rules);
 
         if (! $this->validator->isValid()) {
             return new ValidationResult(
