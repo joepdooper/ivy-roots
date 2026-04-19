@@ -10,38 +10,29 @@ trait Stash
     {
         $type = static::class;
 
-        $instance = new $type;
-        $instances = $instance->fetchAll();
+        if (!isset(self::$stashData[$type])) {
+            self::$stashData[$type] = $type::all();
+        }
 
-        self::$stashData[$type] = $instances;
-
-        return $instance;
+        return new $type;
     }
 
     public function keyByColumn(string $column): void
     {
         $type = static::class;
 
-        if (! isset(self::$stashData[$type])) {
-            throw new \RuntimeException('No data available to stash. Call stash() first.');
+        if (!isset(self::$stashData[$type])) {
+            throw new \RuntimeException('Call stash() before keyByColumn().');
         }
 
-        $stashData = [];
-        foreach (self::$stashData[$type] as $instance) {
-            $getter = 'get'.str_replace('_', '', ucwords($column, '_'));
-
-            if (method_exists($instance, $getter)) {
-                $key = strtolower(str_replace(' ', '_', $instance->$getter()));
-            } elseif (property_exists($instance, $column)) {
-                $key = strtolower(str_replace(' ', '_', $instance->$column));
-            } else {
-                throw new \InvalidArgumentException("Column '$column' is not valid for this model.");
-            }
-
-            $stashData[$key] = $instance;
-        }
-
-        self::$stashData[$type] = $stashData;
+        self::$stashData[$type] = self::$stashData[$type]
+            ->keyBy($column)
+            ->mapWithKeys(function ($item) use ($column) {
+                $value = $item->{$column};
+                $key = strtolower(str_replace(' ', '_', $value));
+                return [$key => $item];
+            })
+            ->all();
     }
 
     public static function stashGet(string $key): mixed
@@ -53,7 +44,7 @@ trait Stash
     {
         self::$stashData[static::class][$key] = $value;
     }
-
+    
     public static function stashClear(): void
     {
         unset(self::$stashData[static::class]);

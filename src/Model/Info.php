@@ -2,37 +2,24 @@
 
 namespace Ivy\Model;
 
-use Ivy\Abstract\Model;
-use Ivy\Trait\HasDirtyChecking;
+use Illuminate\Database\Eloquent\Model;
+use Ivy\Trait\HasPolicies;
 use Ivy\Trait\Stash;
 
 class Info extends Model
 {
-    use Stash, HasDirtyChecking;
+    use Stash, HasPolicies;
 
-    protected string $table = 'infos';
-
-    protected string $path = 'admin/info';
-
-    /** @var string[] */
-    protected array $columns = [
+    protected $fillable = [
         'name',
         'value',
         'info',
         'plugin_id',
         'is_default',
-        'token',
     ];
 
-    protected string $name;
-
-    protected ?string $value = null;
-
-    protected ?string $info = null;
-
-    protected ?int $plugin_id = null;
-
-    protected int $is_default = 0;
-
-    protected ?string $token = null;
+    protected function getPath(): string
+    {
+        return 'admin/info';
+    }
 }

@@ -27,6 +27,7 @@ class TemplateController extends Controller
     public function before(): void
     {
         if (! User::getAuth()->isLoggedIn() && Setting::stashGet('private')->bool) {
+
             if (! $this->isAlwaysPublicPath(Path::get('CURRENT_PAGE'))) {
                 $this->redirect('user/login');
             }
@@ -39,28 +40,36 @@ class TemplateController extends Controller
 
         View::set('admin/template.latte', [
             'templateBase' => basename((string) TemplateManager::getTemplateBase()),
-            'templateSub' => basename((string) TemplateManager::getTemplateSub()),
+            'templateSub'  => basename((string) TemplateManager::getTemplateSub()),
         ]);
     }
 
     public function update(Template|int $template, mixed $data): void
     {
-        if(is_int($template)) {
-            $template = (new Template)->where('id', $template)->fetchOne();
+        if (is_int($template)) {
+            $template = Template::find($template);
         }
 
-        if($template && $template->isDirty($data)) {
+        if ($template && $template->isDirty($data)) {
+
             $template->authorize('update');
-            $template->populate($data)->update();
+            $template->fill($data)->save();
+
             $publisher = new AssetPublisher;
             $publisher->publish('templates', $template->value);
-            $this->flashBag->add('success', $template->type . '-template updated successfully.');
+
+            $this->flashBag->add(
+                'success',
+                $template->type . '-template updated successfully.'
+            );
         }
     }
 
     public function sync(): void
     {
         $this->template->authorize('sync');
+
+        $errors = $old = [];
 
         foreach ($this->request->get('template') as $index => $data) {
 
@@ -87,13 +96,13 @@ class TemplateController extends Controller
     private function isAlwaysPublicPath(string $current): bool
     {
         $allowed = [
-            Path::get('PUBLIC_URL').'user/login',
-            Path::get('PUBLIC_URL').'user/reset',
-            Path::get('PUBLIC_URL').'user/register',
+            Path::get('PUBLIC_URL') . 'user/login',
+            Path::get('PUBLIC_URL') . 'user/reset',
+            Path::get('PUBLIC_URL') . 'user/register',
         ];
 
         foreach ($allowed as $prefix) {
-            if ($current === $prefix || str_starts_with($current, $prefix.'/')) {
+            if ($current === $prefix || str_starts_with($current, $prefix . '/')) {
                 return true;
             }
         }

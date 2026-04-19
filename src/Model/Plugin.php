@@ -2,20 +2,15 @@
 
 namespace Ivy\Model;
 
-use Ivy\Abstract\Model;
+use Illuminate\Database\Eloquent\Model;
 use Ivy\Helper\PluginInfo;
-use Ivy\Trait\HasDirtyChecking;
+use Ivy\Trait\HasPolicies;
 
 class Plugin extends Model
 {
-    use HasDirtyChecking;
-
-    protected string $table = 'plugins';
-
-    protected string $path = 'admin/plugin';
-
-    /** @var string[] */
-    protected array $columns = [
+    use HasPolicies;
+    
+    protected $fillable = [
         'name',
         'url',
         'version',
@@ -25,30 +20,11 @@ class Plugin extends Model
         'parent_id',
     ];
 
-    protected string $name;
-
-    protected string $url;
-
-    protected string $version;
-
-    protected ?string $description = null;
-
-    protected ?string $type = null;
-
-    protected ?int $active = null;
-
-    protected ?int $parent_id = null;
-
     protected PluginInfo $info;
 
     public function setInfo(): Plugin
     {
-        if (! isset($this->url) && $this->id) {
-            $plugin = $this->select(['url'])->where('id', $this->id)->fetchOne();
-            if ($plugin) {
-                $this->url = $plugin->url;
-            }
-        }
+        $this->url ??= self::whereKey($this->id)->value('url');
 
         if (empty($this->url)) {
             throw new \Exception('Plugin URL is missing, cannot initialize PluginInfo.');
@@ -56,10 +32,13 @@ class Plugin extends Model
 
         $this->info = new PluginInfo($this->url);
 
-        foreach ($this->columns as $property) {
-            $getter = 'get'.ucfirst($property);
+        foreach ($this->getFillable() as $property) {
+
+            $getter = 'get' . ucfirst($property);
+
             if (method_exists($this->info, $getter)) {
                 $value = $this->info->$getter();
+
                 if ($value !== null) {
                     $this->$property = $value;
                 }

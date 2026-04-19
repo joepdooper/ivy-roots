@@ -4,17 +4,18 @@ namespace Ivy\Model;
 
 use Delight\Auth\Auth;
 use Delight\Auth\Role;
-use Ivy\Abstract\Model;
+use Illuminate\Database\Capsule\Manager as DB;
+use Illuminate\Database\Eloquent\Model;
 use Ivy\Manager\DatabaseManager;
+use Ivy\Trait\HasPolicies;
 
 class User extends Model
 {
-    protected string $table = 'users';
+    use HasPolicies;
 
-    protected string $path = 'admin/user';
+    private static Auth $auth;
 
-    /** @var string[] */
-    protected array $columns = [
+    protected $fillable = [
         'email',
         'username',
         'status',
@@ -25,61 +26,35 @@ class User extends Model
         'last_login',
     ];
 
-    private static Auth $auth;
-
-    protected string $email;
-
-    protected string $username;
-
-    protected int $status;
-
-    protected int $verified;
-
-    protected int $resettable;
-
-    protected int $roles_mask;
-
-    protected int $registered;
-
-    protected ?int $last_login;
-
-    public static function canEditAsEditor(): bool
-    {
-        $roles = [
-            Role::EDITOR,
-            Role::ADMIN,
-            Role::SUPER_ADMIN,
-        ];
-
-        return self::$auth->hasAnyRole(...$roles);
-    }
-
-    public static function canEditAsAdmin(): bool
-    {
-        $roles = [
-            Role::ADMIN,
-            Role::SUPER_ADMIN,
-        ];
-
-        return self::$auth->hasAnyRole(...$roles);
-    }
-
-    public static function canEditAsSuperAdmin(): bool
-    {
-        $roles = [
-            Role::SUPER_ADMIN,
-        ];
-
-        return self::$auth->hasAnyRole(...$roles);
-    }
-
     public static function setAuth(): void
     {
-        self::$auth = new Auth(DatabaseManager::connection());
+        self::$auth = new Auth(DB::connection()->getPdo());
     }
 
     public static function getAuth(): Auth
     {
         return self::$auth;
+    }
+
+    public static function canEditAsEditor(): bool
+    {
+        return self::$auth->hasAnyRole(
+            Role::EDITOR,
+            Role::ADMIN,
+            Role::SUPER_ADMIN
+        );
+    }
+
+    public static function canEditAsAdmin(): bool
+    {
+        return self::$auth->hasAnyRole(
+            Role::ADMIN,
+            Role::SUPER_ADMIN
+        );
+    }
+
+    public static function canEditAsSuperAdmin(): bool
+    {
+        return self::$auth->hasRole(Role::SUPER_ADMIN);
     }
 }

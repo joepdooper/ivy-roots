@@ -2,32 +2,21 @@
 
 namespace Ivy\Model;
 
-use Ivy\Abstract\Model;
+use Illuminate\Database\Eloquent\Model;
+use Ivy\Trait\HasPolicies;
 
-/**
- * @property int $user_id
- * @property ?string $user_image
- * @property ?User $user
- */
 class Profile extends Model
 {
-    protected string $table = 'profiles';
+    use HasPolicies;
 
-    protected string $path = 'admin/profile';
+    private static ?Profile $currentProfile = null;
 
-    /** @var string[] */
-    protected array $columns = [
+    protected $fillable = [
         'user_id',
         'user_image',
     ];
 
-    protected int $user_id;
-
-    protected ?string $user_image;
-
-    private static ?Profile $currentProfile = null;
-
-    public function user(): ?User
+    public function user()
     {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
@@ -35,7 +24,10 @@ class Profile extends Model
     public static function getUserProfile(): ?self
     {
         if (self::$currentProfile === null) {
-            self::$currentProfile = (new self)->where('user_id', User::getAuth()->getUserId())->fetchOne();
+            self::$currentProfile = self::where(
+                'user_id',
+                User::getAuth()->getUserId()
+            )->first();
         }
 
         return self::$currentProfile;
@@ -44,20 +36,27 @@ class Profile extends Model
     public static function lastSeen(int $last_login): string
     {
         $seconds_ago = time() - $last_login;
+
         if ($seconds_ago >= 31536000) {
-            $value = 'seen '.intval($seconds_ago / 31536000).' years ago';
-        } elseif ($seconds_ago >= 2419200) {
-            $value = 'seen '.intval($seconds_ago / 2419200).' months ago';
-        } elseif ($seconds_ago >= 86400) {
-            $value = 'seen '.intval($seconds_ago / 86400).' days ago';
-        } elseif ($seconds_ago >= 3600) {
-            $value = 'seen '.intval($seconds_ago / 3600).' hours ago';
-        } elseif ($seconds_ago >= 60) {
-            $value = 'seen '.intval($seconds_ago / 60).' minutes ago';
-        } else {
-            $value = 'seen less than a minute ago';
+            return 'seen ' . intval($seconds_ago / 31536000) . ' years ago';
         }
 
-        return $value;
+        if ($seconds_ago >= 2419200) {
+            return 'seen ' . intval($seconds_ago / 2419200) . ' months ago';
+        }
+
+        if ($seconds_ago >= 86400) {
+            return 'seen ' . intval($seconds_ago / 86400) . ' days ago';
+        }
+
+        if ($seconds_ago >= 3600) {
+            return 'seen ' . intval($seconds_ago / 3600) . ' hours ago';
+        }
+
+        if ($seconds_ago >= 60) {
+            return 'seen ' . intval($seconds_ago / 60) . ' minutes ago';
+        }
+
+        return 'seen less than a minute ago';
     }
 }

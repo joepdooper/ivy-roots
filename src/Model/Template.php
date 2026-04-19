@@ -2,29 +2,16 @@
 
 namespace Ivy\Model;
 
-use Ivy\Abstract\Model;
-use Ivy\Trait\HasDirtyChecking;
+use Illuminate\Database\Eloquent\Model;
+use Ivy\Trait\HasPolicies;
 use Ivy\Trait\Stash;
 
-/**
- * @property string $type
- * @property string $value
- */
 class Template extends Model
 {
-    use HasDirtyChecking;
+    use Stash, HasPolicies;
 
-    protected string $table = 'templates';
-
-    protected string $path = 'admin/template';
-
-    /** @var string[] */
-    protected array $columns = [
+    protected $fillable = [
         'type',
         'value',
     ];
-
-    protected string $type;
-
-    protected string $value;
 }

@@ -4,6 +4,7 @@ namespace Ivy\Core;
 
 use Dotenv\Dotenv;
 use Ivy\Exceptions\AuthorizationException;
+use Ivy\Manager\DatabaseManager;
 use Ivy\Manager\ErrorManager;
 use Ivy\Manager\LanguageManager;
 use Ivy\Manager\RouterManager;
@@ -20,7 +21,7 @@ class App
 {
     private function loadPluginRoutesAssets(): void
     {
-        $plugins = (new Plugin)->where('active', 1)->fetchAll();
+        $plugins = Plugin::where('active', 1)->get()->toArray();
         if (! empty($plugins)) {
             SessionManager::set('plugin_actives', array_map(fn ($plugin) => $plugin->name, $plugins));
             foreach ($plugins as $plugin) {
@@ -58,6 +59,7 @@ class App
 
     private function bootstrap(): void
     {
+        DatabaseManager::boot();
         User::setAuth();
         Info::stash()->keyByColumn('name');
         Setting::stash()->keyByColumn('name');
