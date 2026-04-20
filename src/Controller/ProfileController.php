@@ -22,11 +22,13 @@ use Ivy\View\View;
 
 class ProfileController extends Controller
 {
+    private Profile $profile;
     private ProfileForm $profileForm;
 
     public function __construct()
     {
         parent::__construct();
+        $this->profile = new Profile;
         $this->profileForm = new ProfileForm;
     }
 

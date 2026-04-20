@@ -48,6 +48,14 @@ class UserController extends Controller
         }
     }
 
+    public function index(): void
+    {
+        $this->user->authorize('index');
+
+        $users = (new User)->all();
+        View::set('admin/user.latte', ['users' => $users]);
+    }
+
     public function sync(): void
     {
         $this->user->authorize('sync');
@@ -58,30 +66,30 @@ class UserController extends Controller
 
             if($result->valid){
 
-                $user = (new User)->where('id', $result->data['id'])->fetchOne();
+                $user = User::where('id', $result->data['id'])->first();
 
                 if ($user) {
                     if (isset($result->data['delete'])) {
                         try {
-                            $user::getAuth()->admin()->deleteUserById($user->getId());
+                            $user::getAuth()->admin()->deleteUserById($user->id);
                         } catch (UnknownIdException|AuthError $e) {
                             $this->flashBag->add('error', 'Something went wrong: ' . $e);
                         }
                     } else {
                         if ($result->data['editor']) {
-                            $user::getAuth()->admin()->addRoleForUserById($user->getId(), Role::EDITOR);
+                            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::EDITOR);
                         } else {
-                            $user::getAuth()->admin()->removeRoleForUserById($user->getId(), Role::EDITOR);
+                            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::EDITOR);
                         }
                         if ($result->data['admin']) {
-                            $user::getAuth()->admin()->addRoleForUserById($user->getId(), Role::ADMIN);
+                            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::ADMIN);
                         } else {
-                            $user::getAuth()->admin()->removeRoleForUserById($user->getId(), Role::ADMIN);
+                            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::ADMIN);
                         }
                         if ($result->data['super_admin']) {
-                            $user::getAuth()->admin()->addRoleForUserById($user->getId(), Role::SUPER_ADMIN);
+                            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::SUPER_ADMIN);
                         } else {
-                            $user::getAuth()->admin()->removeRoleForUserById($user->getId(), Role::SUPER_ADMIN);
+                            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::SUPER_ADMIN);
                         }
                     }
                 }
@@ -91,14 +99,6 @@ class UserController extends Controller
 
         $this->flashBag->add('success', 'Update successfully');
         $this->redirect('admin/user');
-    }
-
-    public function index(): void
-    {
-        $this->user->authorize('index');
-
-        $users = (new User)->fetchAll();
-        View::set('admin/user.latte', ['users' => $users]);
     }
 
     public function beforeRegister(): void

@@ -50,19 +50,24 @@ class TemplateController extends Controller
             $template = Template::find($template);
         }
 
-        if ($template && $template->isDirty($data)) {
-
-            $template->authorize('update');
-            $template->fill($data)->save();
-
-            $publisher = new AssetPublisher;
-            $publisher->publish('templates', $template->value);
-
-            $this->flashBag->add(
-                'success',
-                $template->type . '-template updated successfully.'
-            );
+        if (! $template) {
+            return;
         }
+
+        $template->fill($data);
+
+        if (! $template->isDirty()) {
+            return;
+        }
+
+        $template->authorize('update');
+
+        $template->save();
+
+        $this->flashBag->add(
+            'success',
+            $template->type . '-template updated successfully.'
+        );
     }
 
     public function sync(): void

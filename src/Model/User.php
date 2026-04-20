@@ -13,6 +13,8 @@ class User extends Model
 {
     use HasPolicies;
 
+    public $timestamps = false;
+
     private static Auth $auth;
 
     protected $fillable = [
