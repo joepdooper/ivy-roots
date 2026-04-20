@@ -51,15 +51,25 @@ class ProfileController extends Controller
                 ->where('user_id', $_SESSION['auth_user_id'])
                 ->first();
 
-            if ($profile) {
+            if ($profile && $profile?->user) {
 
-                if ($profile->user && (User::getAuth()->getUsername() !== $result->data['username'])) {
-                    $profile->user->fill([
-                        'username' => $result->data['username']
-                    ])->save();
+                $profile->user->fill([
+                    'username' => $result->data['username'],
+                ]);
+
+                if ($profile->user->isDirty('username')) {
+                    $profile->user->save();
+                    $this->flashBag->add(
+                        'success',
+                        'Username ' . $result->data['username'] . ' succesfull updated'
+                    );
                 }
 
-                if (User::getAuth()->getEmail() !== $result->data['email']) {
+                $profile->user->fill([
+                    'email' => $result->data['email']
+                ]);
+
+                if ($profile->user->isDirty('email')) {
                     try {
                         User::getAuth()->changeEmail(
                             $result->data['email'],
