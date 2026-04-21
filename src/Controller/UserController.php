@@ -20,6 +20,7 @@ use Ivy\Abstract\Controller;
 use Ivy\Core\Path;
 use Ivy\Form\UserForm;
 use Ivy\Manager\DatabaseManager;
+use Ivy\Model\Profile;
 use Ivy\Model\Setting;
 use Ivy\Model\User;
 use Ivy\Service\Mail;
@@ -125,10 +126,11 @@ class UserController extends Controller
                 $mail->setBody('Activate your account with this link: '.$url);
                 $mail->send();
             });
-            DatabaseManager::connection()->insert('profiles', ['user_id' => $userId]);
+
+            Profile::create(['user_id' => $userId]);
 
             // Set role to registered user
-            if (isset(Setting::stashGet('registration_role')->value)) {
+            if (Setting::stashGet('registration_role')->bool && isset(Setting::stashGet('registration_role')->value)) {
                 $role = strtoupper(Setting::stashGet('registration_role')->value);
                 $roleConstant = "\Delight\Auth\Role::$role";
                 User::getAuth()->admin()->addRoleForUserById($userId, constant($roleConstant));

@@ -11,7 +11,6 @@ class Mail
     public function __construct()
     {
         $this->mailer = new PHPMailer(true);
-
         $this->mailer->isSMTP();
         $this->mailer->Host = $_ENV['MAIL_HOST'];
         $this->mailer->Port = $_ENV['MAIL_PORT'];
