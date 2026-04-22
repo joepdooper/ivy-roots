@@ -19,6 +19,31 @@ use Ivy\View\View;
 
 class App
 {
+    private DatabaseManager $db;
+
+    private function initDatabase(): void
+    {
+        $this->db = new DatabaseManager();
+
+        $config = [
+            'driver'    => $_ENV['DB_DRIVER'],
+            'host'      => $_ENV['DB_HOST'],
+            'port'      => $_ENV['DB_PORT'],
+            'database'  => $_ENV['DB_DATABASE'],
+            'username'  => $_ENV['DB_USERNAME'],
+            'password'  => $_ENV['DB_PASSWORD'],
+        ];
+
+        if ($_ENV['DB_DRIVER'] === 'mysql') {
+            $config['charset']   = 'utf8mb4';
+            $config['collation'] = 'utf8mb4_unicode_ci';
+        }
+
+        $this->db->addConnection($config);
+
+        $this->db->boot();
+    }
+
     private function loadPluginRoutesAssets(): void
     {
         $plugins = Plugin::where('active', 1)->get()->toArray();
@@ -53,16 +78,18 @@ class App
             View::set('errors/forbidden.latte', [
                 'message' => $e->getMessage(),
             ]);
-            // exit;
         }
     }
 
     private function bootstrap(): void
     {
-        DatabaseManager::boot();
+        $this->initDatabase();
+
         User::setAuth();
+
         Info::stash()->keyByColumn('name');
         Setting::stash()->keyByColumn('name');
+
         TemplateManager::init();
         LanguageManager::init();
     }

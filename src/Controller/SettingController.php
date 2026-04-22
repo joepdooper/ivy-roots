@@ -129,7 +129,7 @@ class SettingController extends Controller
             $this->flashBag->set('old', $old);
         }
 
-        $this->redirect('/admin/setting');
+        $this->redirect('admin/setting');
     }
 
     protected function resolveRefererContext(string $url = '', int $statusCode = 302): ?string

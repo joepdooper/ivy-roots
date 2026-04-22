@@ -19,7 +19,6 @@ use Delight\Db\Throwable\IntegrityConstraintViolationException;
 use Ivy\Abstract\Controller;
 use Ivy\Core\Path;
 use Ivy\Form\UserForm;
-use Ivy\Manager\DatabaseManager;
 use Ivy\Model\Profile;
 use Ivy\Model\Setting;
 use Ivy\Model\User;
@@ -57,6 +56,66 @@ class UserController extends Controller
         View::set('admin/user.latte', ['users' => $users]);
     }
 
+    public function update(User|int $user, mixed $data): void
+    {
+        if (is_int($user)) {
+            $user = User::find($user);
+        }
+
+        if (! $user) {
+            return;
+        }
+
+        $user->authorize('update');
+
+        if ($data['editor']) {
+            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::EDITOR);
+        } else {
+            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::EDITOR);
+        }
+        if ($data['admin']) {
+            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::ADMIN);
+        } else {
+            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::ADMIN);
+        }
+        if ($data['super_admin']) {
+            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::SUPER_ADMIN);
+        } else {
+            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::SUPER_ADMIN);
+        }
+
+        $this->flashBag->add(
+            'success',
+            'Info ' . $user->username . ' updated successfully.'
+        );
+    }
+
+    public function delete(User|int $user): void
+    {
+        if (is_int($user)) {
+            $user = User::find($user);
+        }
+
+        if (! $user) {
+            return;
+        }
+
+        $user->authorize('delete');
+
+        try {
+            User::getAuth()->admin()->deleteUserById($user->id);
+        } catch (UnknownIdException|AuthError $e) {
+            $this->flashBag->add('error', 'Something went wrong: ' . $e);
+        }
+
+        Profile::where('user_id', $user->id)->delete();
+
+        $this->flashBag->add(
+            'success',
+            'User ' . $user->username . ' deleted successfully.'
+        );
+    }
+
     public function sync(): void
     {
         $this->user->authorize('sync');
@@ -66,39 +125,14 @@ class UserController extends Controller
             $result = $this->userForm->validate($data);
 
             if($result->valid){
-
-                $user = User::where('id', $result->data['id'])->first();
-
-                if ($user) {
-                    if (isset($result->data['delete'])) {
-                        try {
-                            $user::getAuth()->admin()->deleteUserById($user->id);
-                        } catch (UnknownIdException|AuthError $e) {
-                            $this->flashBag->add('error', 'Something went wrong: ' . $e);
-                        }
-                    } else {
-                        if ($result->data['editor']) {
-                            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::EDITOR);
-                        } else {
-                            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::EDITOR);
-                        }
-                        if ($result->data['admin']) {
-                            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::ADMIN);
-                        } else {
-                            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::ADMIN);
-                        }
-                        if ($result->data['super_admin']) {
-                            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::SUPER_ADMIN);
-                        } else {
-                            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::SUPER_ADMIN);
-                        }
-                    }
+                if (isset($result->data['delete'])) {
+                    $this->delete($result->data['id']);
+                } else {
+                    $this->update($result->data['id'], $result->data);
                 }
-
             }
         }
 
-        $this->flashBag->add('success', 'Update successfully');
         $this->redirect('admin/user');
     }
 

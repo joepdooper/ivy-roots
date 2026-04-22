@@ -3,7 +3,7 @@
 namespace Ivy\Helper;
 
 use Ivy\Core\Path;
-use Ivy\Manager\DatabaseManager;
+use Ivy\Model\Plugin;
 use Symfony\Component\HttpFoundation\File\File;
 
 class PluginHelper
@@ -71,7 +71,7 @@ class PluginHelper
     public static function getMissingDependencies(?array $dependencies = []): array
     {
         return array_filter($dependencies ?? [], function ($dependency) {
-            return ! DatabaseManager::connection()->selectValue('SELECT id FROM plugins WHERE name = :name', ['name' => $dependency]);
+            return ! Plugin::select('id')->where('name', $dependency)->first();
         });
     }
 }

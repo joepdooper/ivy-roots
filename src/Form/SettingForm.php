@@ -17,6 +17,7 @@ class SettingForm extends Form
             'value' => new InfoSettingRule,
             'info' => ['string', 'max:50'],
             'plugin_id' => 'numeric',
+            'delete' => ['string']
         ];
     }
 }

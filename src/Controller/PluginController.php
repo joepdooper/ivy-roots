@@ -130,25 +130,27 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('sync');
 
-        foreach ($this->request->get('plugin') as $data) {
+        if($this->request->request->has('plugin')){
+            foreach ($this->request->get('plugin') as $data) {
 
-            $result = $this->pluginForm->validate($data);
+                $result = $this->pluginForm->validate($data);
 
-            if ($result->valid) {
+                if ($result->valid) {
 
-                if (empty($result->data['id'])) {
-                    $this->install($result->data);
+                    if (empty($result->data['id'])) {
+                        $this->install($result->data);
 
-                } elseif (isset($result->data['delete'])) {
-                    $this->uninstall($result->data['id']);
+                    } elseif (isset($result->data['delete'])) {
+                        $this->uninstall($result->data['id']);
+
+                    } else {
+                        $this->update($result->data['id'], $result->data);
+                    }
 
                 } else {
-                    $this->update($result->data['id'], $result->data);
+                    $errors[$index] = $result->errors;
+                    $old[$index] = $result->old;
                 }
-
-            } else {
-                $errors[$index] = $result->errors;
-                $old[$index] = $result->old;
             }
         }
 

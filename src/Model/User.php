@@ -6,7 +6,6 @@ use Delight\Auth\Auth;
 use Delight\Auth\Role;
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Database\Eloquent\Model;
-use Ivy\Manager\DatabaseManager;
 use Ivy\Trait\HasPolicies;
 
 class User extends Model

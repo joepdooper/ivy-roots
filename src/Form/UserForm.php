@@ -16,6 +16,7 @@ class UserForm extends Form
             'super_admin' => ['in:0,1'],
             'admin' => ['in:0,1'],
             'editor' => ['in:0,1'],
+            'delete' => ['string']
         ];
     }
 }

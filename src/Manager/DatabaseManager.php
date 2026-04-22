@@ -6,22 +6,26 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 class DatabaseManager
 {
-    public static function boot(): void
+    private Capsule $capsule;
+
+    public function __construct()
     {
-        $capsule = new Capsule;
+        $this->capsule = new Capsule;
+    }
 
-        $capsule->addConnection([
-            'driver'    => 'mysql',
-            'host'      => $_ENV['DB_HOST'],
-            'port'      => $_ENV['DB_PORT'],
-            'database'  => $_ENV['DB_DATABASE'],
-            'username'  => $_ENV['DB_USERNAME'],
-            'password'  => $_ENV['DB_PASSWORD'],
-            'charset'   => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-        ]);
+    public function addConnection(array $config, string $name = 'default'): void
+    {
+        $this->capsule->addConnection($config, $name);
+    }
 
-        $capsule->setAsGlobal();
-        $capsule->bootEloquent();
+    public function boot(): void
+    {
+        $this->capsule->setAsGlobal();
+        $this->capsule->bootEloquent();
+    }
+
+    public function getConnection(?string $name = null)
+    {
+        return $this->capsule->getConnection($name);
     }
 }

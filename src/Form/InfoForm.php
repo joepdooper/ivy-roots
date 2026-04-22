@@ -16,6 +16,7 @@ class InfoForm extends Form
             'name' => ['required', 'not_nullable', new InfoSettingRule],
             'value' => new InfoSettingRule,
             'plugin_id' => 'numeric',
+            'delete' => ['string']
         ];
     }
 }

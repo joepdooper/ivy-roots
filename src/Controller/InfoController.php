@@ -125,7 +125,7 @@ class InfoController extends Controller
             $this->flashBag->set('old', $old);
         }
 
-        $this->redirect('/admin/info');
+        $this->redirect('admin/info');
     }
 
     protected function resolveRefererContext(string $url = '', int $statusCode = 302): ?string
