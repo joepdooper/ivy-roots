@@ -100,7 +100,7 @@ class SettingController extends Controller
 
         foreach ($this->request->get('setting') as $index => $data) {
 
-            if (empty($data['name'])) {
+            if (empty($data['name']) && !isset($data['id'])) {
                 continue;
             }
 
