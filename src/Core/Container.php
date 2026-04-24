@@ -4,32 +4,41 @@ namespace Ivy\Core;
 
 class Container
 {
-    /** @var array<(callable)|string> */
+    /** @var array<string, callable> */
     protected array $bindings = [];
 
-    /** @var string[] */
+    /** @var array<string, mixed> */
     protected array $instances = [];
 
-    public function bind(string $abstract, callable $concrete): void
+    public function bind(string $abstract, callable $factory): void
     {
-        $this->bindings[$abstract] = $concrete;
+        $this->bindings[$abstract] = $factory;
     }
 
-    public function singleton(string $abstract, callable $concrete): void
+    public function singleton(string $abstract, callable $factory): void
     {
-        $this->instances[$abstract] = $concrete($this);
+        $this->bindings[$abstract] = function ($container) use ($factory, $abstract) {
+            if (!isset($this->instances[$abstract])) {
+                $this->instances[$abstract] = $factory($container);
+            }
+            return $this->instances[$abstract];
+        };
     }
 
-    public function get(string $abstract): string
+    public function get(string $abstract): mixed
     {
         if (isset($this->instances[$abstract])) {
             return $this->instances[$abstract];
         }
 
-        if (! isset($this->bindings[$abstract])) {
-            throw new \Exception("Nothing bound to {$abstract}");
+        if (isset($this->bindings[$abstract])) {
+            return $this->bindings[$abstract]($this);
         }
 
-        return $this->bindings[$abstract]($this);
+        if (class_exists($abstract)) {
+            return new $abstract();
+        }
+
+        throw new \RuntimeException("Service not found: {$abstract}");
     }
 }

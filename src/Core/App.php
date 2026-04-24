@@ -2,11 +2,13 @@
 
 namespace Ivy\Core;
 
+use Bramus\Router\Router;
 use Dotenv\Dotenv;
 use Ivy\Exceptions\AuthorizationException;
 use Ivy\Manager\DatabaseManager;
 use Ivy\Manager\ErrorManager;
 use Ivy\Manager\LanguageManager;
+use Ivy\Manager\PluginManager;
 use Ivy\Manager\RouterManager;
 use Ivy\Manager\SecurityManager;
 use Ivy\Manager\SessionManager;
@@ -19,11 +21,12 @@ use Ivy\View\View;
 
 class App
 {
-    private DatabaseManager $db;
+    private DatabaseManager $databaseManager;
+    private Router $router;
 
     private function initDatabase(): void
     {
-        $this->db = new DatabaseManager();
+        $this->databaseManager = new DatabaseManager();
 
         $config = [
             'driver'    => $_ENV['DB_DRIVER'],
@@ -39,52 +42,19 @@ class App
             $config['collation'] = 'utf8mb4_unicode_ci';
         }
 
-        $this->db->addConnection($config);
+        $this->databaseManager->addConnection($config);
 
-        $this->db->boot();
+        $this->databaseManager->boot();
     }
 
-    private function loadPluginRoutesAssets(): void
+    private function initRouter(): void
     {
-        $plugins = Plugin::where('active', 1)->get()->toArray();
-        if (! empty($plugins)) {
-            SessionManager::set('plugin_actives', array_map(fn ($plugin) => $plugin->name, $plugins));
-            foreach ($plugins as $plugin) {
-                require Path::get('PLUGINS_PATH').$plugin->url.DIRECTORY_SEPARATOR.'plugin.php';
-            }
-        } else {
-            SessionManager::set('plugin_actives', []);
-        }
+        $this->router = RouterManager::router();
+        $this->router->setBasePath(Path::get('SUBFOLDER'));
     }
 
-    private function loadRoutes(): void
+    private function initManagers(): void
     {
-        $router = RouterManager::router();
-        $router->setBasePath(Path::get('SUBFOLDER'));
-
-        $this->loadPluginRoutesAssets();
-
-        require TemplateManager::file('template.php');
-
-        require Path::get('PROJECT_PATH').'routes/web.php';
-        require Path::get('PROJECT_PATH').'routes/user.php';
-        require Path::get('PROJECT_PATH').'routes/admin.php';
-        require Path::get('PROJECT_PATH').'routes/error.php';
-
-        try {
-            $router->run();
-        } catch (AuthorizationException $e) {
-            http_response_code(403);
-            View::set('errors/forbidden.latte', [
-                'message' => $e->getMessage(),
-            ]);
-        }
-    }
-
-    private function bootstrap(): void
-    {
-        $this->initDatabase();
-
         User::setAuth();
 
         Info::stash()->keyByColumn('name');
@@ -94,12 +64,59 @@ class App
         LanguageManager::init();
     }
 
+    private function initPlugins(): void
+    {
+        $plugins = Plugin::select('name', 'namespace')->where('active', 1)->get()->toArray();
+
+        $classes = array_map(
+            fn ($p) => $p['namespace'] ?? null,
+            $plugins
+        );
+
+        foreach ($classes as $class) {
+            if (!class_exists($class)) {
+                continue;
+            }
+
+            $plugin = new $class();
+
+            if (method_exists($plugin, 'register')) {
+                $plugin->register();
+            }
+        }
+    }
+
+    private function loadRoutes(): void
+    {
+        require TemplateManager::file('template.php');
+
+        require Path::get('PROJECT_PATH').'routes/web.php';
+        require Path::get('PROJECT_PATH').'routes/user.php';
+        require Path::get('PROJECT_PATH').'routes/admin.php';
+        require Path::get('PROJECT_PATH').'routes/error.php';
+
+        try {
+            $this->router->run();
+        } catch (AuthorizationException $e) {
+            http_response_code(403);
+            View::set('errors/forbidden.latte', [
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
     public function run(): void
     {
         (Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
+
         ErrorManager::setErrorReporting();
         SecurityManager::setSecurityHeaders();
-        $this->bootstrap();
+
+        $this->initDatabase();
+        $this->initRouter();
+        $this->initManagers();
+        $this->initPlugins();
+
         $this->loadRoutes();
     }
 }

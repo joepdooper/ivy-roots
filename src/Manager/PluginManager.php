@@ -3,89 +3,168 @@
 namespace Ivy\Manager;
 
 use Exception;
+use Ivy\Core\Contracts\PluginInterface;
 use Ivy\Core\Language;
-use Ivy\Core\Path;
-use Ivy\Helper\PluginHelper;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
+use Ivy\Helper\PluginHelper;
 
 class PluginManager
 {
-    private Plugin $plugin;
+    public function __construct(
+        private Plugin $pluginModel
+    ) {}
 
-    public function __construct(Plugin $plugin)
+    /**
+     * Resolve plugin instance from class name stored in metadata/DB
+     */
+    private function resolvePlugin(): PluginInterface
     {
-        $this->plugin = $plugin;
+        $class = $this->pluginModel->class
+            ?? $this->pluginModel->getInfo()->getMainClass();
+
+        if (!class_exists($class)) {
+            throw new Exception("Plugin class not found: {$class}");
+        }
+
+        $instance = new $class();
+
+        if (!$instance instanceof PluginInterface) {
+            throw new Exception("Plugin must implement PluginInterface: {$class}");
+        }
+
+        return $instance;
     }
 
     public function install(): array
     {
-        $this->plugin->authorize('install');
-        $this->plugin->setInfo();
+        $this->pluginModel->authorize('install');
+        $this->pluginModel->setInfo();
 
         try {
-            if (! empty($missing = PluginHelper::getMissingDependencies($this->plugin->getInfo()->getDependencies()))) {
-                $count = count($missing);
-                $message = 'This plugin has '.$count.($count > 1 ? ' dependencies' : ' dependency').'. Please install the '.($count > 1 ? 'plugins' : 'plugin').' '.implode(', ', $missing);
+            $missing = PluginHelper::getMissingDependencies(
+                $this->pluginModel->getInfo()->getDependencies()
+            );
 
-                return ['status' => 'warning', 'message' => $message];
+            if (!empty($missing)) {
+                return [
+                    'status' => 'warning',
+                    'message' => 'Missing dependencies: ' . implode(', ', $missing),
+                ];
             }
 
-            if (isset($this->plugin->getInfo()->getDatabase()['install']) && ! empty($this->plugin->getInfo()->getDatabase()['install']) && ! empty($this->plugin->getInfo()->getUrl())) {
-                $installPath = Path::get('PLUGINS_PATH').$this->plugin->getInfo()->getUrl().DIRECTORY_SEPARATOR.$this->plugin->getInfo()->getDatabase()['install'];
-                if (file_exists($installPath)) {
-                    require_once $installPath;
-                }
-            }
+            $plugin = $this->resolvePlugin();
+            $plugin->install();
 
-            $this->plugin->save();
+            $this->pluginModel->save();
 
-            if ($this->plugin->getInfo()->hasSettings()) {
-                foreach ($this->plugin->getInfo()->getSettings() as $setting) {
-                    $data = array_merge($setting, [
-                        'plugin_id' => $this->plugin->id,
-                        'is_default' => 1,
-                    ]);
-                    (new Setting)->populate($data)->insert();
-                }
-            }
+            $this->installSettings();
 
-            if ($this->plugin->getInfo()->hasCollection()) {
-                (new PluginCollectionManager($this->plugin))->install();
-            }
+            // $this->installCollections();
 
-            return ['status' => 'success', 'message' => Language::translate('plugin.installed_successfully', ['plugin' => $this->plugin->name])];
+            return [
+                'status' => 'success',
+                'message' => Language::translate(
+                    'plugin.installed_successfully',
+                    ['plugin' => $this->pluginModel->name]
+                )
+            ];
+
         } catch (Exception $e) {
-            return ['status' => 'error', 'message' => 'Error installing plugin: '.$e->getMessage()];
+            return [
+                'status' => 'error',
+                'message' => 'Error installing plugin: ' . $e->getMessage()
+            ];
         }
     }
 
     public function uninstall(): array
     {
-        $this->plugin->authorize('uninstall');
-        $this->plugin->setInfo();
+        $this->pluginModel->authorize('uninstall');
+        $this->pluginModel->setInfo();
 
         try {
-            if ($this->plugin->getInfo()->getCollection()) {
-                (new PluginCollectionManager($this->plugin))->uninstall();
-            }
+            $plugin = $this->resolvePlugin();
+            $plugin->uninstall();
 
-            if ($this->plugin->getInfo()->hasSettings()) {
-                $settings = (new Setting)->where('plugin_id', $this->plugin->id)->deleteAll();
-            }
+            $this->uninstallCollections();
 
-            if (isset($this->plugin->getInfo()->getDatabase()['uninstall']) && ! empty($this->plugin->getInfo()->getDatabase()['uninstall'])) {
-                $uninstallPath = Path::get('PLUGINS_PATH').$this->plugin->getInfo()->getUrl().DIRECTORY_SEPARATOR.$this->plugin->getInfo()->getDatabase()['uninstall'];
-                if (file_exists($uninstallPath)) {
-                    require_once $uninstallPath;
-                }
-            }
+            $this->pluginModel
+                ->getRelation('settings')
+                ?->deleteAll();
 
-            $this->plugin->delete();
+            $this->pluginModel->delete();
 
-            return ['status' => 'success', 'message' => Language::translate('plugin.uninstalled_successfully', ['plugin' => $this->plugin->name])];
+            return [
+                'status' => 'success',
+                'message' => Language::translate(
+                    'plugin.uninstalled_successfully',
+                    ['plugin' => $this->pluginModel->name]
+                )
+            ];
+
         } catch (Exception $e) {
-            return ['status' => 'error', 'message' => 'Error deleting plugin: '.$e->getMessage()];
+            return [
+                'status' => 'error',
+                'message' => 'Error uninstalling plugin: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public function enable(): void
+    {
+        $plugin = $this->resolvePlugin();
+
+        $plugin->enable();
+        $this->pluginModel->update(['active' => 1]);
+    }
+
+    public function disable(): void
+    {
+        $plugin = $this->resolvePlugin();
+
+        $plugin->disable();
+        $this->pluginModel->update(['active' => 0]);
+    }
+
+    public function register(): void
+    {
+        $plugin = $this->resolvePlugin();
+        $plugin->register();
+    }
+
+    public function boot(): void
+    {
+        $plugin = $this->resolvePlugin();
+        $plugin->boot();
+    }
+
+    private function installSettings(): void
+    {
+        if (!$this->pluginModel->getInfo()->hasSettings()) {
+            return;
+        }
+
+        foreach ($this->pluginModel->getInfo()->getSettings() as $setting) {
+            (new Setting)->populate([
+                ...$setting,
+                'plugin_id' => $this->pluginModel->id,
+                'is_default' => 1,
+            ])->insert();
+        }
+    }
+
+    private function installCollections(): void
+    {
+        if ($this->pluginModel->getInfo()->hasCollection()) {
+            (new PluginCollectionManager($this->pluginModel))->install();
+        }
+    }
+
+    private function uninstallCollections(): void
+    {
+        if ($this->pluginModel->getInfo()->hasCollection()) {
+            (new PluginCollectionManager($this->pluginModel))->uninstall();
         }
     }
 }
