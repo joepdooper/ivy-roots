@@ -6,6 +6,8 @@ class PluginInfo
 {
     private ?string $name;
 
+    private string $namespace;
+
     private ?string $version;
 
     private ?string $description;
@@ -36,6 +38,7 @@ class PluginInfo
         $infoJsonContent = PluginHelper::parseJson($url.DIRECTORY_SEPARATOR.'info.json');
 
         $this->name = $infoJsonContent['name'] ?? null;
+        $this->namespace = $infoJsonContent['namespace'] ?? null;
         $this->version = $infoJsonContent['version'] ?? null;
         $this->description = $infoJsonContent['description'] ?? null;
         $this->type = $infoJsonContent['type'] ?? null;
@@ -49,6 +52,11 @@ class PluginInfo
     public function getName(): ?string
     {
         return $this->name;
+    }
+
+    public function getNamespace(): ?string
+    {
+        return $this->namespace;
     }
 
     public function getVersion(): ?string

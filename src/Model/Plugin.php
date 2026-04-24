@@ -11,13 +11,14 @@ class Plugin extends Model
     use HasPolicies;
     
     protected $fillable = [
+        'parent_id',
         'name',
         'url',
+        'namespace',
         'version',
         'description',
         'type',
         'active',
-        'parent_id',
     ];
 
     protected PluginInfo $info;

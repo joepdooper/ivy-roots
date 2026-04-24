@@ -20,8 +20,7 @@ class PluginManager
      */
     private function resolvePlugin(): PluginInterface
     {
-        $class = $this->pluginModel->class
-            ?? $this->pluginModel->getInfo()->getMainClass();
+        $class = $this->pluginModel->namespace ?? $this->pluginModel->getInfo()->getNamespace();
 
         if (!class_exists($class)) {
             throw new Exception("Plugin class not found: {$class}");
@@ -39,6 +38,7 @@ class PluginManager
     public function install(): array
     {
         $this->pluginModel->authorize('install');
+
         $this->pluginModel->setInfo();
 
         try {
@@ -53,8 +53,7 @@ class PluginManager
                 ];
             }
 
-            $plugin = $this->resolvePlugin();
-            $plugin->install();
+            $this->resolvePlugin()->install();
 
             $this->pluginModel->save();
 

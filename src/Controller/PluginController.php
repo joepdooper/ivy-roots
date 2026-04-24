@@ -86,12 +86,11 @@ class PluginController extends Controller
 
     public function install(mixed $data): void
     {
+        $this->plugin->authorize('install');
+
         $plugin = new Plugin;
 
-        $plugin->authorize('install');
-        $plugin->fill($data);
-
-        $this->pluginManager = new PluginManager($plugin);
+        $this->pluginManager = new PluginManager($plugin->fill($data));
         $this->responses[] = $this->pluginManager->install();
     }
 
@@ -131,22 +130,18 @@ class PluginController extends Controller
         $this->plugin->authorize('sync');
 
         if($this->request->request->has('plugin')){
-            foreach ($this->request->get('plugin') as $data) {
+            foreach ($this->request->get('plugin') as $index => $data) {
 
                 $result = $this->pluginForm->validate($data);
 
                 if ($result->valid) {
-
                     if (empty($result->data['id'])) {
                         $this->install($result->data);
-
                     } elseif (isset($result->data['delete'])) {
                         $this->uninstall($result->data['id']);
-
                     } else {
                         $this->update($result->data['id'], $result->data);
                     }
-
                 } else {
                     $errors[$index] = $result->errors;
                     $old[$index] = $result->old;
