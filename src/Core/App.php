@@ -68,6 +68,11 @@ class App
     {
         $plugins = Plugin::select('name', 'namespace')->where('active', 1)->get()->toArray();
 
+        SessionManager::set(
+            'plugin_actives',
+            array_column($plugins, 'name')
+        );
+
         $classes = array_map(
             fn ($p) => $p['namespace'] ?? null,
             $plugins
