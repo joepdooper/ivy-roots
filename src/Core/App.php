@@ -4,7 +4,7 @@ namespace Ivy\Core;
 
 use Bramus\Router\Router;
 use Dotenv\Dotenv;
-use Ivy\Exceptions\AuthorizationException;
+use Ivy\Exception\AuthorizationException;
 use Ivy\Manager\DatabaseManager;
 use Ivy\Manager\ErrorManager;
 use Ivy\Manager\LanguageManager;
@@ -17,6 +17,7 @@ use Ivy\Model\Info;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Model\User;
+use Ivy\Registry\PluginRegistry;
 use Ivy\View\View;
 
 class App
@@ -66,29 +67,32 @@ class App
 
     private function initPlugins(): void
     {
-        $plugins = Plugin::select('name', 'namespace')->where('active', 1)->get()->toArray();
+        $plugins = Plugin::select('name', 'namespace')
+            ->where('active', 1)
+            ->get();
 
-        SessionManager::set(
-            'plugin_actives',
-            array_column($plugins, 'name')
-        );
+        $active = [];
 
-        $classes = array_map(
-            fn ($p) => $p['namespace'] ?? null,
-            $plugins
-        );
+        foreach ($plugins as $p) {
+            $name = $p->name ?? null;
+            $class = $p->namespace ?? null;
 
-        foreach ($classes as $class) {
-            if (!class_exists($class)) {
+            if ($name) {
+                $active[$name] = true;
+            }
+
+            if (!$class || !class_exists($class)) {
                 continue;
             }
 
             $plugin = new $class();
 
-            if (method_exists($plugin, 'register')) {
+            if ($plugin instanceof PluginInterface) {
                 $plugin->register();
             }
         }
+
+        PluginRegistry::setActive($active);
     }
 
     private function loadRoutes(): void

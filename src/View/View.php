@@ -14,6 +14,7 @@ use Ivy\Model\Info;
 use Ivy\Model\Profile;
 use Ivy\Model\Setting;
 use Ivy\Model\User;
+use Ivy\Registry\PluginRegistry;
 use Ivy\Tag\ButtonTag;
 use Latte\Engine;
 use Latte\Runtime\Html;
@@ -93,7 +94,7 @@ class View
         self::$latte->addFunction('info', fn ($key) => Info::stashGet($key)->value ?? '');
         self::$latte->addFunction('setting', fn ($key) => Setting::stashGet($key)->value ?? '');
         self::$latte->addFunction('enabled', fn ($key) => Setting::stashGet($key)->bool ?? false);
-        self::$latte->addFunction('isPluginActive', fn ($key) => in_array($key, SessionManager::get('plugin_actives')));
+        self::$latte->addFunction('isPluginActive', fn (string $key): bool => PluginRegistry::isActive($key));
         self::$latte->addFunction('csrf', fn () => new Html('<input type="hidden" name="csrf_token" value="'.self::generateCsrfToken().'">'));
         self::$latte->addFunction('auth', fn () => User::getAuth());
         self::$latte->addFunction('profile', fn () => Profile::getUserProfile());
