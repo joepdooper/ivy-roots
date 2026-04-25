@@ -4,6 +4,7 @@ namespace Ivy\Core;
 
 use Bramus\Router\Router;
 use Dotenv\Dotenv;
+use Ivy\Core\Contracts\PluginInterface;
 use Ivy\Exception\AuthorizationException;
 use Ivy\Manager\DatabaseManager;
 use Ivy\Manager\ErrorManager;

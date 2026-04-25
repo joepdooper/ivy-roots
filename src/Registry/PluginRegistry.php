@@ -6,9 +6,9 @@ class PluginRegistry
 {
     private static array $active = [];
 
-    public static function setActive(array $names): void
+    public static function setActive(array $active): void
     {
-        self::$active = array_flip($names);
+        self::$active = $active;
     }
 
     public static function isActive(string $name): bool

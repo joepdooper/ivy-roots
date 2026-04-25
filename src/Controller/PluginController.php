@@ -96,19 +96,25 @@ class PluginController extends Controller
 
     public function update(Plugin|int $plugin, mixed $data): void
     {
+
         if (is_int($plugin)) {
             $plugin = Plugin::find($plugin);
         }
 
-        if ($plugin && $plugin->isDirty($data)) {
-            $plugin->authorize('update');
-            $plugin->fill($data)->save();
+        $plugin->fill($data);
 
-            $this->flashBag->add(
-                'success',
-                'Plugin ' . $plugin->name . ' updated successfully.'
-            );
+        if (! $plugin->isDirty()) {
+            return;
         }
+
+        $plugin->authorize('update');
+
+        $plugin->save();
+
+        $this->flashBag->add(
+            'success',
+            'Plugin ' . $plugin->name . ' updated successfully.'
+        );
     }
 
     public function uninstall(Plugin|int $plugin): void
