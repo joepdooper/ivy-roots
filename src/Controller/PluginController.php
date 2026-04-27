@@ -4,7 +4,10 @@ namespace Ivy\Controller;
 
 use Ivy\Abstract\Controller;
 use Ivy\Core\Path;
+use Ivy\Factory\PluginInfoFactory;
 use Ivy\Form\PluginForm;
+use Ivy\Form\PluginInfoForm;
+use Ivy\Helper\PluginInfoLoader;
 use Ivy\Manager\PluginManager;
 use Ivy\Model\Plugin;
 use Ivy\Model\User;
@@ -40,51 +43,63 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('index');
 
-        $parent_id = null;
+        $parentId = $id
+            ? Plugin::where('url', $id)->value('id')
+            : null;
 
-        if ($id) {
-            $parent_id = Plugin::where('url', $id)->value('id');
-        }
+        $loader = new PluginInfoLoader();
+        $factory = new PluginInfoFactory();
 
-        $installed_plugins = Plugin::all();
+        $installedPlugins = Plugin::all()->map(function ($plugin) use ($loader, $factory, &$installedUrls) {
+            $data = $loader->load($plugin->url);
+            $data['url'] = $plugin->url;
 
-        $values_to_remove = ['.', '..', '.DS_Store'];
+            $plugin->info = $factory->make($data);
 
-        foreach ($installed_plugins as $plugin) {
-            $plugin->setInfo();
-            $values_to_remove[] = $plugin->url;
-        }
+            $installedUrls[$plugin->url] = true;
+            return $plugin;
+        });
 
-        $uninstalled_plugins = [];
+        $uninstalledPlugins = [];
 
-        if (! $id && is_dir(Path::get('PLUGINS_PATH'))) {
+        if (!$id) {
+            $pluginsPath = Path::get('PLUGINS_PATH');
 
-            $uninstalled_plugins = array_filter(
-                scandir(Path::get('PLUGINS_PATH')),
-                fn ($plugin) => ! in_array($plugin, $values_to_remove)
-            );
+            if (is_dir($pluginsPath)) {
 
-            $uninstalled_plugins_info = [];
+                $ignore = ['.' => true, '..' => true, '.DS_Store' => true];
 
-            foreach ($uninstalled_plugins as $key => $plugin) {
-                $info = json_decode(
-                    file_get_contents(Path::get('PLUGINS_PATH') . $plugin . '/info.json')
-                );
+                foreach (scandir($pluginsPath) as $plugin) {
 
-                $info->url = $plugin;
-                $uninstalled_plugins_info[$key] = $info;
+                    if (isset($ignore[$plugin]) || isset($installedUrls[$plugin])) {
+                        continue;
+                    }
+
+                    $infoPath = $pluginsPath . $plugin . '/info.json';
+
+                    if (!is_file($infoPath)) {
+                        continue;
+                    }
+
+                    $info = json_decode(file_get_contents($infoPath));
+
+                    if ($info === null) {
+                        continue;
+                    }
+
+                    $info->url = $plugin;
+                    $uninstalledPlugins[] = $info;
+                }
             }
-
-            $uninstalled_plugins = $uninstalled_plugins_info;
         }
-        
+
         View::set('admin/plugin.latte', [
-            'installed_plugins' => $installed_plugins,
-            'uninstalled_plugins' => $uninstalled_plugins
+            'installed_plugins' => $installedPlugins,
+            'uninstalled_plugins' => $uninstalledPlugins,
         ]);
     }
 
-    public function install(mixed $data): void
+    public function add(mixed $data): void
     {
         $this->plugin->authorize('install');
 
@@ -117,18 +132,20 @@ class PluginController extends Controller
         );
     }
 
-    public function uninstall(Plugin|int $plugin): void
+    public function delete(Plugin|int $plugin): void
     {
         if (is_int($plugin)) {
             $plugin = Plugin::find($plugin);
         }
 
-        if ($plugin) {
-            $plugin->authorize('uninstall');
-
-            $this->pluginManager = new PluginManager($plugin);
-            $this->responses[] = $this->pluginManager->uninstall();
+        if (! $plugin) {
+            return;
         }
+
+        $plugin->authorize('uninstall');
+
+        $this->pluginManager = new PluginManager($plugin);
+        $this->responses[] = $this->pluginManager->uninstall();
     }
 
     public function sync(): void
@@ -142,9 +159,9 @@ class PluginController extends Controller
 
                 if ($result->valid) {
                     if (empty($result->data['id'])) {
-                        $this->install($result->data);
+                        $this->add($result->data);
                     } elseif (isset($result->data['delete'])) {
-                        $this->uninstall($result->data['id']);
+                        $this->delete($result->data['id']);
                     } else {
                         $this->update($result->data['id'], $result->data);
                     }

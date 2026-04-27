@@ -65,12 +65,12 @@ class PluginHelper
     }
 
     /**
-     * @param array<string>|null $dependencies
+     * @param array<string> $dependencies
      * @return array<string>
      */
-    public static function getMissingDependencies(?array $dependencies = []): array
+    public static function getMissingDependencies(array $dependencies): array
     {
-        return array_filter($dependencies ?? [], function ($dependency) {
+        return array_filter($dependencies, function ($dependency) {
             return ! Plugin::select('id')->where('name', $dependency)->first();
         });
     }

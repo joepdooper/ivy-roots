@@ -68,7 +68,7 @@ class App
 
     private function initPlugins(): void
     {
-        $plugins = Plugin::select('name', 'namespace')
+        $plugins = Plugin::select('name', 'interface')
             ->where('active', 1)
             ->get();
 
@@ -76,7 +76,7 @@ class App
 
         foreach ($plugins as $p) {
             $name = $p->name ?? null;
-            $class = $p->namespace ?? null;
+            $class = $p->interface ?? null;
 
             if ($name) {
                 $active[$name] = true;

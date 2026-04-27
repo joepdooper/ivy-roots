@@ -16,6 +16,7 @@ class DatabaseManager
     public function addConnection(array $config, string $name = 'default'): void
     {
         $this->capsule->addConnection($config, $name);
+        $this->capsule->getDatabaseManager()->setDefaultConnection($name);
     }
 
     public function boot(): void
@@ -27,5 +28,10 @@ class DatabaseManager
     public function getConnection(?string $name = null)
     {
         return $this->capsule->getConnection($name);
+    }
+
+    public function schema(?string $name = null)
+    {
+        return $this->getConnection($name)->getSchemaBuilder();
     }
 }

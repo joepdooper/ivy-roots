@@ -35,7 +35,7 @@ class PluginPolicy
 
     public static function collection(Plugin $plugin): bool
     {
-        if ($plugin->getInfo()->hasCollection() && User::canEditAsAdmin()) {
+        if ($plugin->info->hasCollection() && User::canEditAsAdmin()) {
             return true;
         }
 
@@ -44,7 +44,7 @@ class PluginPolicy
 
     public static function settings(Plugin $plugin): bool
     {
-        if ($plugin->getInfo()->hasSettings() && User::canEditAsAdmin()) {
+        if ($plugin->info->hasSettings() && User::canEditAsAdmin()) {
             return true;
         }
 

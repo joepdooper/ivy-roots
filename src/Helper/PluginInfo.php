@@ -2,135 +2,38 @@
 
 namespace Ivy\Helper;
 
-class PluginInfo
+final class PluginInfo
 {
-    private ?string $name;
-
-    private string $namespace;
-
-    private ?string $version;
-
-    private ?string $description;
-
-    private string $url;
-
-    private ?string $type;
-
-    /** @var array<string> */
-    private array $collection = [];
-
-    /** @var array<string, string> */
-    private array $settings = [];
-
-    /** @var array<string, string> */
-    private array $actions = [];
-
-    /** @var null|array<string, string> */
-    private ?array $database;
-
-    /** @var null|array<string> */
-    private ?array $dependencies;
-
-    public function __construct(string $url)
-    {
-        $this->url = $url;
-
-        $infoJsonContent = PluginHelper::parseJson($url.DIRECTORY_SEPARATOR.'info.json');
-
-        $this->name = $infoJsonContent['name'] ?? null;
-        $this->namespace = $infoJsonContent['namespace'] ?? null;
-        $this->version = $infoJsonContent['version'] ?? null;
-        $this->description = $infoJsonContent['description'] ?? null;
-        $this->type = $infoJsonContent['type'] ?? null;
-        $this->collection = $infoJsonContent['collection'] ?? [];
-        $this->settings = $infoJsonContent['settings'] ?? [];
-        $this->actions = $infoJsonContent['actions'] ?? [];
-        $this->database = $infoJsonContent['database'] ?? null;
-        $this->dependencies = $infoJsonContent['dependencies'] ?? null;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function getNamespace(): ?string
-    {
-        return $this->namespace;
-    }
-
-    public function getVersion(): ?string
-    {
-        return $this->version;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function getType(): ?string
-    {
-        return $this->type;
-    }
-
-    public function getUrl(): ?string
-    {
-        return $this->url;
-    }
+    public function __construct(
+        public readonly string $name,
+        public readonly string $interface,
+        public readonly ?string $version,
+        public readonly ?string $description,
+        public readonly string $url,
+        public readonly ?string $type,
+        public readonly array $collection = [],
+        public readonly array $settings = [],
+        public readonly array $actions = [],
+        public readonly array $dependencies = [],
+    ) {}
 
     public function hasCollection(): bool
     {
-        return ! empty($this->collection);
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getCollection(): array
-    {
-        return $this->collection;
+        return $this->collection !== [];
     }
 
     public function hasSettings(): bool
     {
-        return ! empty($this->settings);
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public function getSettings(): array
-    {
-        return $this->settings;
+        return $this->settings !== [];
     }
 
     public function hasActions(): bool
     {
-        return ! empty($this->actions);
+        return $this->actions !== [];
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function getActions(): array
+    public function hasDependencies(): bool
     {
-        return $this->actions;
-    }
-
-    /**
-     * @return null|array<string, string>
-     */
-    public function getDatabase(): ?array
-    {
-        return $this->database;
-    }
-
-    /**
-     * @return null|array<string>
-     */
-    public function getDependencies(): ?array
-    {
-        return $this->dependencies;
+        return $this->dependencies !== [];
     }
 }

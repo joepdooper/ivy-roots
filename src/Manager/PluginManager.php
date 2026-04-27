@@ -3,8 +3,11 @@
 namespace Ivy\Manager;
 
 use Exception;
+use Illuminate\Database\Capsule\Manager as Capsule;
 use Ivy\Core\Contracts\PluginInterface;
 use Ivy\Core\Language;
+use Ivy\Form\PluginInfoForm;
+use Ivy\Helper\PluginInfoLoader;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Helper\PluginHelper;
@@ -12,15 +15,12 @@ use Ivy\Helper\PluginHelper;
 class PluginManager
 {
     public function __construct(
-        private Plugin $pluginModel
+        private Plugin $plugin
     ) {}
 
-    /**
-     * Resolve plugin instance from class name stored in metadata/DB
-     */
-    private function resolvePlugin(): PluginInterface
+    private function resolvePluginInterface(): PluginInterface
     {
-        $class = $this->pluginModel->namespace ?? $this->pluginModel->getInfo()->getNamespace();
+        $class = $this->plugin->interface;
 
         if (!class_exists($class)) {
             throw new Exception("Plugin class not found: {$class}");
@@ -37,133 +37,102 @@ class PluginManager
 
     public function install(): array
     {
-        $this->pluginModel->authorize('install');
+        $this->plugin->authorize('install');
 
-        $this->pluginModel->setInfo();
+        $info = (new PluginInfoLoader)->load($this->plugin->url);
+        $result = (new PluginInfoForm)->validate($info);
 
-        try {
-            $missing = PluginHelper::getMissingDependencies(
-                $this->pluginModel->getInfo()->getDependencies()
-            );
+        if(!$result->valid) {
+            return [
+                'status' => 'error',
+                'message' => 'Invalid info.json: ' . implode(', ', $result->errors),
+            ];
+        }
 
+        $this->plugin->fill($result->data);
+
+        if (isset($info['dependencies']) && is_array($info['dependencies'])) {
+            $missing = PluginHelper::getMissingDependencies($info['dependencies']);
             if (!empty($missing)) {
                 return [
                     'status' => 'warning',
                     'message' => 'Missing dependencies: ' . implode(', ', $missing),
                 ];
             }
+        }
 
-            $this->resolvePlugin()->install();
+        $this->resolvePluginInterface()->install();
 
-            $this->pluginModel->save();
-
-            $this->installSettings();
-
-            // $this->installCollections();
-
-            return [
-                'status' => 'success',
-                'message' => Language::translate(
-                    'plugin.installed_successfully',
-                    ['plugin' => $this->pluginModel->name]
-                )
-            ];
-
+        try {
+            Capsule::transaction(function () use($info) {
+                $this->plugin->save();
+                if (isset($info['settings'])) {
+                    foreach ($info['settings'] as $setting) {
+                        new Setting()->fill([
+                            ...$setting,
+                            'plugin_id' => $this->plugin->id,
+                            'is_default' => 1,
+                        ])->save();
+                    }
+                }
+                if (isset($info['collection']) && !empty($info['collection'])) {
+                    (new PluginCollectionManager($this->plugin))->install();
+                }
+            });
         } catch (Exception $e) {
+            $this->resolvePluginInterface()->uninstall();
             return [
                 'status' => 'error',
                 'message' => 'Error installing plugin: ' . $e->getMessage()
             ];
         }
+
+        return [
+            'status' => 'success',
+            'message' => Language::translate(
+                'plugin.installed_successfully',
+                ['plugin' => $this->plugin->name]
+            )
+        ];
     }
 
     public function uninstall(): array
     {
-        $this->pluginModel->authorize('uninstall');
-        $this->pluginModel->setInfo();
+        $this->plugin->authorize('uninstall');
+
+        $info = (new PluginInfoLoader)->load($this->plugin->url);
+        $result = (new PluginInfoForm)->validate($info);
+
+        if(!$result->valid) {
+            return [
+                'status' => 'error',
+                'message' => 'Invalid info.json: ' . implode(', ', $result->errors),
+            ];
+        }
 
         try {
-            $plugin = $this->resolvePlugin();
-            $plugin->uninstall();
-
-            $this->uninstallCollections();
-
-            $this->pluginModel
-                ->getRelation('settings')
-                ?->deleteAll();
-
-            $this->pluginModel->delete();
-
-            return [
-                'status' => 'success',
-                'message' => Language::translate(
-                    'plugin.uninstalled_successfully',
-                    ['plugin' => $this->pluginModel->name]
-                )
-            ];
-
+            Capsule::transaction(function () use ($info) {
+                if (isset($info['collection']) && !empty($info['collection'])) {
+                    (new PluginCollectionManager($this->plugin))->uninstall();
+                }
+                Setting::where('plugin_id', $this->plugin->id)->delete();
+                $this->plugin->delete();
+            });
         } catch (Exception $e) {
             return [
                 'status' => 'error',
                 'message' => 'Error uninstalling plugin: ' . $e->getMessage()
             ];
         }
-    }
 
-    public function enable(): void
-    {
-        $plugin = $this->resolvePlugin();
+        $this->resolvePluginInterface()->uninstall();
 
-        $plugin->enable();
-        $this->pluginModel->update(['active' => 1]);
-    }
-
-    public function disable(): void
-    {
-        $plugin = $this->resolvePlugin();
-
-        $plugin->disable();
-        $this->pluginModel->update(['active' => 0]);
-    }
-
-    public function register(): void
-    {
-        $plugin = $this->resolvePlugin();
-        $plugin->register();
-    }
-
-    public function boot(): void
-    {
-        $plugin = $this->resolvePlugin();
-        $plugin->boot();
-    }
-
-    private function installSettings(): void
-    {
-        if (!$this->pluginModel->getInfo()->hasSettings()) {
-            return;
-        }
-
-        foreach ($this->pluginModel->getInfo()->getSettings() as $setting) {
-            (new Setting)->populate([
-                ...$setting,
-                'plugin_id' => $this->pluginModel->id,
-                'is_default' => 1,
-            ])->insert();
-        }
-    }
-
-    private function installCollections(): void
-    {
-        if ($this->pluginModel->getInfo()->hasCollection()) {
-            (new PluginCollectionManager($this->pluginModel))->install();
-        }
-    }
-
-    private function uninstallCollections(): void
-    {
-        if ($this->pluginModel->getInfo()->hasCollection()) {
-            (new PluginCollectionManager($this->pluginModel))->uninstall();
-        }
+        return [
+            'status' => 'success',
+            'message' => Language::translate(
+                'plugin.uninstalled_successfully',
+                ['plugin' => $this->plugin->name]
+            )
+        ];
     }
 }
