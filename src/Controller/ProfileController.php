@@ -17,6 +17,7 @@ use Ivy\Form\ProfileForm;
 use Ivy\Manager\SessionManager;
 use Ivy\Model\Profile;
 use Ivy\Model\User;
+use Ivy\Registry\PluginRegistry;
 use Ivy\Service\Mail;
 use Ivy\View\View;
 
@@ -107,7 +108,7 @@ class ProfileController extends Controller
                     }
                 }
 
-                if (in_array('Image', SessionManager::get('plugin_actives'))) {
+                if (PluginRegistry::isActive('Image')) {
 
                     if ($this->request->files->get('avatar')) {
 

@@ -77,4 +77,9 @@ class TemplateManager
 
         return self::$cache[$filename] = $filename;
     }
+
+    public static function require(string $filename):void
+    {
+        require self::file($filename);
+    }
 }

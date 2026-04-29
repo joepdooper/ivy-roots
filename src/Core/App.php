@@ -98,12 +98,7 @@ class App
 
     private function loadRoutes(): void
     {
-        require TemplateManager::file('template.php');
-
-        require Path::get('PROJECT_PATH').'routes/web.php';
-        require Path::get('PROJECT_PATH').'routes/user.php';
-        require Path::get('PROJECT_PATH').'routes/admin.php';
-        require Path::get('PROJECT_PATH').'routes/error.php';
+        TemplateManager::require('template.php');
 
         try {
             $this->router->run();
