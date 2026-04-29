@@ -155,27 +155,27 @@ class AssetManager
      */
     private static function processAssets(array $assets, string $type, bool $shouldMinify): array
     {
-        $minifiedUrl = "/{$type}/minified.{$type}";
-        $minifiedPath = Path::get('PUBLIC_PATH').$minifiedUrl;
-
-        if ($shouldMinify) {
-            if (Environment::isDev() && ! file_exists($minifiedPath)) {
-                $minifierClass = '\\MatthiasMullie\\Minify\\'.strtoupper($type);
-                $minify = new $minifierClass;
-
-                foreach ($assets as $file) {
-                    $minify->add(Path::get('PUBLIC_PATH').ltrim($file, '/'));
-                }
-
-                $minify->minify($minifiedPath);
-            }
-
-            return [$minifiedUrl];
-        }
-
-        if (Environment::isDev() && file_exists($minifiedPath)) {
-            unlink($minifiedPath);
-        }
+//        $minifiedUrl = "/{$type}/minified.{$type}";
+//        $minifiedPath = Path::get('PUBLIC_PATH').$minifiedUrl;
+//
+//        if ($shouldMinify) {
+//            if (Environment::isDev() && ! file_exists($minifiedPath)) {
+//                $minifierClass = '\\MatthiasMullie\\Minify\\'.strtoupper($type);
+//                $minify = new $minifierClass;
+//
+//                foreach ($assets as $file) {
+//                    $minify->add(Path::get('PUBLIC_PATH').ltrim($file, '/'));
+//                }
+//
+//                $minify->minify($minifiedPath);
+//            }
+//
+//            return [$minifiedUrl];
+//        }
+//
+//        if (Environment::isDev() && file_exists($minifiedPath)) {
+//            unlink($minifiedPath);
+//        }
 
         return $assets;
     }

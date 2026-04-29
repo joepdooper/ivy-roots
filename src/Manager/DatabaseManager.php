@@ -2,7 +2,9 @@
 
 namespace Ivy\Manager;
 
+use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Events\Dispatcher;
 
 class DatabaseManager
 {
@@ -21,6 +23,7 @@ class DatabaseManager
 
     public function boot(): void
     {
+        $this->capsule->setEventDispatcher(new Dispatcher(new Container));
         $this->capsule->setAsGlobal();
         $this->capsule->bootEloquent();
     }
