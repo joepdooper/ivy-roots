@@ -1,3 +1,6 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
 parameters:
     ignoreErrors:
         - '#Instantiated class Items\\Collection\\Image\\ImageFile not found#'
