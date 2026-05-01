@@ -35,6 +35,9 @@ class PluginManager
         return $instance;
     }
 
+    /**
+     * @return array{status: string, message: string}
+     */
     public function install(): array
     {
         $this->plugin->authorize('install');
@@ -64,8 +67,9 @@ class PluginManager
         $this->resolvePluginInterface()->install();
 
         try {
-            Capsule::transaction(function () use($info) {
+            Capsule::connection()->transaction(function () use ($info) {
                 $this->plugin->save();
+
                 if (isset($info['settings'])) {
                     foreach ($info['settings'] as $setting) {
                         new Setting()->fill([
@@ -75,7 +79,8 @@ class PluginManager
                         ])->save();
                     }
                 }
-                if (isset($info['collection']) && !empty($info['collection'])) {
+
+                if (!empty($info['collection'])) {
                     (new PluginCollectionManager($this->plugin))->install();
                 }
             });
@@ -96,6 +101,9 @@ class PluginManager
         ];
     }
 
+    /**
+     * @return array{status: string, message: string}
+     */
     public function uninstall(): array
     {
         $this->plugin->authorize('uninstall');
@@ -111,10 +119,11 @@ class PluginManager
         }
 
         try {
-            Capsule::transaction(function () use ($info) {
-                if (isset($info['collection']) && !empty($info['collection'])) {
+            Capsule::connection()->transaction(function () use ($info) {
+                if (!empty($info['collection'])) {
                     (new PluginCollectionManager($this->plugin))->uninstall();
                 }
+
                 Setting::where('plugin_id', $this->plugin->id)->delete();
                 $this->plugin->delete();
             });

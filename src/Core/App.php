@@ -6,6 +6,8 @@ use Bramus\Router\Router;
 use Dotenv\Dotenv;
 use Ivy\Core\Contracts\PluginInterface;
 use Ivy\Exception\AuthorizationException;
+use Ivy\Handler\MinifyCssHandler;
+use Ivy\Handler\MinifyJsHandler;
 use Ivy\Manager\DatabaseManager;
 use Ivy\Manager\ErrorManager;
 use Ivy\Manager\LanguageManager;
@@ -19,6 +21,7 @@ use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Model\User;
 use Ivy\Registry\PluginRegistry;
+use Ivy\Registry\SettingRegistry;
 use Ivy\View\View;
 
 class App
@@ -47,23 +50,6 @@ class App
         $this->databaseManager->addConnection($config);
 
         $this->databaseManager->boot();
-    }
-
-    private function initRouter(): void
-    {
-        $this->router = RouterManager::router();
-        $this->router->setBasePath(Path::get('SUBFOLDER'));
-    }
-
-    private function initManagers(): void
-    {
-        User::setAuth();
-
-        Info::stash()->keyByColumn('name');
-        Setting::stash()->keyByColumn('name');
-
-        TemplateManager::init();
-        LanguageManager::init();
     }
 
     private function initPlugins(): void
@@ -96,9 +82,37 @@ class App
         PluginRegistry::setActive($active);
     }
 
-    private function loadRoutes(): void
+    public function run(): void
     {
+        (Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
+
+        ErrorManager::setErrorReporting();
+        SecurityManager::setSecurityHeaders();
+
+        $this->initDatabase();
+
+        $this->router = RouterManager::router();
+        $this->router->setBasePath(Path::get('SUBFOLDER'));
+
+        User::setAuth();
+
+        Info::stash()->keyByColumn('name');
+        Setting::stash()->keyByColumn('name');
+
+        TemplateManager::init();
+        LanguageManager::init();
+
+        $this->initPlugins();
+
         TemplateManager::require('template.php');
+
+        SettingRegistry::define('Minify CSS', [
+            'handler' => MinifyCssHandler::class,
+        ]);
+
+        SettingRegistry::define('Minify JS', [
+            'handler' => MinifyJsHandler::class,
+        ]);
 
         try {
             $this->router->run();
@@ -108,20 +122,5 @@ class App
                 'message' => $e->getMessage(),
             ]);
         }
-    }
-
-    public function run(): void
-    {
-        (Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
-
-        ErrorManager::setErrorReporting();
-        SecurityManager::setSecurityHeaders();
-
-        $this->initDatabase();
-        $this->initRouter();
-        $this->initManagers();
-        $this->initPlugins();
-
-        $this->loadRoutes();
     }
 }
