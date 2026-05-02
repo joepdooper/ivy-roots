@@ -38,7 +38,7 @@ class RouterManager
             return $handler;
         }
 
-        if (is_string($handler) && str_contains($handler, '@')) {
+        if (str_contains($handler, '@')) {
             [$class, $method] = explode('@', $handler);
 
             return function (...$params) use ($class, $method) {

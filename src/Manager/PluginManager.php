@@ -36,7 +36,10 @@ class PluginManager
     }
 
     /**
-     * @return array{status: string, message: string}
+     * @return array{
+     *     status: string,
+     *     message: string|array<string, mixed>
+     * }
      */
     public function install(): array
     {
@@ -102,7 +105,10 @@ class PluginManager
     }
 
     /**
-     * @return array{status: string, message: string}
+     * @return array{
+     *     status: string,
+     *     message: string|array<string, mixed>
+     * }
      */
     public function uninstall(): array
     {
