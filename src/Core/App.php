@@ -5,7 +5,6 @@ namespace Ivy\Core;
 use Bramus\Router\Router;
 use Dotenv\Dotenv;
 use Illuminate\Container\Container;
-use Ivy\Config\Environment;
 use Ivy\Core\Contracts\PluginInterface;
 use Ivy\Exception\AuthorizationException;
 use Ivy\Handler\MinifyCssHandler;
@@ -13,10 +12,8 @@ use Ivy\Handler\MinifyJsHandler;
 use Ivy\Manager\DatabaseManager;
 use Ivy\Manager\ErrorManager;
 use Ivy\Manager\LanguageManager;
-use Ivy\Manager\PluginManager;
 use Ivy\Manager\RouterManager;
 use Ivy\Manager\SecurityManager;
-use Ivy\Manager\SessionManager;
 use Ivy\Manager\TemplateManager;
 use Ivy\Middleware\CsrfVerifier;
 use Ivy\Middleware\MiddlewarePipeline;
@@ -24,13 +21,10 @@ use Ivy\Middleware\RequestNormalizer;
 use Ivy\Model\Info;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
-use Ivy\Model\User;
 use Ivy\Registry\PluginRegistry;
 use Ivy\Registry\SettingRegistry;
 use Ivy\View\View;
-use Latte\Engine;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class App
 {
@@ -100,6 +94,10 @@ class App
         $this->container->instance(Request::class, $request);
         Container::setInstance($this->container);
 
+        $pipeline = new MiddlewarePipeline;
+        $pipeline->add(new RequestNormalizer());
+        $pipeline->add(new CsrfVerifier());
+
         ErrorManager::setErrorReporting();
         SecurityManager::setSecurityHeaders();
 
@@ -125,10 +123,6 @@ class App
         SettingRegistry::define('Minify JS', [
             'handler' => MinifyJsHandler::class,
         ]);
-
-        $pipeline = new MiddlewarePipeline;
-        $pipeline->add(new RequestNormalizer());
-        $pipeline->add(new CsrfVerifier());
 
         try {
             $pipeline->handle($request, function () {
