@@ -10,19 +10,23 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CsrfVerifier implements MiddlewareInterface
 {
-    public function handle(Request $request, callable $next): ?Response
+    public function handle(Request $request): void
     {
         if (in_array($request->getMethod(), ['POST', 'PATCH'])) {
+
             $csrfToken = SessionManager::get('csrf_token');
             $submitted = $request->request->get('csrf_token', '');
 
             if (! $csrfToken || ! hash_equals($csrfToken, $submitted)) {
-                SessionManager::getFlashBag()->add('error', 'No valid security token.');
 
-                return new RedirectResponse(Path::get('BASE_PATH'));
+                SessionManager::getFlashBag()->add(
+                    'error',
+                    'No valid security token.'
+                );
+
+                (new RedirectResponse($request->headers->get('referer')))->send();
+                exit;
             }
         }
-
-        return $next($request);
     }
 }

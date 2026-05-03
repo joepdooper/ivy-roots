@@ -3,6 +3,7 @@
 namespace Ivy\Abstract;
 
 use Curl\Curl;
+use Illuminate\Container\Container;
 use Ivy\Core\Path;
 use Ivy\Manager\SessionManager;
 use Ivy\Middleware\CsrfVerifier;
@@ -17,24 +18,15 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 
 abstract class Controller
 {
-    protected Request $request;
     protected FlashBagInterface $flashBag;
     protected AuthService $authService;
+    protected Request $request;
 
     public function __construct()
     {
-        $this->request = Request::createFromGlobals();
+        $this->request = Container::getInstance()->make(Request::class);
         $this->flashBag = SessionManager::getFlashBag();
         $this->authService = new AuthService();
-        $this->runMiddlewares();
-    }
-
-    protected function runMiddlewares(): void
-    {
-        $pipeline = new MiddlewarePipeline;
-        $pipeline->add(new RequestNormalizer);
-        $pipeline->add(new CsrfVerifier);
-        $pipeline->handle($this->request, fn (Request $req) => null);
     }
 
     protected function redirect(string $url = '', int $statusCode = 302): void
