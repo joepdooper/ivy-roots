@@ -35,7 +35,7 @@ class ProfileController extends Controller
 
     public function before(): void
     {
-        if (! User::getAuth()->isLoggedIn()) {
+        if (! $this->authService->isLoggedIn()) {
             $this->redirect('user/login');
         }
     }
@@ -146,14 +146,14 @@ class ProfileController extends Controller
     {
         $profile = Profile::where('user_id', $_SESSION['auth_user_id'])->first();
 
-        View::set('admin/profile.latte', ['profile' => $profile]);
+        View::render('admin/profile.latte', ['profile' => $profile]);
     }
 
     public function public(int $id): void
     {
         $profile = Profile::where('id', $id)->first();
 
-        View::set('include/profile.latte', ['profile' => $profile]);
+        View::render('include/profile.latte', ['profile' => $profile]);
     }
 
     public function verify(?string $selector = null, ?string $token = null): void

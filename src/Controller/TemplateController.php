@@ -26,7 +26,7 @@ class TemplateController extends Controller
 
     public function before(): void
     {
-        if (! User::getAuth()->isLoggedIn() && Setting::stashGet('private')->bool) {
+        if (! $this->authService->isLoggedIn() && Setting::stashGet('private')->bool) {
 
             if (! $this->isAlwaysPublicPath(Path::get('CURRENT_PAGE'))) {
                 $this->redirect('user/login');
@@ -38,7 +38,7 @@ class TemplateController extends Controller
     {
         $this->template->authorize('index');
 
-        View::set('admin/template.latte', [
+        View::render('admin/template.latte', [
             'templateBase' => basename((string) TemplateManager::getTemplateBase()),
             'templateSub'  => basename((string) TemplateManager::getTemplateSub()),
         ]);

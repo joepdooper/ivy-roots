@@ -39,7 +39,7 @@ class UserController extends Controller
 
     public function before(): void
     {
-        if (User::getAuth()->isLoggedIn()) {
+        if ($this->authService->isLoggedIn()) {
             $this->redirect('admin/profile');
         } else {
             if (Path::get('CURRENT_PAGE') != Path::get('BASE_PATH').'user/login') {
@@ -53,7 +53,7 @@ class UserController extends Controller
         $this->user->authorize('index');
 
         $users = (new User)->all();
-        View::set('admin/user.latte', ['users' => $users]);
+        View::render('admin/user.latte', ['users' => $users]);
     }
 
     public function update(User|int $user, mixed $data): void
@@ -69,19 +69,19 @@ class UserController extends Controller
         $user->authorize('update');
 
         if ($data['editor']) {
-            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::EDITOR);
+            $this->authService->auth()->admin()->addRoleForUserById($user->id, Role::EDITOR);
         } else {
-            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::EDITOR);
+            $this->authService->auth()->admin()->removeRoleForUserById($user->id, Role::EDITOR);
         }
         if ($data['admin']) {
-            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::ADMIN);
+            $this->authService->auth()->admin()->addRoleForUserById($user->id, Role::ADMIN);
         } else {
-            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::ADMIN);
+            $this->authService->auth()->admin()->removeRoleForUserById($user->id, Role::ADMIN);
         }
         if ($data['super_admin']) {
-            $user::getAuth()->admin()->addRoleForUserById($user->id, Role::SUPER_ADMIN);
+            $this->authService->auth()->admin()->addRoleForUserById($user->id, Role::SUPER_ADMIN);
         } else {
-            $user::getAuth()->admin()->removeRoleForUserById($user->id, Role::SUPER_ADMIN);
+            $this->authService->auth()->admin()->removeRoleForUserById($user->id, Role::SUPER_ADMIN);
         }
 
         $this->flashBag->add(
@@ -103,7 +103,7 @@ class UserController extends Controller
         $user->authorize('delete');
 
         try {
-            User::getAuth()->admin()->deleteUserById($user->id);
+            $this->authService->auth()->admin()->deleteUserById($user->id);
         } catch (UnknownIdException|AuthError $e) {
             $this->flashBag->add('error', 'Something went wrong: ' . $e);
         }
@@ -138,7 +138,7 @@ class UserController extends Controller
 
     public function beforeRegister(): void
     {
-        if (User::getAuth()->isLoggedIn()) {
+        if ($this->authService->isLoggedIn()) {
             $this->redirect('admin/profile');
         }
     }
@@ -151,7 +151,7 @@ class UserController extends Controller
     public function register(): void
     {
         try {
-            $userId = User::getAuth()->register($this->request->get('email'), $this->request->get('password'), $this->request->get('username'), function ($selector, $token) {
+            $userId = $this->authService->auth()->register($this->request->get('email'), $this->request->get('password'), $this->request->get('username'), function ($selector, $token) {
                 $url = Path::get('PUBLIC_URL').'user/login/'.urlencode($selector).'/'.urlencode($token);
                 // send email
                 $mail = new Mail;
@@ -167,7 +167,7 @@ class UserController extends Controller
             if (Setting::stashGet('registration_role')->bool && isset(Setting::stashGet('registration_role')->value)) {
                 $role = strtoupper(Setting::stashGet('registration_role')->value);
                 $roleConstant = "\Delight\Auth\Role::$role";
-                User::getAuth()->admin()->addRoleForUserById($userId, constant($roleConstant));
+                $this->authService->auth()->admin()->addRoleForUserById($userId, constant($roleConstant));
             }
 
         } catch (InvalidEmailException) {
@@ -190,12 +190,12 @@ class UserController extends Controller
 
     public function viewRegister(): void
     {
-        View::set('user/register.latte');
+        View::render('user/register.latte');
     }
 
     public function beforeLogin(): void
     {
-        if (User::getAuth()->isLoggedIn()) {
+        if ($this->authService->isLoggedIn()) {
             $this->redirect('admin/profile');
         }
     }
@@ -207,8 +207,8 @@ class UserController extends Controller
     public function login(): void
     {
         try {
-            User::getAuth()->login($this->request->get('email'), $this->request->get('password'));
-            $this->flashBag->add('success', 'Welcome '.User::getAuth()->getUsername());
+            $this->authService->auth()->login($this->request->get('email'), $this->request->get('password'));
+            $this->flashBag->add('success', 'Welcome '.$this->authService->auth()->getUsername());
             $this->redirect('admin/profile');
         } catch (InvalidEmailException) {
             $this->flashBag->add('error', 'Wrong email address');
@@ -229,14 +229,14 @@ class UserController extends Controller
     {
         if (isset($selector) && isset($token)) {
             try {
-                if (User::getAuth()->isLoggedIn()) {
+                if ($this->authService->auth()->isLoggedIn()) {
                     try {
-                        User::getAuth()->logOutEverywhere();
+                        $this->authService->auth()->logOutEverywhere();
                     } catch (NotLoggedInException) {
                         $this->flashBag->add('error', 'Not logged in');
                     }
                 }
-                User::getAuth()->confirmEmail($selector, $token);
+                $this->authService->auth()->confirmEmail($selector, $token);
                 $this->flashBag->add('success', 'Email address has been verified');
             } catch (InvalidSelectorTokenPairException) {
                 $this->flashBag->add('error', 'Invalid token');
@@ -250,12 +250,12 @@ class UserController extends Controller
                 $this->flashBag->add('error', 'Auth error');
             }
         }
-        View::set('user/login.latte');
+        View::render('user/login.latte');
     }
 
     public function beforeLogout(): void
     {
-        if (! User::getAuth()->isLoggedIn()) {
+        if (! $this->authService->isLoggedIn()) {
             $this->redirect('user/login');
         }
     }
@@ -265,19 +265,19 @@ class UserController extends Controller
      */
     public function logout(): void
     {
-        User::getAuth()->logOut();
+        $this->authService->auth()->logOut();
 
         $this->redirect();
     }
 
     public function viewLogout(): void
     {
-        View::set('user/logout.latte');
+        View::render('user/logout.latte');
     }
 
     public function beforeReset(): void
     {
-        if (User::getAuth()->isLoggedIn()) {
+        if ($this->authService->isLoggedIn()) {
             $this->redirect('admin/profile');
         }
     }
@@ -289,7 +289,7 @@ class UserController extends Controller
     {
         if ($this->request->get('email')) {
             try {
-                User::getAuth()->forgotPassword($this->request->get('email'), function ($selector, $token) {
+                $this->authService->auth()->forgotPassword($this->request->get('email'), function ($selector, $token) {
                     $url = Path::get('PUBLIC_URL').'user/reset/'.urlencode($selector).'/'.urlencode($token);
                     // send email
                     $mail = new Mail;
@@ -317,7 +317,7 @@ class UserController extends Controller
 
         if ($this->request->get('password')) {
             try {
-                User::getAuth()->resetPassword($this->request->get('selector'), $this->request->get('token'), $this->request->get('password'));
+                $this->authService->auth()->resetPassword($this->request->get('selector'), $this->request->get('token'), $this->request->get('password'));
                 $this->flashBag->add('success', 'Password has been reset');
                 $this->redirect('user/login');
             } catch (InvalidSelectorTokenPairException) {
@@ -343,7 +343,7 @@ class UserController extends Controller
     {
         if (isset($selector) && isset($token)) {
             try {
-                User::getAuth()->canResetPasswordOrThrow($selector, $token);
+                $this->authService->auth()->canResetPasswordOrThrow($selector, $token);
                 $this->flashBag->add('success', 'Create a new secure password');
             } catch (InvalidSelectorTokenPairException $e) {
                 $this->flashBag->add('error', 'Invalid token');
@@ -362,6 +362,6 @@ class UserController extends Controller
                 $this->redirect('user/reset');
             }
         }
-        View::set('user/reset.latte', ['selector' => $selector, 'token' => $token]);
+        View::render('user/reset.latte', ['selector' => $selector, 'token' => $token]);
     }
 }

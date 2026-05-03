@@ -18,9 +18,8 @@ class CsrfVerifier implements MiddlewareInterface
 
             if (! $csrfToken || ! hash_equals($csrfToken, $submitted)) {
                 SessionManager::getFlashBag()->add('error', 'No valid security token.');
-                $redirect = new RedirectResponse(Path::get('BASE_PATH'));
-                $redirect->send();
-                exit;
+
+                return new RedirectResponse(Path::get('BASE_PATH'));
             }
         }
 

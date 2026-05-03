@@ -2,39 +2,39 @@
 
 namespace Ivy\Policy;
 
+use Ivy\Abstract\Policy;
 use Ivy\Model\Info;
-use Ivy\Model\User;
 
-class InfoPolicy
+class InfoPolicy extends Policy
 {
-    public static function index(Info $info): bool
+    public function index(Info $info): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function sync(Info $info): bool
+    public function sync(Info $info): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function save(Info $info): bool
+    public function save(Info $info): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function add(Info $info): bool
+    public function add(Info $info): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function update(Info $info): bool
+    public function update(Info $info): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function delete(Info $info): bool
+    public function delete(Info $info): bool
     {
-        if (! $info->is_default && User::canEditAsAdmin()) {
+        if (! $info->is_default && $this->canEditAsAdmin()) {
             return true;
         }
 

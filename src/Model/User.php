@@ -4,7 +4,7 @@ namespace Ivy\Model;
 
 use Delight\Auth\Auth;
 use Delight\Auth\Role;
-use Illuminate\Database\Capsule\Manager as DB;
+use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Eloquent\Model;
 use Ivy\Trait\HasPolicies;
 
@@ -13,8 +13,6 @@ class User extends Model
     use HasPolicies;
 
     public $timestamps = false;
-
-    private static Auth $auth;
 
     protected $fillable = [
         'email',
@@ -27,35 +25,41 @@ class User extends Model
         'last_login',
     ];
 
-    public static function setAuth(): void
+    public function hasRole(int $role): bool
     {
-        self::$auth = new Auth(DB::connection()->getPdo());
+        return ($this->roles_mask & $role) !== 0;
     }
 
-    public static function getAuth(): Auth
+    public function hasAnyRole(int ...$roles): bool
     {
-        return self::$auth;
+        foreach ($roles as $role) {
+            if ($this->hasRole($role)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    public static function canEditAsEditor(): bool
+    public function canEditAsEditor(): bool
     {
-        return self::$auth->hasAnyRole(
-            Role::EDITOR,
-            Role::ADMIN,
-            Role::SUPER_ADMIN
+        return $this->hasAnyRole(
+            \Delight\Auth\Role::EDITOR,
+            \Delight\Auth\Role::ADMIN,
+            \Delight\Auth\Role::SUPER_ADMIN
         );
     }
 
-    public static function canEditAsAdmin(): bool
+    public function canEditAsAdmin(): bool
     {
-        return self::$auth->hasAnyRole(
-            Role::ADMIN,
-            Role::SUPER_ADMIN
+        return $this->hasAnyRole(
+            \Delight\Auth\Role::ADMIN,
+            \Delight\Auth\Role::SUPER_ADMIN
         );
     }
 
-    public static function canEditAsSuperAdmin(): bool
+    public function canEditAsSuperAdmin(): bool
     {
-        return self::$auth->hasRole(Role::SUPER_ADMIN);
+        return $this->hasRole(\Delight\Auth\Role::SUPER_ADMIN);
     }
 }

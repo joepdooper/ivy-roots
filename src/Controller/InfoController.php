@@ -30,7 +30,7 @@ class InfoController extends Controller
 
         $infos = Info::where('plugin_id', $plugin_id)->get();
 
-        View::set('admin/info.latte', ['infos' => $infos]);
+        View::render('admin/info.latte', ['infos' => $infos]);
     }
 
     public function add(mixed $data): void

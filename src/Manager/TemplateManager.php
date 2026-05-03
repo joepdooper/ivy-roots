@@ -4,6 +4,8 @@ namespace Ivy\Manager;
 
 use Ivy\Core\Path;
 use Illuminate\Database\Capsule\Manager as DB;
+use Ivy\View\Engine\LatteEngine;
+use Ivy\View\View;
 
 class TemplateManager
 {
@@ -47,6 +49,13 @@ class TemplateManager
         }
 
         self::$initialized = true;
+
+        $engine = match ($_ENV['VIEW_ENGINE'] ?? 'latte') {
+            'latte' => new LatteEngine(),
+            default => new LatteEngine(),
+        };
+
+        View::setEngine($engine);
     }
 
     public static function file(string $filename): string

@@ -3,28 +3,49 @@
 namespace Ivy\Trait;
 
 use Ivy\Exceptions\AuthorizationException;
+use Ivy\Service\AuthService;
 
 trait HasPolicies
 {
-    public function policy(string $action): bool
+    protected function policyInstance(): object
     {
         $modelClass = get_class($this);
         $modelName = (new \ReflectionClass($modelClass))->getShortName();
-        $namespace = str_replace('Model', 'Policy', (new \ReflectionClass($modelClass))->getNamespaceName());
+
+        $namespace = str_replace(
+            'Model',
+            'Policy',
+            (new \ReflectionClass($modelClass))->getNamespaceName()
+        );
+
         $policyClass = "{$namespace}\\{$modelName}Policy";
 
-        if (! class_exists($policyClass) || ! method_exists($policyClass, $action)) {
+        if (!class_exists($policyClass)) {
+            throw new AuthorizationException("Policy not found: {$policyClass}");
+        }
+
+        // resolve AuthService (simple local creation)
+        $auth = new AuthService();
+
+        return new $policyClass($auth);
+    }
+
+    public function policy(string $action): bool
+    {
+        $policy = $this->policyInstance();
+
+        if (!method_exists($policy, $action)) {
             return false;
         }
 
-        return (bool) $policyClass::$action($this);
+        return (bool) $policy->$action($this);
     }
 
     public function authorize(string $action): void
     {
         if (! $this->policy($action)) {
             throw new AuthorizationException(
-                "Not authorized to perform [{$action}] on ".static::class
+                "Not authorized to perform [{$action}] on " . static::class
             );
         }
     }

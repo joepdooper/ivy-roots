@@ -30,8 +30,8 @@ class PluginController extends Controller
 
     public function before(): void
     {
-        if (User::getAuth()->isLoggedIn()) {
-            if (! User::canEditAsSuperAdmin()) {
+        if ($this->auth->isLoggedIn()) {
+            if($this->plugin->authorize('index')) {
                 $this->redirect();
             }
         } else {
@@ -93,7 +93,7 @@ class PluginController extends Controller
             }
         }
 
-        View::set('admin/plugin.latte', [
+        View::render('admin/plugin.latte', [
             'installed_plugins' => $installedPlugins,
             'uninstalled_plugins' => $uninstalledPlugins,
         ]);

@@ -3,6 +3,8 @@
 namespace Ivy\Model;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Ivy\Service\AuthService;
 use Ivy\Trait\HasPolicies;
 
 class Profile extends Model
@@ -16,21 +18,23 @@ class Profile extends Model
         'user_image',
     ];
 
-    public function user()
+    public function user(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'user_id');
     }
 
-    public static function getUserProfile(): ?self
+    /**
+     * Resolve profile for current authenticated user
+     */
+    public static function getUserProfile(AuthService $auth): ?self
     {
-        if (self::$currentProfile === null) {
-            self::$currentProfile = self::where(
-                'user_id',
-                User::getAuth()->getUserId()
-            )->first();
+        $userId = $auth->auth()->getUserId();
+
+        if (!$userId) {
+            return null;
         }
 
-        return self::$currentProfile;
+        return self::where('user_id', $userId)->first();
     }
 
     public static function lastSeen(int $last_login): string

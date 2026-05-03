@@ -2,39 +2,40 @@
 
 namespace Ivy\Policy;
 
+use Ivy\Abstract\Policy;
 use Ivy\Model\Setting;
 use Ivy\Model\User;
 
-class SettingPolicy
+class SettingPolicy extends Policy
 {
-    public static function index(Setting $setting): bool
+    public function index(Setting $setting): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function sync(Setting $setting): bool
+    public function sync(Setting $setting): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function save(Setting $setting): bool
+    public function save(Setting $setting): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function add(Setting $setting): bool
+    public function add(Setting $setting): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function update(Setting $setting): bool
+    public function update(Setting $setting): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function delete(Setting $setting): bool
+    public function delete(Setting $setting): bool
     {
-        if (! $setting->is_default && User::canEditAsAdmin()) {
+        if (! $setting->is_default && $this->canEditAsAdmin()) {
             return true;
         }
 

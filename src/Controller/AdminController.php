@@ -9,7 +9,7 @@ class AdminController extends Controller
 {
     public function before(): void
     {
-        if (! User::getAuth()->isLoggedIn()) {
+        if (! $this->authService->isLoggedIn()) {
             $this->redirect('user/login');
         }
     }

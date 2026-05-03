@@ -14,7 +14,7 @@ class Mail
         $this->mailer->isSMTP();
         $this->mailer->Host = $_ENV['MAIL_HOST'];
         $this->mailer->Port = $_ENV['MAIL_PORT'];
-        $this->mailer->SMTPAuth = $_ENV['MAIL_SMTP_AUTH'] === 'false' ? false : true;
+        $this->mailer->SMTPAuth = filter_var($_ENV['MAIL_SMTP_AUTH'], FILTER_VALIDATE_BOOLEAN);
         if ($_ENV['MAIL_SMTP_SECURE'] === 'ssl') {
             $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         } elseif ($_ENV['MAIL_SMTP_SECURE'] === 'tls') {

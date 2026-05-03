@@ -2,49 +2,50 @@
 
 namespace Ivy\Policy;
 
+use Ivy\Abstract\Policy;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Model\User;
 
-class PluginPolicy
+class PluginPolicy extends Policy
 {
-    public static function index(Plugin $plugin): bool
+    public function index(Plugin $plugin): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function sync(Plugin $plugin): bool
+    public function sync(Plugin $plugin): bool
     {
-        return User::canEditAsSuperAdmin();
+        return $this->canEditAsSuperAdmin();
     }
 
-    public static function install(Plugin $plugin): bool
+    public function install(Plugin $plugin): bool
     {
-        return User::canEditAsSuperAdmin();
+        return $this->canEditAsSuperAdmin();
     }
 
-    public static function uninstall(Plugin $plugin): bool
+    public function uninstall(Plugin $plugin): bool
     {
-        return User::canEditAsSuperAdmin();
+        return $this->canEditAsSuperAdmin();
     }
 
-    public static function update(Plugin $plugin): bool
+    public function update(Plugin $plugin): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function collection(Plugin $plugin): bool
+    public function collection(Plugin $plugin): bool
     {
-        if ($plugin->info->hasCollection() && User::canEditAsAdmin()) {
+        if ($plugin->info->hasCollection() && $this->canEditAsAdmin()) {
             return true;
         }
 
         return false;
     }
 
-    public static function settings(Plugin $plugin): bool
+    public function settings(Plugin $plugin): bool
     {
-        if ($plugin->info->hasSettings() && User::canEditAsAdmin()) {
+        if ($plugin->info->hasSettings() && $this->canEditAsAdmin()) {
             return true;
         }
 

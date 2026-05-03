@@ -4,6 +4,7 @@ namespace Ivy\Core;
 
 use Bramus\Router\Router;
 use Dotenv\Dotenv;
+use Ivy\Config\Environment;
 use Ivy\Core\Contracts\PluginInterface;
 use Ivy\Exception\AuthorizationException;
 use Ivy\Handler\MinifyCssHandler;
@@ -23,6 +24,7 @@ use Ivy\Model\User;
 use Ivy\Registry\PluginRegistry;
 use Ivy\Registry\SettingRegistry;
 use Ivy\View\View;
+use Latte\Engine;
 
 class App
 {
@@ -93,8 +95,6 @@ class App
 
         $this->router = RouterManager::router();
         $this->router->setBasePath(Path::get('SUBFOLDER'));
-
-        User::setAuth();
 
         Info::stash()->keyByColumn('name');
         Setting::stash()->keyByColumn('name');

@@ -8,6 +8,7 @@ use Ivy\Manager\SessionManager;
 use Ivy\Middleware\CsrfVerifier;
 use Ivy\Middleware\MiddlewarePipeline;
 use Ivy\Middleware\RequestNormalizer;
+use Ivy\Service\AuthService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,13 +18,14 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 abstract class Controller
 {
     protected Request $request;
-
     protected FlashBagInterface $flashBag;
+    protected AuthService $authService;
 
     public function __construct()
     {
         $this->request = Request::createFromGlobals();
         $this->flashBag = SessionManager::getFlashBag();
+        $this->authService = new AuthService();
         $this->runMiddlewares();
     }
 

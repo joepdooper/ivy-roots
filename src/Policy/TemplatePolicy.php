@@ -2,23 +2,24 @@
 
 namespace Ivy\Policy;
 
+use Ivy\Abstract\Policy;
 use Ivy\Model\Template;
 use Ivy\Model\User;
 
-class TemplatePolicy
+class TemplatePolicy extends Policy
 {
-    public static function index(Template $template): bool
+    public function index(Template $template): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function sync(Template $template): bool
+    public function sync(Template $template): bool
     {
-        return User::canEditAsSuperAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function update(Template $template): bool
+    public function update(Template $template): bool
     {
-        return User::canEditAsSuperAdmin();
+        return $this->canEditAsAdmin();
     }
 }

@@ -31,7 +31,7 @@ class SettingController extends Controller
 
         $settings = Setting::where('plugin_id', $plugin_id)->get();
 
-        View::set('admin/setting.latte', ['settings' => $settings]);
+        View::render('admin/setting.latte', ['settings' => $settings]);
     }
 
     public function add(mixed $data): void
