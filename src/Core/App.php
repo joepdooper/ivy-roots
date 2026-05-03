@@ -23,6 +23,8 @@ use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Registry\PluginRegistry;
 use Ivy\Registry\SettingRegistry;
+use Ivy\Service\AuthService;
+use Ivy\View\Engine\LatteEngine;
 use Ivy\View\View;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -103,6 +105,9 @@ class App
 
         $this->initDatabase();
 
+        $auth = new AuthService();
+        $this->container->instance(AuthService::class, $auth);
+
         $this->router = RouterManager::router();
         $this->router->setBasePath(Path::get('SUBFOLDER'));
 
@@ -111,6 +116,15 @@ class App
 
         TemplateManager::init();
         LanguageManager::init();
+
+        $engine = match ($_ENV['VIEW_ENGINE'] ?? 'latte') {
+            'latte' => new LatteEngine(),
+            default => new LatteEngine(),
+        };
+
+        $engine->setAuth($auth);
+
+        View::setEngine($engine);
 
         $this->initPlugins();
 

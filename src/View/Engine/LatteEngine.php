@@ -22,10 +22,17 @@ use Ivy\Tag\ButtonTag;
 class LatteEngine implements ViewEngineInterface
 {
     private Engine $latte;
+    private AuthService $auth;
+
 
     public function __construct()
     {
         $this->latte = new Engine();
+    }
+
+    public function setAuth(AuthService $auth): void
+    {
+        $this->auth = $auth;
     }
 
     public function boot(): void
@@ -60,8 +67,6 @@ class LatteEngine implements ViewEngineInterface
 
     private function registerFunctions(): void
     {
-        $auth = new AuthService();
-
         $this->latte->addFunction('icon', fn ($icon) =>
         file_get_contents(Path::get('MEDIA_PATH') . 'icons/' . $icon)
         );
@@ -108,24 +113,24 @@ class LatteEngine implements ViewEngineInterface
         new Html('<input type="hidden" name="csrf_token" value="' . \Ivy\Manager\CsrfManager::token() . '">')
         );
 
-        $this->latte->addFunction('auth', fn () =>
-        $auth->auth()
+        $this->latte->addFunction('doesUserHaveRole', fn ($user, $role) =>
+        $this->auth->auth()->admin()->doesUserHaveRole($user, $role)
         );
 
-        $this->latte->addFunction('profile', fn () =>
-        Profile::getUserProfile($auth)
+        $this->latte->addFunction('authRoles', fn () =>
+        $this->auth->auth()->getRoles()
         );
 
-        $this->latte->addFunction('canEditAsEditor', fn () =>
-        $auth->user()->canEditAsEditor()
+        $this->latte->addFunction('authUser', fn () =>
+        $this->auth->authUser()
         );
 
-        $this->latte->addFunction('canEditAsAdmin', fn () =>
-        $auth->user()->canEditAsAdmin()
+        $this->latte->addFunction('isLoggedIn', fn () =>
+        $this->auth->isLoggedIn()
         );
 
-        $this->latte->addFunction('canEditAsSuperAdmin', fn () =>
-        $auth->user()->canEditAsSuperAdmin()
+        $this->latte->addFunction('can', fn ($action, $model) =>
+        (bool) $this->auth->can($action, $model)
         );
 
         $this->latte->addFunction('hook', fn ($key) =>

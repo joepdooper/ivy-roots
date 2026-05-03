@@ -30,7 +30,7 @@ class AuthService
     /**
      * Bridge: Delight userId → Eloquent User
      */
-    public function user(): ?User
+    public function authUser(): ?User
     {
         if (! $this->auth->isLoggedIn()) {
             return null;
@@ -41,4 +41,8 @@ class AuthService
         return User::find($userId);
     }
 
+    public function can(string $action, $model): bool
+    {
+        return (bool) $model->policy($action);
+    }
 }

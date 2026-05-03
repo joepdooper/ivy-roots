@@ -5,6 +5,7 @@ namespace Ivy\View;
 use Ivy\Core\Contracts\ViewEngineInterface;
 use Ivy\Manager\SessionManager;
 use Ivy\Manager\TemplateManager;
+use Ivy\Service\AuthService;
 
 class View
 {

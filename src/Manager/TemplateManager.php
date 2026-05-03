@@ -49,13 +49,6 @@ class TemplateManager
         }
 
         self::$initialized = true;
-
-        $engine = match ($_ENV['VIEW_ENGINE'] ?? 'latte') {
-            'latte' => new LatteEngine(),
-            default => new LatteEngine(),
-        };
-
-        View::setEngine($engine);
     }
 
     public static function file(string $filename): string

@@ -23,20 +23,6 @@ class Profile extends Model
         return $this->hasOne(User::class, 'id', 'user_id');
     }
 
-    /**
-     * Resolve profile for current authenticated user
-     */
-    public static function getUserProfile(AuthService $auth): ?self
-    {
-        $userId = $auth->auth()->getUserId();
-
-        if (!$userId) {
-            return null;
-        }
-
-        return self::where('user_id', $userId)->first();
-    }
-
     public static function lastSeen(int $last_login): string
     {
         $seconds_ago = time() - $last_login;

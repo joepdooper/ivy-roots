@@ -2,39 +2,40 @@
 
 namespace Ivy\Policy;
 
+use Ivy\Abstract\Policy;
 use Ivy\Model\Profile;
 use Ivy\Model\User;
 
-class ProfilePolicy
+class ProfilePolicy extends Policy
 {
-    public static function index(Profile $profile): bool
+    public function index(Profile $profile): bool
     {
-        return User::getAuth()->isLoggedIn();
+        return $this->isLoggedIn();
     }
 
-    public static function sync(Profile $profile): bool
+    public function sync(Profile $profile): bool
     {
-        return User::getAuth()->isLoggedIn();
+        return $this->isLoggedIn();
     }
 
-    public static function save(Profile $profile): bool
+    public function save(Profile $profile): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function add(Profile $profile): bool
+    public function add(Profile $profile): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function update(Profile $profile): bool
+    public function update(Profile $profile): bool
     {
-        return User::canEditAsAdmin();
+        return $this->canEditAsAdmin();
     }
 
-    public static function delete(Profile $profile): bool
+    public function delete(Profile $profile): bool
     {
-        if (! $info->is_default && User::canEditAsAdmin()) {
+        if (! $info->is_default && $this->canEditAsAdmin()) {
             return true;
         }
 

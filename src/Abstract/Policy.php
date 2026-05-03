@@ -3,20 +3,27 @@
 namespace Ivy\Abstract;
 
 use Delight\Auth\Auth;
+use Illuminate\Container\Container;
 use Ivy\Service\AuthService;
+use Symfony\Component\HttpFoundation\Request;
 
 abstract class Policy
 {
-    protected AuthService $authService;
+    protected Auth $auth;
 
-    public function __construct(AuthService $authService)
+    public function __construct(Auth $auth)
     {
-        $this->authService = $authService;
+        $this->auth = $auth;
+    }
+
+    public function isLoggedIn(): bool
+    {
+        return $this->auth->isLoggedIn();
     }
 
     public function canEditAsEditor(): bool
     {
-        return $this->authService->auth()->hasAnyRole(
+        return $this->auth->hasAnyRole(
             \Delight\Auth\Role::EDITOR,
             \Delight\Auth\Role::ADMIN,
             \Delight\Auth\Role::SUPER_ADMIN
@@ -25,7 +32,7 @@ abstract class Policy
 
     public function canEditAsAdmin(): bool
     {
-        return $this->authService->auth()->hasAnyRole(
+        return $this->auth->hasAnyRole(
             \Delight\Auth\Role::ADMIN,
             \Delight\Auth\Role::SUPER_ADMIN
         );
@@ -33,7 +40,7 @@ abstract class Policy
 
     public function canEditAsSuperAdmin(): bool
     {
-        return $this->authService->auth()->hasRole(
+        return $this->auth->hasRole(
             \Delight\Auth\Role::SUPER_ADMIN
         );
     }

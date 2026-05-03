@@ -2,8 +2,11 @@
 
 namespace Ivy\Trait;
 
+use Delight\Auth\Auth;
+use Illuminate\Container\Container;
 use Ivy\Exceptions\AuthorizationException;
 use Ivy\Service\AuthService;
+use Symfony\Component\HttpFoundation\Request;
 
 trait HasPolicies
 {
@@ -23,11 +26,7 @@ trait HasPolicies
         if (!class_exists($policyClass)) {
             throw new AuthorizationException("Policy not found: {$policyClass}");
         }
-
-        // resolve AuthService (simple local creation)
-        $auth = new AuthService();
-
-        return new $policyClass($auth);
+        return new $policyClass(Container::getInstance()->make(AuthService::class)->auth());
     }
 
     public function policy(string $action): bool
