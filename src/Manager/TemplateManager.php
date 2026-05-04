@@ -4,6 +4,7 @@ namespace Ivy\Manager;
 
 use Ivy\Core\Path;
 use Illuminate\Database\Capsule\Manager as DB;
+use Ivy\Service\AssetPublisher;
 use Ivy\View\Engine\LatteEngine;
 use Ivy\View\View;
 

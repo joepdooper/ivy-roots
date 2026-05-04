@@ -2,124 +2,61 @@
 
 namespace Ivy\Service;
 
-use Ivy\Config\Environment;
 use Ivy\Core\Path;
+use Ivy\Model\Template;
 
 class AssetPublisher
 {
-    public function publish(string $type, string $name): void
+    public function publish(): void
     {
-        $basePath = $this->resolveBasePath($type, $name);
-        $source = $basePath.'dist'.DIRECTORY_SEPARATOR;
+        $target = Path::get('PUBLIC_PATH');
 
-        if (! is_dir($source)) {
-            return;
-        }
+        // fresh state
+        $this->removeDirectory($target . 'css');
+        $this->removeDirectory($target . 'js');
 
-        if ($type === 'templates') {
-            $target = Path::get('PUBLIC_PATH');
+        $templates = Template::whereIn('type', ['base', 'sub'])
+            ->orderByRaw("FIELD(type, 'base', 'sub')")
+            ->get();
 
-            $this->removeDirectory($target.'css');
-            $this->removeDirectory($target.'js');
+        foreach ($templates as $template) {
+            $source = Path::get('TEMPLATES_PATH')
+                . $template->value
+                . DIRECTORY_SEPARATOR
+                . 'dist'
+                . DIRECTORY_SEPARATOR;
 
-            if (is_dir($source.'css')) {
-                $this->copyDirectory(
-                    $source.'css'.DIRECTORY_SEPARATOR,
-                    $target.'css'.DIRECTORY_SEPARATOR
-                );
+            if (is_dir($source)) {
+                $this->copy($source, $target);
             }
-
-            if (is_dir($source.'js')) {
-                $this->copyDirectory(
-                    $source.'js'.DIRECTORY_SEPARATOR,
-                    $target.'js'.DIRECTORY_SEPARATOR
-                );
-            }
-
-            if (Environment::isProd()) {
-                $this->setReadOnly($target.'css');
-                $this->setReadOnly($target.'js');
-            }
-
-            return;
         }
     }
 
-    protected function publishFiles(string $source, string $targetBase, string $type): void
+    protected function copy(string $source, string $target): void
     {
-        if (is_dir($targetBase)) {
-            $this->removeDirectory($targetBase);
-        }
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
 
-        @mkdir($targetBase, 0755, true);
+        foreach ($iterator as $item) {
+            $relative = substr($item->getPathname(), strlen($source));
+            $dst = $target . DIRECTORY_SEPARATOR . $relative;
 
-        $items = scandir($source);
-        foreach ($items as $item) {
-            if ($item === '.' || $item === '..') {
-                continue;
-            }
-
-            $ext = pathinfo($item, PATHINFO_EXTENSION);
-            if ($ext !== $type) {
-                continue;
-            }
-
-            copy($source.$item, $targetBase.$item);
-        }
-
-        if (Environment::isProd()) {
-            $this->setReadOnly($targetBase);
-        }
-    }
-
-    protected function resolveBasePath(string $type, string $name): string
-    {
-        if (! in_array($type, ['templates', 'plugins'])) {
-            throw new \InvalidArgumentException("Invalid type: $type");
-        }
-
-        if (! preg_match('/^[a-zA-Z0-9_\-]+$/', $name)) {
-            throw new \InvalidArgumentException("Invalid name: $name");
-        }
-
-        return $type === 'templates'
-            ? Path::get('TEMPLATES_PATH').$name.DIRECTORY_SEPARATOR
-            : Path::get('PLUGINS_PATH').$name.DIRECTORY_SEPARATOR;
-    }
-
-    protected function copyDirectory(string $source, string $target): void
-    {
-        $parent = dirname($target);
-
-        if (! is_dir($parent)) {
-            throw new \RuntimeException("Parent directory does not exist: $parent");
-        }
-
-        if (! is_writable($parent)) {
-            chmod($parent, 0755);
-        }
-
-        if (! is_dir($target) && ! mkdir($target, 0755, true)) {
-            throw new \RuntimeException("Failed to create directory: $target");
-        }
-
-        $items = scandir($source);
-
-        foreach ($items as $item) {
-            if ($item === '.' || $item === '..') {
-                continue;
-            }
-
-            $src = rtrim($source, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$item;
-            $dst = rtrim($target, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$item;
-
-            if (is_dir($src)) {
-                $this->copyDirectory($src.DIRECTORY_SEPARATOR, $dst.DIRECTORY_SEPARATOR);
-            } else {
-                if (! copy($src, $dst)) {
-                    throw new \RuntimeException("Failed to copy file: $src → $dst");
+            if ($item->isDir()) {
+                if (! is_dir($dst)) {
+                    mkdir($dst, 0755, true);
                 }
+                continue;
             }
+
+            $dir = dirname($dst);
+
+            if (! is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+
+            copy($item->getPathname(), $dst);
         }
     }
 
@@ -129,52 +66,19 @@ class AssetPublisher
             return;
         }
 
-        $items = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
-
-        foreach ($items as $item) {
-            chmod($item->getRealPath(), $item->isDir() ? 0755 : 0644);
-        }
-
-        chmod($dir, 0755);
-
-        $items = new \RecursiveIteratorIterator(
+        $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
             \RecursiveIteratorIterator::CHILD_FIRST
         );
 
-        foreach ($items as $item) {
-            if ($item->isDir()) {
-                rmdir($item->getRealPath());
+        foreach ($iterator as $file) {
+            if ($file->isDir()) {
+                rmdir($file->getRealPath());
             } else {
-                unlink($item->getRealPath());
+                unlink($file->getRealPath());
             }
         }
 
         rmdir($dir);
-    }
-
-    protected function setReadOnly(string $target): void
-    {
-        if (! is_dir($target)) {
-            return;
-        }
-
-        $items = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($target, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
-
-        foreach ($items as $item) {
-            if ($item->isDir()) {
-                chmod($item->getRealPath(), 0555);
-            } else {
-                chmod($item->getRealPath(), 0444);
-            }
-        }
-
-        chmod(Path::get('MEDIA_PATH'), 0755);
     }
 }

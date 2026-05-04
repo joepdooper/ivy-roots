@@ -17,9 +17,6 @@ class AssetManager
     /** @var array<string> */
     protected static array $module = [];
 
-    /** @var array<string> */
-    protected static array $vite = [];
-
     /**
      * Register a CSS asset.
      */
@@ -50,7 +47,7 @@ class AssetManager
      */
     public static function getCSS(): array
     {
-        return self::processAssets(self::$css, 'css', Setting::stashGet('minify_css')->bool);
+        return self::$css;
     }
 
     /**
@@ -59,7 +56,7 @@ class AssetManager
      */
     public static function getJS(): array
     {
-        return self::processAssets(self::$js, 'js', Setting::stashGet('minify_js')->bool);
+        return self::$js;
     }
 
     /**
@@ -68,7 +65,7 @@ class AssetManager
      */
     public static function getModules(): array
     {
-        return self::processAssets(self::$module, 'js', Setting::stashGet('minify_js')->bool);
+        return self::$module;
     }
 
     /**
@@ -147,45 +144,4 @@ class AssetManager
 
         $collection[] = $host.$path;
     }
-
-    /**
-     * Handle minification and dev cleanup.
-     * @param array<string> $assets
-     * @return array<string>
-     */
-    private static function processAssets(array $assets, string $type, bool $shouldMinify): array
-    {
-//        $minifiedUrl = "/{$type}/minified.{$type}";
-//        $minifiedPath = Path::get('PUBLIC_PATH').$minifiedUrl;
-//
-//        if ($shouldMinify) {
-//            if (Environment::isDev() && ! file_exists($minifiedPath)) {
-//                $minifierClass = '\\MatthiasMullie\\Minify\\'.strtoupper($type);
-//                $minify = new $minifierClass;
-//
-//                foreach ($assets as $file) {
-//                    $minify->add(Path::get('PUBLIC_PATH').ltrim($file, '/'));
-//                }
-//
-//                $minify->minify($minifiedPath);
-//            }
-//
-//            return [$minifiedUrl];
-//        }
-//
-//        if (Environment::isDev() && file_exists($minifiedPath)) {
-//            unlink($minifiedPath);
-//        }
-
-        return $assets;
-    }
 }
-
-//            $src = TemplateManager::file($path);
-//            $dest = Path::get('PUBLIC_PATH') . $path;
-//
-//            if (file_exists($src)) {
-//                if (!is_dir(dirname($dest))) mkdir(dirname($dest), 0755, true);
-//                if (file_exists($dest)) unlink($dest);
-//                copy($src, $dest);
-//            }
