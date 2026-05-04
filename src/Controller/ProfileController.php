@@ -72,7 +72,7 @@ class ProfileController extends Controller
 
                 if ($profile->user->isDirty('email')) {
                     try {
-                        User::getAuth()->changeEmail(
+                        $this->authService->auth()->changeEmail(
                             $result->data['email'],
                             function ($selector, $token) use ($result) {
 
@@ -160,7 +160,7 @@ class ProfileController extends Controller
     {
         if ($selector && $token) {
             try {
-                User::getAuth()->confirmEmail($selector, $token);
+                $this->authService->auth()->confirmEmail($selector, $token);
                 $this->flashBag->add('success', 'Email address has been verified');
 
             } catch (InvalidSelectorTokenPairException) {
