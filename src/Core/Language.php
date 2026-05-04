@@ -52,7 +52,30 @@ class Language
 
         if (! empty($translation) && is_string($translation) && ! empty($variables)) {
             foreach ($variables as $placeholder => $value) {
-                $translation = str_replace(":{$placeholder}", $value, $translation);
+                $translation = preg_replace_callback(
+                    '/:([A-Za-z_][A-Za-z0-9_]*)/',
+                    function ($matches) use ($variables) {
+                        $key = $matches[1];
+                        $lookup = mb_strtolower($key);
+
+                        if (!array_key_exists($lookup, $variables)) {
+                            return $matches[0];
+                        }
+
+                        $value = $variables[$lookup];
+
+                        if ($key === mb_strtoupper($key)) {
+                            return mb_strtoupper($value);
+                        }
+
+                        if ($key === mb_convert_case($key, MB_CASE_TITLE, "UTF-8")) {
+                            return mb_convert_case($value, MB_CASE_TITLE, "UTF-8");
+                        }
+
+                        return $value;
+                    },
+                    $translation
+                );
             }
         }
 

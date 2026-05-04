@@ -57,4 +57,10 @@ abstract class Controller
 
         return ltrim(substr($path, strlen($basePath)), '/');
     }
+
+    protected function redirectToFormWithErrors($result) {
+        $this->flashBag->set('errors', $result->errors);
+        $this->flashBag->set('old', $result->old);
+        $this->redirect($this->getRefererPath());
+    }
 }

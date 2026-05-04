@@ -5,7 +5,7 @@ namespace Ivy\Rule;
 use BlakvGhost\PHPValidator\Contracts\Rule;
 use Ivy\Core\Language;
 
-class InfoSettingRule implements Rule
+class PasswordRule implements Rule
 {
     protected string $field;
 
@@ -15,11 +15,18 @@ class InfoSettingRule implements Rule
     {
         $this->field = $field;
 
-        return preg_match('/^[a-zA-Z0-9\-_ \x2C\/:.]+$/', $value) === 1;
+        if (!is_string($value)) {
+            return false;
+        }
+
+        return preg_match(
+                '/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/',
+                $value
+            ) === 1;
     }
 
     public function message(): string
     {
-        return Language::translate('form.rules.name', ['field' => $this->field]);
+        return Language::translate('form.rules.password', ['field' => $this->field]);
     }
 }

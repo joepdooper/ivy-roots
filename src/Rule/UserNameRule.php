@@ -3,6 +3,7 @@
 namespace Ivy\Rule;
 
 use BlakvGhost\PHPValidator\Contracts\Rule;
+use Ivy\Core\Language;
 
 class UserNameRule implements Rule
 {
@@ -19,6 +20,6 @@ class UserNameRule implements Rule
 
     public function message(): string
     {
-        return "The {$this->field} must be 3–20 characters long, start with a letter, and may only contain letters, numbers, dots, underscores, or dashes.";
+        return Language::translate('form.rules.username', ['field' => $this->field]);
     }
 }

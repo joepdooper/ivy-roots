@@ -3,6 +3,7 @@
 namespace Ivy\Rule;
 
 use BlakvGhost\PHPValidator\Contracts\Rule;
+use Ivy\Core\Language;
 
 class UserImageRule implements Rule
 {
@@ -26,6 +27,6 @@ class UserImageRule implements Rule
 
     public function message(): string
     {
-        return "The field '{$this->field}' contains invalid characters.";
+        return Language::translate('form.rules.image', ['field' => $this->field]);
     }
 }

@@ -3,6 +3,7 @@
 namespace Ivy\Rule;
 
 use BlakvGhost\PHPValidator\Contracts\Rule;
+use Ivy\Core\Language;
 
 class UniqueRule implements Rule
 {
@@ -34,6 +35,6 @@ class UniqueRule implements Rule
 
     public function message(): string
     {
-        return "The field '{$this->field}' must be unique.";
+        return Language::translate('form.rules.unique', ['field' => $this->field]);
     }
 }
