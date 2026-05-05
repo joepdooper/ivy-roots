@@ -94,7 +94,7 @@ class TemplateController extends Controller
         }
 
         TemplateManager::init(true);
-        (new AssetPublisher)->publish();
+        (new AssetPublisher)->publishTemplate();
 
         $this->redirect('admin/template');
     }

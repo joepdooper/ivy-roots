@@ -18,6 +18,10 @@ class MinifyCssHandler implements SettingInterface
         if ($bool && Environment::isProd()) {
             $minifier = new CSS;
             foreach (AssetManager::getCSS() as $css) {
+                if (str_ends_with($css, '.editor.css')) {
+                    continue;
+                }
+
                 $minifier->add(Path::get('PUBLIC_PATH').ltrim($css, '/'));
             }
             $minifier->minify(Path::get('PUBLIC_PATH').$this->minifiedCssPath);

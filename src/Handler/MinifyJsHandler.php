@@ -18,6 +18,9 @@ class MinifyJsHandler implements SettingInterface
         if ($bool && Environment::isProd()) {
             $minifier = new JS;
             foreach (AssetManager::getJs() as $js) {
+                if (str_ends_with($css, '.editor.js')) {
+                    continue;
+                }
                 $minifier->add(Path::get('PUBLIC_PATH').ltrim($js, '/'));
             }
             $minifier->minify(Path::get('PUBLIC_PATH').$this->minifiedJsPath);

@@ -11,6 +11,7 @@ use Ivy\Helper\PluginInfoLoader;
 use Ivy\Model\Plugin;
 use Ivy\Model\Setting;
 use Ivy\Helper\PluginHelper;
+use Ivy\Service\AssetPublisher;
 
 class PluginManager
 {
@@ -82,6 +83,8 @@ class PluginManager
                         ])->save();
                     }
                 }
+
+                (new AssetPublisher)->publishPlugin($this->plugin->url);
 
                 if (!empty($info['collection'])) {
                     (new PluginCollectionManager($this->plugin))->install();

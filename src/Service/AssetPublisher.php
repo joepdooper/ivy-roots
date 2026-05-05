@@ -7,11 +7,10 @@ use Ivy\Model\Template;
 
 class AssetPublisher
 {
-    public function publish(): void
+    public function publishTemplate(): void
     {
         $target = Path::get('PUBLIC_PATH');
 
-        // fresh state
         $this->removeDirectory($target . 'css');
         $this->removeDirectory($target . 'js');
 
@@ -32,8 +31,34 @@ class AssetPublisher
         }
     }
 
+    public function publishPlugin(string $plugin): void
+    {
+        $source = Path::get('PLUGINS_PATH')
+            . $plugin
+            . DIRECTORY_SEPARATOR
+            . 'dist'
+            . DIRECTORY_SEPARATOR;
+
+        if (! is_dir($source)) {
+            return;
+        }
+
+        $target = Path::get('PUBLIC_PATH')
+            . 'plugins'
+            . DIRECTORY_SEPARATOR
+            . $plugin
+            . DIRECTORY_SEPARATOR;
+
+        $this->copy($source . 'css', $target . 'css');
+        $this->copy($source . 'js',  $target . 'js');
+    }
+
     protected function copy(string $source, string $target): void
     {
+        if (! is_dir($source)) {
+            return;
+        }
+
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
             \RecursiveIteratorIterator::SELF_FIRST
