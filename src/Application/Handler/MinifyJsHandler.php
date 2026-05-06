@@ -2,11 +2,11 @@
 
 namespace Ivy\Application\Handler;
 
+use Ivy\Domain\Entity\SettingEntity;
 use Ivy\Shared\Config\Environment;
-use Ivy\Shared\Core\Contracts\SettingInterface;
+use Ivy\Shared\Contract\SettingInterface;
 use Ivy\Shared\Core\Path;
 use Ivy\Infrastructure\Manager\AssetManager;
-use Ivy\Domain\Entity\SettingEntity;
 use MatthiasMullie\Minify\JS;
 
 class MinifyJsHandler implements SettingInterface
@@ -27,7 +27,5 @@ class MinifyJsHandler implements SettingInterface
         } elseif (file_exists(Path::get('PUBLIC_PATH').$this->minifiedJsPath)) {
             unlink(Path::get('PUBLIC_PATH').$this->minifiedJsPath);
         }
-
-        return;
     }
 }
