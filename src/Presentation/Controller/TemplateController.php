@@ -3,29 +3,29 @@
 namespace Ivy\Presentation\Controller;
 
 use Ivy\Application\Service\AssetPublisherApplicationService;
+use Ivy\Domain\Model\SettingModel;
+use Ivy\Domain\Model\TemplateModel;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
 use Ivy\Presentation\Form\TemplateForm;
 use Ivy\Infrastructure\Manager\TemplateManager;
-use Ivy\Domain\Entity\SettingEntity;
-use Ivy\Domain\Entity\TemplateEntity;
 use Ivy\Presentation\View\View;
 
 class TemplateController extends Controller
 {
-    protected TemplateEntity $template;
+    protected TemplateModel $template;
     protected TemplateForm $templateForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->template = new TemplateEntity();
-        $this->templateForm = new TemplateForm;
+        $this->template = new TemplateModel();
+        $this->templateForm = new TemplateForm();
     }
 
     public function before(): void
     {
-        if (! $this->authService->isLoggedIn() && SettingEntity::stashGet('private')->bool) {
+        if (! $this->authService->isLoggedIn() && SettingModel::stashGet('private')->bool) {
 
             if (! $this->isAlwaysPublicPath(Path::get('CURRENT_PAGE'))) {
                 $this->redirect('user/login');
@@ -43,10 +43,10 @@ class TemplateController extends Controller
         ]);
     }
 
-    public function update(TemplateEntity|int $template, mixed $data): void
+    public function update(TemplateModel|int $template, mixed $data): void
     {
         if (is_int($template)) {
-            $template = TemplateEntity::find($template);
+            $template = TemplateModel::find($template);
         }
 
         if (! $template) {

@@ -2,37 +2,37 @@
 
 namespace Ivy\Domain\Policy;
 
+use Ivy\Domain\Model\ProfileModel;
 use Ivy\Shared\Base\Policy;
-use Ivy\Domain\Entity\ProfileEntity;
 
 class ProfilePolicy extends Policy
 {
-    public function index(ProfileEntity $profile): bool
+    public function index(ProfileModel $profile): bool
     {
         return $this->isLoggedIn();
     }
 
-    public function sync(ProfileEntity $profile): bool
+    public function sync(ProfileModel $profile): bool
     {
         return $this->isLoggedIn();
     }
 
-    public function save(ProfileEntity $profile): bool
+    public function save(ProfileModel $profile): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function add(ProfileEntity $profile): bool
+    public function add(ProfileModel $profile): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function update(ProfileEntity $profile): bool
+    public function update(ProfileModel $profile): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function delete(ProfileEntity $profile): bool
+    public function delete(ProfileModel $profile): bool
     {
         return $this->canEditAsAdmin();
     }

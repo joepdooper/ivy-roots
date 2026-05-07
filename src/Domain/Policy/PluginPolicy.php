@@ -2,37 +2,37 @@
 
 namespace Ivy\Domain\Policy;
 
+use Ivy\Domain\Model\PluginModel;
 use Ivy\Shared\Base\Policy;
-use Ivy\Domain\Entity\PluginEntity;
 
 class PluginPolicy extends Policy
 {
-    public function index(PluginEntity $plugin): bool
+    public function index(PluginModel $plugin): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function sync(PluginEntity $plugin): bool
+    public function sync(PluginModel $plugin): bool
     {
         return $this->canEditAsSuperAdmin();
     }
 
-    public function install(PluginEntity $plugin): bool
+    public function install(PluginModel $plugin): bool
     {
         return $this->canEditAsSuperAdmin();
     }
 
-    public function uninstall(PluginEntity $plugin): bool
+    public function uninstall(PluginModel $plugin): bool
     {
         return $this->canEditAsSuperAdmin();
     }
 
-    public function update(PluginEntity $plugin): bool
+    public function update(PluginModel $plugin): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function collection(PluginEntity $plugin): bool
+    public function collection(PluginModel $plugin): bool
     {
         if ($plugin->info->hasCollection() && $this->canEditAsAdmin()) {
             return true;
@@ -41,7 +41,7 @@ class PluginPolicy extends Policy
         return false;
     }
 
-    public function settings(PluginEntity $plugin): bool
+    public function settings(PluginModel $plugin): bool
     {
         if ($plugin->info->hasSettings() && $this->canEditAsAdmin()) {
             return true;

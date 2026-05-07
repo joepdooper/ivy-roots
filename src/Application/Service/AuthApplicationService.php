@@ -4,7 +4,7 @@ namespace Ivy\Application\Service;
 
 use Delight\Auth\Auth;
 use Illuminate\Database\Capsule\Manager as Capsule;
-use Ivy\Domain\Entity\UserEntity;
+use Ivy\Domain\Model\UserModel;
 
 class AuthApplicationService
 {
@@ -30,7 +30,7 @@ class AuthApplicationService
     /**
      * Bridge: Delight userId → Eloquent User
      */
-    public function authUser(): ?UserEntity
+    public function authUser(): ?UserModel
     {
         if (! $this->auth->isLoggedIn()) {
             return null;
@@ -38,7 +38,7 @@ class AuthApplicationService
 
         $userId = $this->auth->getUserId();
 
-        return UserEntity::find($userId);
+        return UserModel::find($userId);
     }
 
     public function can(string $action, $model): bool

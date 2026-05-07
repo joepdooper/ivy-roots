@@ -2,9 +2,9 @@
 
 namespace Ivy\Application\Handler;
 
-use Ivy\Domain\Entity\SettingEntity;
+use Ivy\Domain\Model\SettingModel;
 use Ivy\Shared\Config\Environment;
-use Ivy\Shared\Contract\SettingInterface;
+use Ivy\Shared\Contracts\SettingInterface;
 use Ivy\Shared\Core\Path;
 use Ivy\Infrastructure\Manager\AssetManager;
 use MatthiasMullie\Minify\JS;
@@ -13,7 +13,7 @@ class MinifyJsHandler implements SettingInterface
 {
     private $minifiedJsPath = '/js/minified.js';
 
-    public function handle(SettingEntity $setting, bool $bool): void
+    public function handle(SettingModel $setting, bool $bool): void
     {
         if ($bool && Environment::isProd()) {
             $minifier = new JS;

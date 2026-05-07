@@ -16,28 +16,28 @@ use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
+use Ivy\Domain\Model\ProfileModel;
+use Ivy\Domain\Model\SettingModel;
+use Ivy\Domain\Model\UserModel;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
 use Ivy\Presentation\Form\LoginForm;
 use Ivy\Presentation\Form\RegisterForm;
 use Ivy\Presentation\Form\ResetForm;
 use Ivy\Presentation\Form\UserForm;
-use Ivy\Domain\Entity\ProfileEntity;
-use Ivy\Domain\Entity\SettingEntity;
-use Ivy\Domain\Entity\UserEntity;
 use Ivy\Infrastructure\Service\MailService;
 use Ivy\Presentation\View\View;
 
 class UserController extends Controller
 {
-    private UserEntity $user;
+    private UserModel $user;
     private UserForm $userForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->user = new UserEntity;
-        $this->userForm = new UserForm;
+        $this->user = new UserModel();
+        $this->userForm = new UserForm();
     }
 
     public function before(): void
@@ -55,14 +55,14 @@ class UserController extends Controller
     {
         $this->user->authorize('index');
 
-        $users = (new UserEntity)->all();
+        $users = (new UserModel)->all();
         View::render('admin/user.latte', ['users' => $users]);
     }
 
-    public function update(UserEntity|int $user, mixed $data): void
+    public function update(UserModel|int $user, mixed $data): void
     {
         if (is_int($user)) {
-            $user = UserEntity::find($user);
+            $user = UserModel::find($user);
         }
 
         if (!$user) {
@@ -93,10 +93,10 @@ class UserController extends Controller
         );
     }
 
-    public function delete(UserEntity|int $user): void
+    public function delete(UserModel|int $user): void
     {
         if (is_int($user)) {
-            $user = UserEntity::find($user);
+            $user = UserModel::find($user);
         }
 
         if (!$user) {
@@ -111,7 +111,7 @@ class UserController extends Controller
             $this->flashBag->add('error', 'Something went wrong: ' . $e);
         }
 
-        ProfileEntity::where('user_id', $user->id)->delete();
+        ProfileModel::where('user_id', $user->id)->delete();
 
         $this->flashBag->add(
             'success',
@@ -170,11 +170,11 @@ class UserController extends Controller
                 $mail->send();
             });
 
-            ProfileEntity::create(['user_id' => $userId]);
+            ProfileModel::create(['user_id' => $userId]);
 
             // Set role to registered user
-            if (SettingEntity::stashGet('registration_role')->bool && isset(SettingEntity::stashGet('registration_role')->value)) {
-                $role = strtoupper(SettingEntity::stashGet('registration_role')->value);
+            if (SettingModel::stashGet('registration_role')->bool && isset(SettingModel::stashGet('registration_role')->value)) {
+                $role = strtoupper(SettingModel::stashGet('registration_role')->value);
                 $roleConstant = "\Delight\Auth\Role::$role";
                 $this->authService->auth()->admin()->addRoleForUserById($userId, constant($roleConstant));
             }

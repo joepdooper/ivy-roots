@@ -2,37 +2,37 @@
 
 namespace Ivy\Domain\Policy;
 
+use Ivy\Domain\Model\SettingModel;
 use Ivy\Shared\Base\Policy;
-use Ivy\Domain\Entity\SettingEntity;
 
 class SettingPolicy extends Policy
 {
-    public function index(SettingEntity $setting): bool
+    public function index(SettingModel $setting): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function sync(SettingEntity $setting): bool
+    public function sync(SettingModel $setting): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function save(SettingEntity $setting): bool
+    public function save(SettingModel $setting): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function add(SettingEntity $setting): bool
+    public function add(SettingModel $setting): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function update(SettingEntity $setting): bool
+    public function update(SettingModel $setting): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function delete(SettingEntity $setting): bool
+    public function delete(SettingModel $setting): bool
     {
         if (! $setting->is_default && $this->canEditAsAdmin()) {
             return true;

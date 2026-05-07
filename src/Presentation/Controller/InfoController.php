@@ -3,21 +3,21 @@
 namespace Ivy\Presentation\Controller;
 
 use Ivy\Domain\Exception\AuthorizationException;
+use Ivy\Domain\Model\InfoModel;
+use Ivy\Domain\Model\PluginModel;
 use Ivy\Shared\Base\Controller;
 use Ivy\Presentation\Form\InfoForm;
-use Ivy\Domain\Entity\InfoEntity;
-use Ivy\Domain\Entity\PluginEntity;
 use Ivy\Presentation\View\View;
 
 class InfoController extends Controller
 {
-    private InfoEntity $info;
+    private InfoModel $info;
     private InfoForm $infoForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->info = new InfoEntity;
+        $this->info = new InfoModel;
         $this->infoForm = new InfoForm;
     }
 
@@ -29,10 +29,10 @@ class InfoController extends Controller
         $this->info->authorize('index');
 
         $plugin_id = $id
-            ? PluginEntity::where('url', $id)->value('id')
+            ? PluginModel::where('url', $id)->value('id')
             : null;
 
-        $infos = InfoEntity::where('plugin_id', $plugin_id)->get();
+        $infos = InfoModel::where('plugin_id', $plugin_id)->get();
 
         View::render('admin/info.latte', ['infos' => $infos]);
     }
@@ -42,7 +42,7 @@ class InfoController extends Controller
      */
     public function add(mixed $data): void
     {
-        $info = new InfoEntity;
+        $info = new InfoModel;
 
         $info->authorize('add');
 
@@ -54,10 +54,10 @@ class InfoController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function update(InfoEntity|int $info, mixed $data): void
+    public function update(InfoModel|int $info, mixed $data): void
     {
         if (is_int($info)) {
-            $info = InfoEntity::find($info);
+            $info = InfoModel::find($info);
         }
 
         if (! $info) {
@@ -83,10 +83,10 @@ class InfoController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function delete(InfoEntity|int $info): void
+    public function delete(InfoModel|int $info): void
     {
         if (is_int($info)) {
-            $info = InfoEntity::find($info);
+            $info = InfoModel::find($info);
         }
 
         $info?->authorize('delete');
@@ -154,7 +154,7 @@ class InfoController extends Controller
 
             if ($segments[0] === 'plugin') {
 
-                $this->info->plugin_id = PluginEntity::where('url', $segments[1])
+                $this->info->plugin_id = PluginModel::where('url', $segments[1])
                     ->value('id');
             }
         }

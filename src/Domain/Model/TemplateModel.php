@@ -1,12 +1,12 @@
 <?php
 
-namespace Ivy\Domain\Entity;
+namespace Ivy\Domain\Model;
 
 use Illuminate\Database\Eloquent\Model;
-use Ivy\Shared\Trait\HasPolicies;
-use Ivy\Shared\Trait\Stash;
+use Ivy\Shared\Traits\HasPolicies;
+use Ivy\Shared\Traits\Stash;
 
-class TemplateEntity extends Model
+class TemplateModel extends Model
 {
     use Stash, HasPolicies;
 

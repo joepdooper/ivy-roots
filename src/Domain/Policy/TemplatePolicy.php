@@ -2,22 +2,22 @@
 
 namespace Ivy\Domain\Policy;
 
+use Ivy\Domain\Model\TemplateModel;
 use Ivy\Shared\Base\Policy;
-use Ivy\Domain\Entity\TemplateEntity;
 
 class TemplatePolicy extends Policy
 {
-    public function index(TemplateEntity $template): bool
+    public function index(TemplateModel $template): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function sync(TemplateEntity $template): bool
+    public function sync(TemplateModel $template): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function update(TemplateEntity $template): bool
+    public function update(TemplateModel $template): bool
     {
         return $this->canEditAsAdmin();
     }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Shared\Trait;
+namespace Ivy\Shared\Traits;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -22,12 +22,12 @@ trait HasPolicies
         $modelName = new ReflectionClass($modelClass)->getShortName();
 
         $namespace = str_replace(
-            'Entity',
+            'Model',
             'Policy',
             new ReflectionClass($modelClass)->getNamespaceName()
         );
 
-        $policyClassName = str_replace('Entity', 'Policy', $modelName);
+        $policyClassName = str_replace('Model', 'Policy', $modelName);
         $policyClass = "{$namespace}\\{$policyClassName}";
 
         if (!class_exists($policyClass)) {

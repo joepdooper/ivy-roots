@@ -2,7 +2,7 @@
 
 namespace Ivy\Infrastructure\Helper;
 
-use Ivy\Domain\Entity\PluginEntity;
+use Ivy\Domain\Model\PluginModel;
 use Ivy\Shared\Core\Path;
 use Symfony\Component\HttpFoundation\File\File;
 
@@ -73,7 +73,7 @@ class PluginHelper
     public static function getMissingDependencies(array $dependencies): array
     {
         return array_filter($dependencies, function ($dependency) {
-            return ! PluginEntity::where('name', $dependency)->pluck('id');
+            return ! PluginModel::where('name', $dependency)->pluck('id');
         });
     }
 }

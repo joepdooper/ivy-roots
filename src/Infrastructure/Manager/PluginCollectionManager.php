@@ -2,16 +2,13 @@
 
 namespace Ivy\Infrastructure\Manager;
 
-use Ivy\Presentation\Controller\PluginController;
-use Ivy\Presentation\Form\PluginInfoForm;
+use Ivy\Domain\Model\PluginModel;
 use Ivy\Infrastructure\Helper\PluginHelper;
-use Ivy\Infrastructure\Helper\PluginInfoLoader;
-use Ivy\Domain\Entity\PluginEntity;
 
 readonly class PluginCollectionManager
 {
     public function __construct(
-        private PluginEntity $plugin
+        private PluginModel $plugin
     ) {}
 
     public function install(): void
@@ -40,14 +37,14 @@ readonly class PluginCollectionManager
             if ($action === 'install') {
                 $data = ['url' => $relativePath];
 
-                $plugin = new Plugin();
+                $plugin = new PluginModel();
                 $pluginManager = new PluginManager($plugin->fill($data));
                 $pluginManager->install();
                 continue;
             }
 
             if ($action === 'uninstall') {
-                $plugin = Plugin::where('url', $relativePath)
+                $plugin = PluginModel::where('url', $relativePath)
                     ->where('parent_id', $this->plugin->id)
                     ->first();
 

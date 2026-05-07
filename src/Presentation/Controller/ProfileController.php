@@ -9,22 +9,22 @@ use Delight\Auth\NotLoggedInException;
 use Delight\Auth\TokenExpiredException;
 use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UserAlreadyExistsException;
+use Ivy\Domain\Model\ProfileModel;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
 use Ivy\Presentation\Form\ProfileForm;
-use Ivy\Domain\Entity\ProfileEntity;
 use Ivy\Infrastructure\Registry\PluginRegistry;
 use Ivy\Presentation\View\View;
 
 class ProfileController extends Controller
 {
-    private ProfileEntity $profile;
+    private ProfileModel $profile;
     private ProfileForm $profileForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->profile = new ProfileEntity();
+        $this->profile = new ProfileModel();
         $this->profileForm = new ProfileForm;
     }
 
@@ -43,7 +43,7 @@ class ProfileController extends Controller
 
         if ($result->valid) {
 
-            $profile = ProfileEntity::with('user')
+            $profile = ProfileModel::with('user')
                 ->where('user_id', $_SESSION['auth_user_id'])
                 ->first();
 
@@ -139,14 +139,14 @@ class ProfileController extends Controller
 
     public function user(): void
     {
-        $profile = ProfileEntity::where('user_id', $_SESSION['auth_user_id'])->first();
+        $profile = ProfileModel::where('user_id', $_SESSION['auth_user_id'])->first();
 
         View::render('admin/profile.latte', ['profile' => $profile]);
     }
 
     public function public(int $id): void
     {
-        $profile = ProfileEntity::where('id', $id)->first();
+        $profile = ProfileModel::where('id', $id)->first();
 
         View::render('include/profile.latte', ['profile' => $profile]);
     }

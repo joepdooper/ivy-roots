@@ -2,7 +2,7 @@
 
 namespace Ivy\Presentation\View;
 
-use Ivy\Shared\Contract\ViewEngineInterface;
+use Ivy\Shared\Contracts\ViewEngineInterface;
 use Ivy\Infrastructure\Manager\SessionManager;
 use Ivy\Infrastructure\Manager\TemplateManager;
 use Ivy\Application\Service\AuthApplicationService;

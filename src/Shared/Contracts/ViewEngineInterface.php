@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Shared\Contract;
+namespace Ivy\Shared\Contracts;
 
 interface ViewEngineInterface
 {

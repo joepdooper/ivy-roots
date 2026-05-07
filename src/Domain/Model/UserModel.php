@@ -1,12 +1,12 @@
 <?php
 
-namespace Ivy\Domain\Entity;
+namespace Ivy\Domain\Model;
 
 use Delight\Auth\Role;
 use Illuminate\Database\Eloquent\Model;
-use Ivy\Shared\Trait\HasPolicies;
+use Ivy\Shared\Traits\HasPolicies;
 
-class UserEntity extends Model
+class UserModel extends Model
 {
     use HasPolicies;
 

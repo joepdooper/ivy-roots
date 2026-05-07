@@ -3,8 +3,8 @@
 namespace Ivy\Application\Service;
 
 use FilesystemIterator;
+use Ivy\Domain\Model\TemplateModel;
 use Ivy\Shared\Core\Path;
-use Ivy\Domain\Entity\TemplateEntity;
 
 class AssetPublisherApplicationService
 {
@@ -15,7 +15,7 @@ class AssetPublisherApplicationService
         $this->removeDirectory($target . 'css');
         $this->removeDirectory($target . 'js');
 
-        $templates = TemplateEntity::whereIn('type', ['base', 'sub'])
+        $templates = TemplateModel::whereIn('type', ['base', 'sub'])
             ->orderByRaw("FIELD(type, 'base', 'sub')")
             ->get();
 

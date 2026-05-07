@@ -3,8 +3,10 @@
 namespace Ivy\Presentation\View\Engine;
 
 use Carbon\Carbon;
+use Ivy\Domain\Model\InfoModel;
+use Ivy\Domain\Model\SettingModel;
 use Ivy\Infrastructure\Manager\CsrfManager;
-use Ivy\Shared\Contract\ViewEngineInterface;
+use Ivy\Shared\Contracts\ViewEngineInterface;
 use Latte\Engine;
 use Latte\Runtime\Html;
 use Ivy\Shared\Config\Environment;
@@ -13,8 +15,6 @@ use Ivy\Shared\Core\Path;
 use Ivy\Infrastructure\Manager\HookManager;
 use Ivy\Infrastructure\Manager\SecurityManager;
 use Ivy\Infrastructure\Manager\TemplateManager;
-use Ivy\Domain\Entity\InfoEntity;
-use Ivy\Domain\Entity\SettingEntity;
 use Ivy\Infrastructure\Registry\PluginRegistry;
 use Ivy\Application\Service\AuthApplicationService;
 use Ivy\Presentation\Tag\ButtonTag;
@@ -94,15 +94,15 @@ class LatteEngine implements ViewEngineInterface
         );
 
         $this->latte->addFunction('info', fn ($key) =>
-            InfoEntity::stashGet($key)->value ?? ''
+            InfoModel::stashGet($key)->value ?? ''
         );
 
         $this->latte->addFunction('setting', fn ($key) =>
-            SettingEntity::stashGet($key)->value ?? ''
+            SettingModel::stashGet($key)->value ?? ''
         );
 
         $this->latte->addFunction('enabled', fn ($key) =>
-            SettingEntity::stashGet($key)->bool ?? false
+            SettingModel::stashGet($key)->bool ?? false
         );
 
         $this->latte->addFunction('isPluginActive', fn (string $key): bool =>

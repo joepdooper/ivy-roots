@@ -2,7 +2,7 @@
 
 namespace Ivy\Infrastructure\Manager;
 
-use Ivy\Domain\Entity\TemplateEntity;
+use Ivy\Domain\Model\TemplateModel;
 use Ivy\Shared\Core\Path;
 
 class TemplateManager
@@ -30,10 +30,10 @@ class TemplateManager
             return;
         }
 
-        $templateBase = TemplateEntity::where('type', 'base')
+        $templateBase = TemplateModel::where('type', 'base')
             ->value('value');
 
-        $templateSub = TemplateEntity::where('type', 'sub')
+        $templateSub = TemplateModel::where('type', 'sub')
             ->value('value');
 
         self::$templateBase = Path::get('TEMPLATES_PATH') . $templateBase . DIRECTORY_SEPARATOR;

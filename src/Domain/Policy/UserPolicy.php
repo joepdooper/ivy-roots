@@ -2,37 +2,37 @@
 
 namespace Ivy\Domain\Policy;
 
+use Ivy\Domain\Model\UserModel;
 use Ivy\Shared\Base\Policy;
-use Ivy\Domain\Entity\UserEntity;
 
 class UserPolicy extends Policy
 {
-    public function index(UserEntity $user): bool
+    public function index(UserModel $user): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function sync(UserEntity $user): bool
+    public function sync(UserModel $user): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function save(UserEntity $user): bool
+    public function save(UserModel $user): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function add(UserEntity $user): bool
+    public function add(UserModel $user): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function update(UserEntity $user): bool
+    public function update(UserModel $user): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function delete(UserEntity $user): bool
+    public function delete(UserModel $user): bool
     {
         if(($user->id != $this->auth->getUserId()) && $this->canEditAsSuperAdmin()) {
             return true;

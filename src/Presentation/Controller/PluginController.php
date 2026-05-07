@@ -2,18 +2,18 @@
 
 namespace Ivy\Presentation\Controller;
 
+use Ivy\Domain\Model\PluginModel;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
 use Ivy\Infrastructure\Factory\PluginInfoFactory;
 use Ivy\Presentation\Form\PluginForm;
 use Ivy\Infrastructure\Helper\PluginInfoLoader;
 use Ivy\Infrastructure\Manager\PluginManager;
-use Ivy\Domain\Entity\PluginEntity;
 use Ivy\Presentation\View\View;
 
 class PluginController extends Controller
 {
-    private PluginEntity $plugin;
+    private PluginModel $plugin;
     private PluginForm $pluginForm;
     private PluginManager $pluginManager;
 
@@ -22,8 +22,8 @@ class PluginController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->plugin = new PluginEntity;
-        $this->pluginForm = new PluginForm;
+        $this->plugin = new PluginModel();
+        $this->pluginForm = new PluginForm();
     }
 
     public function before(): void
@@ -42,13 +42,13 @@ class PluginController extends Controller
         $this->plugin->authorize('index');
 
         $parentId = $id
-            ? PluginEntity::where('url', $id)->value('id')
+            ? PluginModel::where('url', $id)->value('id')
             : null;
 
         $loader = new PluginInfoLoader();
         $factory = new PluginInfoFactory();
 
-        $installedPlugins = PluginEntity::all()->map(function ($plugin) use ($loader, $factory, &$installedUrls) {
+        $installedPlugins = PluginModel::all()->map(function ($plugin) use ($loader, $factory, &$installedUrls) {
             $data = $loader->load($plugin->url);
             $data['url'] = $plugin->url;
 
@@ -101,17 +101,17 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('install');
 
-        $plugin = new PluginEntity;
+        $plugin = new PluginModel();
 
         $this->pluginManager = new PluginManager($plugin->fill($data));
         $this->responses[] = $this->pluginManager->install();
     }
 
-    public function update(PluginEntity|int $plugin, mixed $data): void
+    public function update(PluginModel|int $plugin, mixed $data): void
     {
 
         if (is_int($plugin)) {
-            $plugin = PluginEntity::find($plugin);
+            $plugin = PluginModel::find($plugin);
         }
 
         $plugin->fill($data);
@@ -130,10 +130,10 @@ class PluginController extends Controller
         );
     }
 
-    public function delete(PluginEntity|int $plugin): void
+    public function delete(PluginModel|int $plugin): void
     {
         if (is_int($plugin)) {
-            $plugin = PluginEntity::find($plugin);
+            $plugin = PluginModel::find($plugin);
         }
 
         if (! $plugin) {

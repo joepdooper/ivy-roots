@@ -5,7 +5,10 @@ namespace Ivy\Shared\Core;
 use Bramus\Router\Router;
 use Dotenv\Dotenv;
 use Illuminate\Container\Container;
-use Ivy\Shared\Contract\PluginInterface;
+use Ivy\Domain\Model\InfoModel;
+use Ivy\Domain\Model\PluginModel;
+use Ivy\Domain\Model\SettingModel;
+use Ivy\Shared\Contracts\PluginInterface;
 use Ivy\Domain\Exception\AuthorizationException;
 use Ivy\Application\Handler\MinifyCssHandler;
 use Ivy\Application\Handler\MinifyJsHandler;
@@ -18,9 +21,6 @@ use Ivy\Infrastructure\Manager\TemplateManager;
 use Ivy\Presentation\Middleware\CsrfVerifier;
 use Ivy\Presentation\Middleware\MiddlewarePipeline;
 use Ivy\Presentation\Middleware\RequestNormalizer;
-use Ivy\Domain\Entity\InfoEntity;
-use Ivy\Domain\Entity\PluginEntity;
-use Ivy\Domain\Entity\SettingEntity;
 use Ivy\Infrastructure\Registry\PluginRegistry;
 use Ivy\Infrastructure\Registry\SettingRegistry;
 use Ivy\Application\Service\AuthApplicationService;
@@ -59,7 +59,7 @@ class App
 
     private function initPlugins(): void
     {
-        $plugins = PluginEntity::select('name', 'interface')
+        $plugins = PluginModel::select('name', 'interface')
             ->where('active', 1)
             ->get();
 
@@ -111,8 +111,8 @@ class App
         $this->router = RouterManager::router();
         $this->router->setBasePath(Path::get('SUBFOLDER'));
 
-        InfoEntity::stash()->keyByColumn('name');
-        SettingEntity::stash()->keyByColumn('name');
+        InfoModel::stash()->keyByColumn('name');
+        SettingModel::stash()->keyByColumn('name');
 
         TemplateManager::init();
         LanguageManager::init();

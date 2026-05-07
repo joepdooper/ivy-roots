@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Shared\Trait;
+namespace Ivy\Shared\Traits;
 
 trait Stash
 {

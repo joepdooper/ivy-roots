@@ -5,18 +5,18 @@ namespace Ivy\Infrastructure\Manager;
 use Exception;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Ivy\Application\Service\AssetPublisherApplicationService;
-use Ivy\Domain\Entity\PluginEntity;
-use Ivy\Shared\Contract\PluginInterface;
+use Ivy\Domain\Model\PluginModel;
+use Ivy\Domain\Model\SettingModel;
+use Ivy\Shared\Contracts\PluginInterface;
 use Ivy\Shared\Core\Language;
 use Ivy\Presentation\Form\PluginInfoForm;
 use Ivy\Infrastructure\Helper\PluginInfoLoader;
-use Ivy\Domain\Entity\SettingEntity;
 use Ivy\Infrastructure\Helper\PluginHelper;
 
 class PluginManager
 {
     public function __construct(
-        private PluginEntity $plugin
+        private PluginModel $plugin
     ) {}
 
     /**
@@ -80,7 +80,7 @@ class PluginManager
 
                 if (isset($info['settings'])) {
                     foreach ($info['settings'] as $setting) {
-                        new SettingEntity()->fill([
+                        new SettingModel()->fill([
                             ...$setting,
                             'plugin_id' => $this->plugin->id,
                             'is_default' => 1,
@@ -139,7 +139,7 @@ class PluginManager
                     new PluginCollectionManager($this->plugin)->uninstall();
                 }
 
-                SettingEntity::where('plugin_id', $this->plugin->id)->delete();
+                SettingModel::where('plugin_id', $this->plugin->id)->delete();
                 $this->plugin->delete();
             });
         } catch (Exception $e) {

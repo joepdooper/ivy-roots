@@ -1,16 +1,16 @@
 <?php
 
-namespace Ivy\Domain\Entity;
+namespace Ivy\Domain\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Ivy\Shared\Trait\HasPolicies;
+use Ivy\Shared\Traits\HasPolicies;
 
-class ProfileEntity extends Model
+class ProfileModel extends Model
 {
     use HasPolicies;
 
-    private static ?ProfileEntity $currentProfile = null;
+    private static ?ProfileModel $currentProfile = null;
 
     protected $fillable = [
         'user_id',
@@ -19,7 +19,7 @@ class ProfileEntity extends Model
 
     public function user(): HasOne
     {
-        return $this->hasOne(UserEntity::class, 'id', 'user_id');
+        return $this->hasOne(UserModel::class, 'id', 'user_id');
     }
 
     public static function lastSeen(int $last_login): string
