@@ -13,7 +13,7 @@ class MinifyJsHandler implements SettingInterface
 {
     private $minifiedJsPath = '/js/minified.js';
 
-    public function handle(Setting $setting, bool $bool): void
+    public function handle(SettingEntity $setting, bool $bool): void
     {
         if ($bool && Environment::isProd()) {
             $minifier = new JS;

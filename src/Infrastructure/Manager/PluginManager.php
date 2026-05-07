@@ -4,21 +4,24 @@ namespace Ivy\Infrastructure\Manager;
 
 use Exception;
 use Illuminate\Database\Capsule\Manager as Capsule;
-use Ivy\Shared\Core\Contracts\PluginInterface;
+use Ivy\Application\Service\AssetPublisherApplicationService;
+use Ivy\Domain\Entity\PluginEntity;
+use Ivy\Shared\Contract\PluginInterface;
 use Ivy\Shared\Core\Language;
 use Ivy\Presentation\Form\PluginInfoForm;
 use Ivy\Infrastructure\Helper\PluginInfoLoader;
-use Ivy\Domain\Entity\PluginEntity;
 use Ivy\Domain\Entity\SettingEntity;
 use Ivy\Infrastructure\Helper\PluginHelper;
-use Ivy\Service\AssetPublisher;
 
 class PluginManager
 {
     public function __construct(
-        private Plugin $plugin
+        private PluginEntity $plugin
     ) {}
 
+    /**
+     * @throws Exception
+     */
     private function resolvePluginInterface(): PluginInterface
     {
         $class = $this->plugin->interface;
@@ -41,6 +44,7 @@ class PluginManager
      *     status: string,
      *     message: string|array<string, mixed>
      * }
+     * @throws Exception
      */
     public function install(): array
     {
@@ -84,10 +88,10 @@ class PluginManager
                     }
                 }
 
-                (new AssetPublisher)->publishPlugin($this->plugin->url);
+                new AssetPublisherApplicationService()->publishPlugin($this->plugin->url);
 
                 if (!empty($info['collection'])) {
-                    (new PluginCollectionManager($this->plugin))->install();
+                    new PluginCollectionManager($this->plugin)->install();
                 }
             });
         } catch (Exception $e) {
@@ -96,6 +100,7 @@ class PluginManager
                 'status' => 'error',
                 'message' => 'Error installing plugin: ' . $e->getMessage()
             ];
+        } catch (\Throwable $e) {
         }
 
         return [
@@ -112,6 +117,7 @@ class PluginManager
      *     status: string,
      *     message: string|array<string, mixed>
      * }
+     * @throws Exception
      */
     public function uninstall(): array
     {
@@ -130,7 +136,7 @@ class PluginManager
         try {
             Capsule::connection()->transaction(function () use ($info) {
                 if (!empty($info['collection'])) {
-                    (new PluginCollectionManager($this->plugin))->uninstall();
+                    new PluginCollectionManager($this->plugin)->uninstall();
                 }
 
                 SettingEntity::where('plugin_id', $this->plugin->id)->delete();
@@ -141,6 +147,7 @@ class PluginManager
                 'status' => 'error',
                 'message' => 'Error uninstalling plugin: ' . $e->getMessage()
             ];
+        } catch (\Throwable $e) {
         }
 
         $this->resolvePluginInterface()->uninstall();

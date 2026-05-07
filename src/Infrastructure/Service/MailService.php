@@ -2,12 +2,16 @@
 
 namespace Ivy\Infrastructure\Service;
 
+use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 
 class MailService
 {
     private PHPMailer $mailer;
 
+    /**
+     * @throws Exception
+     */
     public function __construct()
     {
         $this->mailer = new PHPMailer(true);
@@ -19,8 +23,6 @@ class MailService
             $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         } elseif ($_ENV['MAIL_SMTP_SECURE'] === 'tls') {
             $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        } else {
-            $this->mailer->SMTPSecure = false;
         }
         $this->mailer->SMTPDebug = (int) $_ENV['MAIL_DEBUG'];
         $this->mailer->Username = $_ENV['MAIL_USERNAME'];
@@ -30,33 +32,39 @@ class MailService
         $this->mailer->addReplyTo($_ENV['MAIL_SENDER_ADDRESS'], $_ENV['MAIL_SENDER_NAME']);
     }
 
-    public function send()
+    /**
+     * @throws Exception
+     */
+    public function send(): void
     {
         $this->mailer->send();
     }
 
-    public function addAddress(string $address, string $name = '')
+    /**
+     * @throws Exception
+     */
+    public function addAddress(string $address, string $name = ''): void
     {
         $this->mailer->addAddress($address, $name);
     }
 
-    public function setSubject(string $subject)
+    public function setSubject(string $subject): void
     {
         $this->mailer->Subject = $subject;
     }
 
-    public function setBody(string $body)
+    public function setBody(string $body): void
     {
         $this->mailer->Body = $body;
         $this->mailer->AltBody = $body;
     }
 
-    public function setAltBody(string $altBody)
+    public function setAltBody(string $altBody): void
     {
         $this->mailer->AltBody = $altBody;
     }
 
-    public function isHTML(?bool $bool = null)
+    public function isHTML(?bool $bool = null): void
     {
         $this->mailer->isHTML($bool);
     }

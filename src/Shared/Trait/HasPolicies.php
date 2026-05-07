@@ -36,6 +36,11 @@ trait HasPolicies
         return new $policyClass(Container::getInstance()->make(AuthApplicationService::class)->auth());
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws BindingResolutionException
+     * @throws AuthorizationException
+     */
     public function policy(string $action): bool
     {
         $policy = $this->policyInstance();
@@ -49,10 +54,14 @@ trait HasPolicies
 
     public function authorize(string $action): void
     {
-        if (! $this->policy($action)) {
-            throw new AuthorizationException(
-                "Not authorized to perform [{$action}] on " . static::class
-            );
+        try {
+            if (!$this->policy($action)) {
+                throw new AuthorizationException(
+                    "Not authorized to perform [{$action}] on " . static::class
+                );
+            }
+        } catch (BindingResolutionException|AuthorizationException|ReflectionException $e) {
+
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Ivy\Presentation\Controller;
 
+use Ivy\Domain\Exception\AuthorizationException;
 use Ivy\Shared\Base\Controller;
 use Ivy\Presentation\Form\InfoForm;
 use Ivy\Domain\Entity\InfoEntity;
@@ -20,6 +21,9 @@ class InfoController extends Controller
         $this->infoForm = new InfoForm;
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function index(?int $id = null): void
     {
         $this->info->authorize('index');
@@ -33,6 +37,9 @@ class InfoController extends Controller
         View::render('admin/info.latte', ['infos' => $infos]);
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function add(mixed $data): void
     {
         $info = new InfoEntity;
@@ -44,6 +51,9 @@ class InfoController extends Controller
         $this->flashBag->add('success', 'Info ' . $info->name . ' added successfully.');
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function update(InfoEntity|int $info, mixed $data): void
     {
         if (is_int($info)) {
@@ -70,6 +80,9 @@ class InfoController extends Controller
         );
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function delete(InfoEntity|int $info): void
     {
         if (is_int($info)) {
@@ -88,6 +101,9 @@ class InfoController extends Controller
         }
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function sync(): void
     {
         $this->info->authorize('sync');
@@ -104,14 +120,14 @@ class InfoController extends Controller
 
             if ($result->valid) {
 
-                if (empty($data['id'])) {
-                    $this->add($data);
+                if (empty($result->data['id'])) {
+                    $this->add($result->data);
 
-                } elseif (isset($data['delete'])) {
-                    $this->delete($data['id']);
+                } elseif (isset($result->data['delete'])) {
+                    $this->delete($result->data['id']);
 
                 } else {
-                    $this->update($data['id'], $data);
+                    $this->update($result->data['id'], $result->data);
                 }
 
             } else {

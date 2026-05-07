@@ -2,18 +2,18 @@
 
 namespace Ivy\Application\Handler;
 
+use Ivy\Domain\Entity\SettingEntity;
 use Ivy\Shared\Config\Environment;
-use Ivy\Shared\Core\Contracts\SettingInterface;
+use Ivy\Shared\Contract\SettingInterface;
 use Ivy\Shared\Core\Path;
 use Ivy\Infrastructure\Manager\AssetManager;
-use Ivy\Domain\Entity\SettingEntity;
 use MatthiasMullie\Minify\CSS;
 
 class MinifyCssHandler implements SettingInterface
 {
     private $minifiedCssPath = '/css/minified.css';
 
-    public function handle(Setting $setting, bool $bool): void
+    public function handle(SettingEntity $setting, bool $bool): void
     {
         if ($bool && Environment::isProd()) {
             $minifier = new CSS;
@@ -28,7 +28,5 @@ class MinifyCssHandler implements SettingInterface
         } elseif (file_exists(Path::get('PUBLIC_PATH').$this->minifiedCssPath)) {
             unlink(Path::get('PUBLIC_PATH').$this->minifiedCssPath);
         }
-
-        return;
     }
 }

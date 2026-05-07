@@ -2,19 +2,19 @@
 
 namespace Ivy\Infrastructure\Helper;
 
-final class PluginInfo
+final readonly class PluginInfo
 {
     public function __construct(
-        public readonly string $name,
-        public readonly string $interface,
-        public readonly ?string $version,
-        public readonly ?string $description,
-        public readonly string $url,
-        public readonly ?string $type,
-        public readonly array $collection = [],
-        public readonly array $settings = [],
-        public readonly array $actions = [],
-        public readonly array $dependencies = [],
+        public string  $name,
+        public string  $interface,
+        public ?string $version,
+        public ?string $description,
+        public string  $url,
+        public ?string $type,
+        public array   $collection = [],
+        public array   $settings = [],
+        public array   $actions = [],
+        public array   $dependencies = [],
     ) {}
 
     public function hasCollection(): bool

@@ -4,14 +4,13 @@ namespace Ivy\Domain\Entity;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Ivy\Application\Service\AuthApplicationService;
 use Ivy\Shared\Trait\HasPolicies;
 
 class ProfileEntity extends Model
 {
     use HasPolicies;
 
-    private static ?Profile $currentProfile = null;
+    private static ?ProfileEntity $currentProfile = null;
 
     protected $fillable = [
         'user_id',

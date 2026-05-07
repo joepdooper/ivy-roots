@@ -2,8 +2,13 @@
 
 namespace Ivy\Infrastructure\Manager;
 
+use Random\RandomException;
+
 class CsrfManager
 {
+    /**
+     * @throws RandomException
+     */
     public static function token(): string
     {
         if (!SessionManager::has('csrf_token')) {

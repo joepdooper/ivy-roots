@@ -8,10 +8,10 @@ class Language
 {
     protected static string $defaultLang = 'en';
 
-    /** @var mixed[] */
+    /** @var array */
     protected static array $translations = [];
 
-    /** @var mixed[] */
+    /** @var array */
     protected static array $loadedFiles = [];
 
     public static function load(?string $lang = null): void
@@ -111,7 +111,7 @@ class Language
     /**
      * @param string[] $translations
      * @param string[] $keys
-     * @return string
+     * @return array|string
      */
     private static function getNestedTranslation(array $translations, array $keys): array|string
     {

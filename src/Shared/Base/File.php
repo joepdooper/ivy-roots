@@ -3,6 +3,8 @@
 namespace Ivy\Shared\Base;
 
 use Ivy\Shared\Core\Path;
+use Random\RandomException;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 abstract class File
@@ -65,6 +67,9 @@ abstract class File
         return $this;
     }
 
+    /**
+     * @throws RandomException
+     */
     public function generateFileName(): string
     {
         $this->fileName = bin2hex(random_bytes(16)).'.'.$this->extension;
@@ -78,15 +83,15 @@ abstract class File
     public function validate(): static
     {
         if (! $this->uploadFile->isValid()) {
-            throw new \RuntimeException('Upload failed with error: '.$this->uploadFile->getError());
+            throw new RuntimeException('Upload failed with error: '.$this->uploadFile->getError());
         }
 
         if (! $this->isMimeAllowed()) {
-            throw new \RuntimeException("File type not allowed: $this->mimeType");
+            throw new RuntimeException("File type not allowed: $this->mimeType");
         }
 
         if (! in_array($this->extension, $this->getAllowedExtensions(), true)) {
-            throw new \RuntimeException("File extension not allowed: .$this->extension");
+            throw new RuntimeException("File extension not allowed: .$this->extension");
         }
 
         return $this;

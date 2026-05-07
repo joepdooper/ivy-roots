@@ -6,11 +6,9 @@ use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
 use Ivy\Infrastructure\Factory\PluginInfoFactory;
 use Ivy\Presentation\Form\PluginForm;
-use Ivy\Presentation\Form\PluginInfoForm;
 use Ivy\Infrastructure\Helper\PluginInfoLoader;
 use Ivy\Infrastructure\Manager\PluginManager;
 use Ivy\Domain\Entity\PluginEntity;
-use Ivy\Domain\Entity\UserEntity;
 use Ivy\Presentation\View\View;
 
 class PluginController extends Controller

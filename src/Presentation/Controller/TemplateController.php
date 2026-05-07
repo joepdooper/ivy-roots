@@ -2,25 +2,24 @@
 
 namespace Ivy\Presentation\Controller;
 
+use Ivy\Application\Service\AssetPublisherApplicationService;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
 use Ivy\Presentation\Form\TemplateForm;
 use Ivy\Infrastructure\Manager\TemplateManager;
 use Ivy\Domain\Entity\SettingEntity;
 use Ivy\Domain\Entity\TemplateEntity;
-use Ivy\Domain\Entity\UserEntity;
-use Ivy\Service\AssetPublisher;
 use Ivy\Presentation\View\View;
 
 class TemplateController extends Controller
 {
-    protected Template $template;
+    protected TemplateEntity $template;
     protected TemplateForm $templateForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->template = new Template;
+        $this->template = new TemplateEntity();
         $this->templateForm = new TemplateForm;
     }
 
@@ -44,7 +43,7 @@ class TemplateController extends Controller
         ]);
     }
 
-    public function update(Template|int $template, mixed $data): void
+    public function update(TemplateEntity|int $template, mixed $data): void
     {
         if (is_int($template)) {
             $template = TemplateEntity::find($template);
@@ -94,7 +93,7 @@ class TemplateController extends Controller
         }
 
         TemplateManager::init(true);
-        (new AssetPublisher)->publishTemplate();
+        new AssetPublisherApplicationService()->publishTemplate();
 
         $this->redirect('admin/template');
     }

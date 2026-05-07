@@ -2,6 +2,7 @@
 
 namespace Ivy\Application\Service;
 
+use FilesystemIterator;
 use Ivy\Shared\Core\Path;
 use Ivy\Domain\Entity\TemplateEntity;
 
@@ -60,7 +61,7 @@ class AssetPublisherApplicationService
         }
 
         $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS),
+            new \RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS),
             \RecursiveIteratorIterator::SELF_FIRST
         );
 

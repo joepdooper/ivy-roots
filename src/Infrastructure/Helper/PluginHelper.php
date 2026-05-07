@@ -2,14 +2,16 @@
 
 namespace Ivy\Infrastructure\Helper;
 
-use Ivy\Shared\Core\Path;
 use Ivy\Domain\Entity\PluginEntity;
+use Ivy\Shared\Core\Path;
 use Symfony\Component\HttpFoundation\File\File;
 
 class PluginHelper
 {
     /**
-     * @return null|mixed[]
+     * @param string $path
+     * @return null|array
+     * @throws \Exception
      */
     public static function parseJson(string $path): ?array
     {
@@ -71,7 +73,7 @@ class PluginHelper
     public static function getMissingDependencies(array $dependencies): array
     {
         return array_filter($dependencies, function ($dependency) {
-            return ! Plugin::select('id')->where('name', $dependency)->first();
+            return ! PluginEntity::where('name', $dependency)->pluck('id');
         });
     }
 }

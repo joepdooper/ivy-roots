@@ -30,7 +30,7 @@ class AuthApplicationService
     /**
      * Bridge: Delight userId → Eloquent User
      */
-    public function authUser(): ?User
+    public function authUser(): ?UserEntity
     {
         if (! $this->auth->isLoggedIn()) {
             return null;

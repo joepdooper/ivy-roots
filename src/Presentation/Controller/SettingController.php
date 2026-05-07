@@ -2,22 +2,21 @@
 
 namespace Ivy\Presentation\Controller;
 
-use Ivy\Shared\Base\Controller;
-use Ivy\Shared\Core\Path;
-use Ivy\Presentation\Form\SettingForm;
 use Ivy\Domain\Entity\PluginEntity;
+use Ivy\Shared\Base\Controller;
+use Ivy\Presentation\Form\SettingForm;
 use Ivy\Domain\Entity\SettingEntity;
 use Ivy\Presentation\View\View;
 
 class SettingController extends Controller
 {
-    private Setting $setting;
+    private SettingEntity $setting;
     private SettingForm $settingForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->setting = new Setting;
+        $this->setting = new SettingEntity();
         $this->settingForm = new SettingForm;
     }
 
@@ -26,7 +25,7 @@ class SettingController extends Controller
         $this->setting->authorize('index');
 
         $plugin_id = $url
-            ? Plugin::where('url', $url)->value('id')
+            ? PluginEntity::where('url', $url)->value('id')
             : null;
 
         $settings = SettingEntity::where('plugin_id', $plugin_id)->get();
@@ -36,7 +35,7 @@ class SettingController extends Controller
 
     public function add(mixed $data): void
     {
-        $setting = new Setting;
+        $setting = new SettingEntity();
 
         $setting->authorize('add');
 
@@ -48,7 +47,7 @@ class SettingController extends Controller
         );
     }
 
-    public function update(Setting|int $setting, mixed $data): void
+    public function update(SettingEntity|int $setting, mixed $data): void
     {
         if (is_int($setting)) {
             $setting = SettingEntity::find($setting);
@@ -74,7 +73,7 @@ class SettingController extends Controller
         );
     }
 
-    public function delete(Setting|int $setting): void
+    public function delete(SettingEntity|int $setting): void
     {
         if (is_int($setting)) {
             $setting = SettingEntity::find($setting);
@@ -142,7 +141,7 @@ class SettingController extends Controller
 
             if ($segments[0] === 'plugin') {
 
-                $this->setting->plugin_id = Plugin::where('url', $segments[1])
+                $this->setting->plugin_id = PluginEntity::where('url', $segments[1])
                     ->value('id');
             }
         }

@@ -8,10 +8,10 @@ use Ivy\Infrastructure\Helper\PluginHelper;
 use Ivy\Infrastructure\Helper\PluginInfoLoader;
 use Ivy\Domain\Entity\PluginEntity;
 
-class PluginCollectionManager
+readonly class PluginCollectionManager
 {
     public function __construct(
-        private Plugin $plugin
+        private PluginEntity $plugin
     ) {}
 
     public function install(): void

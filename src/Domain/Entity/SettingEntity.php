@@ -20,7 +20,7 @@ class SettingEntity extends Model
         'is_default',
     ];
 
-    protected static function booted()
+    protected static function booted(): void
     {
         static::updated(function (Setting $setting) {
             $key = strtolower(str_replace(' ', '_', $setting->name));

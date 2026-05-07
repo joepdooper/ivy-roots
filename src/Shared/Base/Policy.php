@@ -3,9 +3,7 @@
 namespace Ivy\Shared\Base;
 
 use Delight\Auth\Auth;
-use Illuminate\Container\Container;
-use Ivy\Application\Service\AuthApplicationService;
-use Symfony\Component\HttpFoundation\Request;
+use Delight\Auth\Role;
 
 abstract class Policy
 {
@@ -23,25 +21,25 @@ abstract class Policy
 
     public function canEditAsEditor(): bool
     {
-        return $this->auth->hasAnyRole(
-            \Delight\Auth\Role::EDITOR,
-            \Delight\Auth\Role::ADMIN,
-            \Delight\Auth\Role::SUPER_ADMIN
-        );
+        return $this->auth->hasAnyRole([
+            Role::EDITOR,
+            Role::ADMIN,
+            Role::SUPER_ADMIN
+        ]);
     }
 
     public function canEditAsAdmin(): bool
     {
-        return $this->auth->hasAnyRole(
-            \Delight\Auth\Role::ADMIN,
-            \Delight\Auth\Role::SUPER_ADMIN
-        );
+        return $this->auth->hasAnyRole([
+            Role::ADMIN,
+            Role::SUPER_ADMIN
+        ]);
     }
 
     public function canEditAsSuperAdmin(): bool
     {
         return $this->auth->hasRole(
-            \Delight\Auth\Role::SUPER_ADMIN
+            Role::SUPER_ADMIN
         );
     }
 }

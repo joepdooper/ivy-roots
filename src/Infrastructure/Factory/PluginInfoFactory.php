@@ -2,9 +2,7 @@
 
 namespace Ivy\Infrastructure\Factory;
 
-use Ivy\Presentation\Form\PluginInfoForm;
 use Ivy\Infrastructure\Helper\PluginInfo;
-use Ivy\Infrastructure\Helper\PluginInfoLoader;
 
 class PluginInfoFactory
 {

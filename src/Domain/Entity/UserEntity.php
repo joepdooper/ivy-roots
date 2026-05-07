@@ -2,9 +2,7 @@
 
 namespace Ivy\Domain\Entity;
 
-use Delight\Auth\Auth;
 use Delight\Auth\Role;
-use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Eloquent\Model;
 use Ivy\Shared\Trait\HasPolicies;
 
@@ -44,22 +42,22 @@ class UserEntity extends Model
     public function canEditAsEditor(): bool
     {
         return $this->hasAnyRole(
-            \Delight\Auth\Role::EDITOR,
-            \Delight\Auth\Role::ADMIN,
-            \Delight\Auth\Role::SUPER_ADMIN
+            Role::EDITOR,
+            Role::ADMIN,
+            Role::SUPER_ADMIN
         );
     }
 
     public function canEditAsAdmin(): bool
     {
         return $this->hasAnyRole(
-            \Delight\Auth\Role::ADMIN,
-            \Delight\Auth\Role::SUPER_ADMIN
+            Role::ADMIN,
+            Role::SUPER_ADMIN
         );
     }
 
     public function canEditAsSuperAdmin(): bool
     {
-        return $this->hasRole(\Delight\Auth\Role::SUPER_ADMIN);
+        return $this->hasRole(Role::SUPER_ADMIN);
     }
 }

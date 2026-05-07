@@ -9,27 +9,22 @@ use Delight\Auth\NotLoggedInException;
 use Delight\Auth\TokenExpiredException;
 use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UserAlreadyExistsException;
-use Items\Collection\Image\ImageFile;
-use Items\Collection\Image\ImageFileService;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
 use Ivy\Presentation\Form\ProfileForm;
-use Ivy\Infrastructure\Manager\SessionManager;
 use Ivy\Domain\Entity\ProfileEntity;
-use Ivy\Domain\Entity\UserEntity;
 use Ivy\Infrastructure\Registry\PluginRegistry;
-use Ivy\Service\Mail;
 use Ivy\Presentation\View\View;
 
 class ProfileController extends Controller
 {
-    private Profile $profile;
+    private ProfileEntity $profile;
     private ProfileForm $profileForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->profile = new Profile;
+        $this->profile = new ProfileEntity();
         $this->profileForm = new ProfileForm;
     }
 

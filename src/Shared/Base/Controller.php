@@ -6,6 +6,7 @@ use Illuminate\Container\Container;
 use Ivy\Shared\Core\Path;
 use Ivy\Infrastructure\Manager\SessionManager;
 use Ivy\Application\Service\AuthApplicationService;
+use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +25,7 @@ abstract class Controller
         $this->authService = new AuthApplicationService();
     }
 
+    #[NoReturn]
     protected function redirect(string $url = '', int $statusCode = 302): void
     {
         new RedirectResponse(Path::get('BASE_PATH').$url, $statusCode)->send();

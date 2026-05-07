@@ -2,11 +2,8 @@
 
 namespace Ivy\Infrastructure\Manager;
 
+use Ivy\Domain\Entity\TemplateEntity;
 use Ivy\Shared\Core\Path;
-use Illuminate\Database\Capsule\Manager as DB;
-use Ivy\Service\AssetPublisher;
-use Ivy\Presentation\View\Engine\LatteEngine;
-use Ivy\Presentation\View\View;
 
 class TemplateManager
 {
@@ -33,13 +30,10 @@ class TemplateManager
             return;
         }
 
-        // Eloquent / Capsule DB replacement
-        $templateBase = DB::table('templates')
-            ->where('type', 'base')
+        $templateBase = TemplateEntity::where('type', 'base')
             ->value('value');
 
-        $templateSub = DB::table('templates')
-            ->where('type', 'sub')
+        $templateSub = TemplateEntity::where('type', 'sub')
             ->value('value');
 
         self::$templateBase = Path::get('TEMPLATES_PATH') . $templateBase . DIRECTORY_SEPARATOR;

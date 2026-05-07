@@ -3,6 +3,7 @@
 namespace Ivy\Presentation\View\Engine;
 
 use Carbon\Carbon;
+use Ivy\Infrastructure\Manager\CsrfManager;
 use Ivy\Shared\Contract\ViewEngineInterface;
 use Latte\Engine;
 use Latte\Runtime\Html;
@@ -13,7 +14,6 @@ use Ivy\Infrastructure\Manager\HookManager;
 use Ivy\Infrastructure\Manager\SecurityManager;
 use Ivy\Infrastructure\Manager\TemplateManager;
 use Ivy\Domain\Entity\InfoEntity;
-use Ivy\Domain\Entity\ProfileEntity;
 use Ivy\Domain\Entity\SettingEntity;
 use Ivy\Infrastructure\Registry\PluginRegistry;
 use Ivy\Application\Service\AuthApplicationService;
@@ -110,7 +110,7 @@ class LatteEngine implements ViewEngineInterface
         );
 
         $this->latte->addFunction('csrf', fn () =>
-        new Html('<input type="hidden" name="csrf_token" value="' . \Ivy\Infrastructure\Manager\CsrfManager::token() . '">')
+        new Html('<input type="hidden" name="csrf_token" value="' . CsrfManager::token() . '">')
         );
 
         $this->latte->addFunction('doesUserHaveRole', fn ($user, $role) =>

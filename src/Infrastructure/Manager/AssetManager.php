@@ -71,66 +71,6 @@ class AssetManager
     }
 
     /**
-     * Check if Vite dev server is running.
-     */
-    public static function isViteRunning(): bool
-    {
-        if (! function_exists('curl_init')) {
-            return false;
-        }
-
-        $url = Path::get('PROTOCOL').'://'.$_ENV['VITE_BACKEND_HOST'].':'.$_ENV['VITE_PORT'].'/@vite/client';
-        $ch = curl_init($url);
-
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_NOBODY => true,
-            CURLOPT_CONNECTTIMEOUT => 1,
-            CURLOPT_TIMEOUT => 1,
-        ]);
-
-        curl_exec($ch);
-        $success = (curl_errno($ch) === 0 && curl_getinfo($ch, CURLINFO_HTTP_CODE) < 500);
-        curl_close($ch);
-
-        return $success;
-    }
-
-    /**
-     * Generate plugin-based Vite entry files dynamically.
-     */
-    protected static function generatePluginsEntry(): void
-    {
-        if (empty(self::$vite)) {
-            return;
-        }
-
-        $groups = ['base' => [], 'admin' => [], 'editor' => []];
-
-        foreach (self::$vite as $module) {
-            $path = str_replace('\\', '/', $module);
-            match (true) {
-                str_ends_with($path, '_admin.js') => $groups['admin'][] = $path,
-                str_ends_with($path, '_editor.js') => $groups['editor'][] = $path,
-                default => $groups['base'][] = $path,
-            };
-        }
-
-        foreach ($groups as $name => $modules) {
-            if (! $modules) {
-                continue;
-            }
-
-            $entryFile = Path::get('PROJECT_PATH')."vite.{$name}.js";
-            $content = implode("\n", array_map(fn ($m) => "import '/$m';", $modules))."\n";
-
-            if (! file_exists($entryFile) || file_get_contents($entryFile) !== $content) {
-                file_put_contents($entryFile, $content);
-            }
-        }
-    }
-
-    /**
      * Handle adding and syncing asset in dev mode.
      * @param array<string> $collection
      */
