@@ -1,14 +1,14 @@
 <?php
 
-namespace Ivy\Infrastructure\Manager;
+namespace Ivy\Plugin\Infrastructure\Manager;
 
-use Ivy\Domain\Model\PluginModel;
-use Ivy\Infrastructure\Helper\PluginHelper;
+use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Infrastructure\Metadata\PluginHelper;
 
 readonly class PluginCollectionManager
 {
     public function __construct(
-        private PluginModel $plugin
+        private Plugin $plugin
     ) {}
 
     public function install(): void
@@ -21,6 +21,9 @@ readonly class PluginCollectionManager
         $this->processCollection('uninstall');
     }
 
+    /**
+     * @throws \Exception
+     */
     private function processCollection(string $action): void
     {
         $paths = glob(PluginHelper::getCollectionDirectory($this->plugin->url) . '[a-zA-Z0-9_-]*');
@@ -37,14 +40,14 @@ readonly class PluginCollectionManager
             if ($action === 'install') {
                 $data = ['url' => $relativePath];
 
-                $plugin = new PluginModel();
+                $plugin = new Plugin();
                 $pluginManager = new PluginManager($plugin->fill($data));
                 $pluginManager->install();
                 continue;
             }
 
             if ($action === 'uninstall') {
-                $plugin = PluginModel::where('url', $relativePath)
+                $plugin = Plugin::where('url', $relativePath)
                     ->where('parent_id', $this->plugin->id)
                     ->first();
 

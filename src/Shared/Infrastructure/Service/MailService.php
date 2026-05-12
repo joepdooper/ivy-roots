@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Infrastructure\Service;
+namespace Ivy\Shared\Infrastructure\Service;
 
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;

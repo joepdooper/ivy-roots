@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Infrastructure\Manager;
+namespace Ivy\Shared\Infrastructure\Manager;
 
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager as Capsule;

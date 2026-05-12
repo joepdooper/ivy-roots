@@ -1,9 +1,9 @@
 <?php
 
-namespace Ivy\Domain\Model;
+namespace Ivy\Plugin\Domain\Entity;
 
 use Illuminate\Database\Eloquent\Model;
-use Ivy\Infrastructure\Helper\PluginInfo;
+use Ivy\Plugin\Infrastructure\Metadata\PluginInfo;
 use Ivy\Shared\Traits\HasPolicies;
 
 /**
@@ -17,7 +17,7 @@ use Ivy\Shared\Traits\HasPolicies;
  * @property bool $active
  * @property string $url
  */
-class PluginModel extends Model
+class Plugin extends Model
 {
     use HasPolicies;
     

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Presentation\Tag;
+namespace Ivy\Template\Presentation\Tag;
 
 use Latte\Extension;
 

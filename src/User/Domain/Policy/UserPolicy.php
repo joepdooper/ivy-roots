@@ -1,8 +1,8 @@
 <?php
 
-namespace Ivy\Domain\Policy;
+namespace Ivy\User\Domain\Policy;
 
-use Ivy\Domain\Model\UserModel;
+use Ivy\Plugin\Domain\Entity\UserModel;
 use Ivy\Shared\Base\Policy;
 
 class UserPolicy extends Policy

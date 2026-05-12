@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Presentation\Form;
+namespace Ivy\User\Presentation\Form;
 
 use Ivy\Shared\Base\Form;
 

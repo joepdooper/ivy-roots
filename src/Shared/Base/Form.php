@@ -3,7 +3,7 @@
 namespace Ivy\Shared\Base;
 
 use BlakvGhost\PHPValidator\Validator;
-use Ivy\Presentation\Validation\ValidationResult;
+use Ivy\Shared\Presentation\Validation\ValidationResult;
 
 abstract class Form
 {

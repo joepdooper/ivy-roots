@@ -2,7 +2,7 @@
 
 namespace Ivy\Domain\Policy;
 
-use Ivy\Domain\Model\SettingModel;
+use Ivy\Plugin\Domain\Entity\SettingModel;
 use Ivy\Shared\Base\Policy;
 
 class SettingPolicy extends Policy

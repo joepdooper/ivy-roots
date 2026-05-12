@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Domain\Exception;
+namespace Ivy\User\Domain\Exception;
 
 use Exception;
 

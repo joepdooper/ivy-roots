@@ -1,6 +1,8 @@
 <?php
 
-namespace Ivy\Infrastructure\Helper;
+namespace Ivy\Plugin\Infrastructure\Metadata;
+
+use Ivy\Plugin\Infrastructure\Service\PluginService;
 
 class PluginInfoLoader
 {
@@ -9,6 +11,6 @@ class PluginInfoLoader
      */
     public function load(string $url): array
     {
-        return PluginHelper::parseJson($url . DIRECTORY_SEPARATOR . 'info.json');
+        return PluginService::parseJson($url . DIRECTORY_SEPARATOR . 'info.json');
     }
 }

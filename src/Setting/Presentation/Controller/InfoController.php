@@ -1,23 +1,23 @@
 <?php
 
-namespace Ivy\Presentation\Controller;
+namespace Ivy\Setting\Presentation\Controller;
 
-use Ivy\Domain\Exception\AuthorizationException;
-use Ivy\Domain\Model\InfoModel;
-use Ivy\Domain\Model\PluginModel;
+use Ivy\User\Domain\Exception\AuthorizationException;
+use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Setting\Domain\Entity\Info;
+use Ivy\Setting\Presentation\Form\InfoForm;
 use Ivy\Shared\Base\Controller;
-use Ivy\Presentation\Form\InfoForm;
-use Ivy\Presentation\View\View;
+use Ivy\Template\Presentation\View\View;
 
 class InfoController extends Controller
 {
-    private InfoModel $info;
+    private Info $info;
     private InfoForm $infoForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->info = new InfoModel;
+        $this->info = new Info;
         $this->infoForm = new InfoForm;
     }
 
@@ -29,10 +29,10 @@ class InfoController extends Controller
         $this->info->authorize('index');
 
         $plugin_id = $id
-            ? PluginModel::where('url', $id)->value('id')
+            ? Plugin::where('url', $id)->value('id')
             : null;
 
-        $infos = InfoModel::where('plugin_id', $plugin_id)->get();
+        $infos = Info::where('plugin_id', $plugin_id)->get();
 
         View::render('admin/info.latte', ['infos' => $infos]);
     }
@@ -42,7 +42,7 @@ class InfoController extends Controller
      */
     public function add(mixed $data): void
     {
-        $info = new InfoModel;
+        $info = new Info;
 
         $info->authorize('add');
 
@@ -54,10 +54,10 @@ class InfoController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function update(InfoModel|int $info, mixed $data): void
+    public function update(Info|int $info, mixed $data): void
     {
         if (is_int($info)) {
-            $info = InfoModel::find($info);
+            $info = Info::find($info);
         }
 
         if (! $info) {
@@ -83,10 +83,10 @@ class InfoController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function delete(InfoModel|int $info): void
+    public function delete(Info|int $info): void
     {
         if (is_int($info)) {
-            $info = InfoModel::find($info);
+            $info = Info::find($info);
         }
 
         $info?->authorize('delete');
@@ -154,7 +154,7 @@ class InfoController extends Controller
 
             if ($segments[0] === 'plugin') {
 
-                $this->info->plugin_id = PluginModel::where('url', $segments[1])
+                $this->info->plugin_id = Plugin::where('url', $segments[1])
                     ->value('id');
             }
         }

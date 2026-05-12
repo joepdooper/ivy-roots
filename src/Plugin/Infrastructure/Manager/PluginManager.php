@@ -1,22 +1,22 @@
 <?php
 
-namespace Ivy\Infrastructure\Manager;
+namespace Ivy\Plugin\Infrastructure\Manager;
 
 use Exception;
 use Illuminate\Database\Capsule\Manager as Capsule;
-use Ivy\Application\Service\AssetPublisherApplicationService;
-use Ivy\Domain\Model\PluginModel;
-use Ivy\Domain\Model\SettingModel;
-use Ivy\Shared\Contracts\PluginInterface;
+use Ivy\Template\Application\Asset\AssetPublisherApplicationService;
+use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Domain\Entity\SettingModel;
+use Ivy\Plugin\Contracts\PluginInterface;
 use Ivy\Shared\Core\Language;
-use Ivy\Presentation\Form\PluginInfoForm;
-use Ivy\Infrastructure\Helper\PluginInfoLoader;
-use Ivy\Infrastructure\Helper\PluginHelper;
+use Ivy\Plugin\Presentation\Form\PluginInfoForm;
+use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
+use Ivy\Plugin\Infrastructure\Metadata\PluginHelper;
 
 class PluginManager
 {
     public function __construct(
-        private PluginModel $plugin
+        private Plugin $plugin
     ) {}
 
     /**

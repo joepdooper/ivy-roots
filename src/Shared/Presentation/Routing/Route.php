@@ -1,8 +1,8 @@
 <?php
 
-namespace Ivy\Presentation\Routing;
+namespace Ivy\Shared\Presentation\Routing;
 
-use Ivy\Infrastructure\Manager\RouterManager;
+use Ivy\Plugin\Infrastructure\Manager\RouterManager;
 
 class Route
 {

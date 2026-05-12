@@ -1,23 +1,23 @@
 <?php
 
-namespace Ivy\Presentation\View\Engine;
+namespace Ivy\Template\Presentation\View\Engine;
 
 use Carbon\Carbon;
-use Ivy\Domain\Model\InfoModel;
-use Ivy\Domain\Model\SettingModel;
-use Ivy\Infrastructure\Manager\CsrfManager;
-use Ivy\Shared\Contracts\ViewEngineInterface;
+use Ivy\Plugin\Domain\Entity\InfoModel;
+use Ivy\Plugin\Domain\Entity\SettingModel;
+use Ivy\Plugin\Infrastructure\Manager\CsrfManager;
+use Ivy\Plugin\Contracts\ViewEngineInterface;
 use Latte\Engine;
 use Latte\Runtime\Html;
 use Ivy\Shared\Config\Environment;
 use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
-use Ivy\Infrastructure\Manager\HookManager;
-use Ivy\Infrastructure\Manager\SecurityManager;
-use Ivy\Infrastructure\Manager\TemplateManager;
-use Ivy\Infrastructure\Registry\PluginRegistry;
-use Ivy\Application\Service\AuthApplicationService;
-use Ivy\Presentation\Tag\ButtonTag;
+use Ivy\Plugin\Infrastructure\Manager\HookManager;
+use Ivy\Plugin\Infrastructure\Manager\SecurityManager;
+use Ivy\Plugin\Infrastructure\Manager\TemplateManager;
+use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
+use Ivy\Template\Application\Asset\AuthApplicationService;
+use Ivy\Template\Presentation\Tag\ButtonTag;
 
 class LatteEngine implements ViewEngineInterface
 {
@@ -90,7 +90,7 @@ class LatteEngine implements ViewEngineInterface
         );
 
         $this->latte->addFunction('render', fn ($key, $vars = []) =>
-        \Ivy\Presentation\View\View::render($key, $vars)
+        \Ivy\Template\Presentation\View\View::render($key, $vars)
         );
 
         $this->latte->addFunction('info', fn ($key) =>

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Presentation\Validation;
+namespace Ivy\Shared\Presentation\Validation;
 
 final readonly class ValidationResult
 {

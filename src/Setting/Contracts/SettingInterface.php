@@ -1,9 +1,9 @@
 <?php
 
-namespace Ivy\Shared\Contracts;
+namespace Ivy\Setting\Contracts;
 
-use Ivy\Domain\Model\SettingModel;
+use Ivy\Setting\Domain\Entity\Setting;
 
 interface SettingInterface {
-    public function handle(SettingModel $setting, bool $bool): void;
+    public function handle(Setting $setting, bool $bool): void;
 }

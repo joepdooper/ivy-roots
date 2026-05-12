@@ -1,15 +1,15 @@
 <?php
 
-namespace Ivy\Presentation\Controller;
+namespace Ivy\Template\Presentation\Controller;
 
-use Ivy\Application\Service\AssetPublisherApplicationService;
-use Ivy\Domain\Model\SettingModel;
-use Ivy\Domain\Model\TemplateModel;
+use Ivy\Template\Application\Asset\AssetPublisherApplicationService;
+use Ivy\Plugin\Domain\Entity\SettingModel;
+use Ivy\Plugin\Domain\Entity\TemplateModel;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
-use Ivy\Presentation\Form\TemplateForm;
-use Ivy\Infrastructure\Manager\TemplateManager;
-use Ivy\Presentation\View\View;
+use Ivy\Plugin\Presentation\Form\TemplateForm;
+use Ivy\Plugin\Infrastructure\Manager\TemplateManager;
+use Ivy\Template\Presentation\View\View;
 
 class TemplateController extends Controller
 {

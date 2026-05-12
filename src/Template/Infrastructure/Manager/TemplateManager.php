@@ -1,8 +1,8 @@
 <?php
 
-namespace Ivy\Infrastructure\Manager;
+namespace Ivy\Template\Infrastructure\Manager;
 
-use Ivy\Domain\Model\TemplateModel;
+use Ivy\Plugin\Domain\Entity\TemplateModel;
 use Ivy\Shared\Core\Path;
 
 class TemplateManager

@@ -1,12 +1,12 @@
 <?php
 
-namespace Ivy\Application\Service;
+namespace Ivy\User\Application\Service;
 
 use Delight\Auth\Auth;
 use Illuminate\Database\Capsule\Manager as Capsule;
-use Ivy\Domain\Model\UserModel;
+use Ivy\Plugin\Domain\Entity\UserModel;
 
-class AuthApplicationService
+class AuthService
 {
     private Auth $auth;
 

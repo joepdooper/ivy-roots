@@ -1,11 +1,11 @@
 <?php
 
-namespace Ivy\Presentation\Form;
+namespace Ivy\Setting\Presentation\Form;
 
-use Ivy\Domain\Model\SettingModel;
+use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Form;
-use Ivy\Presentation\Rule\InfoSettingRule;
-use Ivy\Presentation\Rule\UniqueRule;
+use Ivy\Setting\Presentation\Rule\InfoSettingRule;
+use Ivy\Shared\Presentation\Rule\UniqueRule;
 
 class SettingForm extends Form
 {
@@ -15,7 +15,7 @@ class SettingForm extends Form
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'not_nullable', new InfoSettingRule, new UniqueRule([SettingModel::class])],
+            'name' => ['required', 'not_nullable', new InfoSettingRule, new UniqueRule([Setting::class])],
             'value' => new InfoSettingRule,
             'info' => ['string', 'max:50'],
             'plugin_id' => 'numeric',

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Presentation\Controller;
+namespace Ivy\User\Presentation\Controller;
 
 use Ivy\Shared\Base\Controller;
 

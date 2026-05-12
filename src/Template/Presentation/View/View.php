@@ -1,11 +1,11 @@
 <?php
 
-namespace Ivy\Presentation\View;
+namespace Ivy\Template\Presentation\View;
 
-use Ivy\Shared\Contracts\ViewEngineInterface;
-use Ivy\Infrastructure\Manager\SessionManager;
-use Ivy\Infrastructure\Manager\TemplateManager;
-use Ivy\Application\Service\AuthApplicationService;
+use Ivy\Plugin\Contracts\ViewEngineInterface;
+use Ivy\Plugin\Infrastructure\Manager\SessionManager;
+use Ivy\Plugin\Infrastructure\Manager\TemplateManager;
+use Ivy\Template\Application\Asset\AuthApplicationService;
 
 class View
 {

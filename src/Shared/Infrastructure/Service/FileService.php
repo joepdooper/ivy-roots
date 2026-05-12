@@ -1,8 +1,8 @@
 <?php
 
-namespace Ivy\Infrastructure\Service;
+namespace Ivy\Shared\Infrastructure\Service;
 
-use Ivy\Domain\Model\UserModel;
+use Ivy\Plugin\Domain\Entity\UserModel;
 use Ivy\Shared\Base\File;
 use Ivy\Shared\Core\Path;
 

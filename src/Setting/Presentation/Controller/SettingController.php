@@ -1,22 +1,22 @@
 <?php
 
-namespace Ivy\Presentation\Controller;
+namespace Ivy\Setting\Presentation\Controller;
 
-use Ivy\Domain\Model\PluginModel;
-use Ivy\Domain\Model\SettingModel;
+use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Setting\Presentation\Form\SettingForm;
+use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Controller;
-use Ivy\Presentation\Form\SettingForm;
-use Ivy\Presentation\View\View;
+use Ivy\Template\Presentation\View\View;
 
 class SettingController extends Controller
 {
-    private SettingModel $setting;
+    private Setting $setting;
     private SettingForm $settingForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->setting = new SettingModel();
+        $this->setting = new Setting();
         $this->settingForm = new SettingForm();
     }
 
@@ -25,17 +25,17 @@ class SettingController extends Controller
         $this->setting->authorize('index');
 
         $plugin_id = $url
-            ? PluginModel::where('url', $url)->value('id')
+            ? Plugin::where('url', $url)->value('id')
             : null;
 
-        $settings = SettingModel::where('plugin_id', $plugin_id)->get();
+        $settings = Setting::where('plugin_id', $plugin_id)->get();
 
         View::render('admin/setting.latte', ['settings' => $settings]);
     }
 
     public function add(mixed $data): void
     {
-        $setting = new SettingModel();
+        $setting = new Setting();
 
         $setting->authorize('add');
 
@@ -47,10 +47,10 @@ class SettingController extends Controller
         );
     }
 
-    public function update(SettingModel|int $setting, mixed $data): void
+    public function update(Setting|int $setting, mixed $data): void
     {
         if (is_int($setting)) {
-            $setting = SettingModel::find($setting);
+            $setting = Setting::find($setting);
         }
 
         if (! $setting) {
@@ -73,10 +73,10 @@ class SettingController extends Controller
         );
     }
 
-    public function delete(SettingModel|int $setting): void
+    public function delete(Setting|int $setting): void
     {
         if (is_int($setting)) {
-            $setting = SettingModel::find($setting);
+            $setting = Setting::find($setting);
         }
 
         $setting?->authorize('delete');
@@ -141,7 +141,7 @@ class SettingController extends Controller
 
             if ($segments[0] === 'plugin') {
 
-                $this->setting->plugin_id = PluginModel::where('url', $segments[1])
+                $this->setting->plugin_id = Plugin::where('url', $segments[1])
                     ->value('id');
             }
         }

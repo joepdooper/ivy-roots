@@ -1,12 +1,12 @@
 <?php
 
-namespace Ivy\Domain\Model;
+namespace Ivy\User\Domain\Entity;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Ivy\Shared\Traits\HasPolicies;
 
-class ProfileModel extends Model
+class Profile extends Model
 {
     use HasPolicies;
 

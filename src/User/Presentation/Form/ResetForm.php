@@ -1,9 +1,9 @@
 <?php
 
-namespace Ivy\Presentation\Form;
+namespace Ivy\User\Presentation\Form;
 
 use Ivy\Shared\Base\Form;
-use Ivy\Presentation\Rule\PasswordRule;
+use Ivy\Setting\Presentation\Rule\PasswordRule;
 
 class ResetForm extends Form
 {

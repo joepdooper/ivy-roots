@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Infrastructure\Manager;
+namespace Ivy\Template\Infrastructure\Manager;
 
 use Ivy\Shared\Config\Environment;
 use Ivy\Shared\Core\Path;

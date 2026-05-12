@@ -1,8 +1,8 @@
 <?php
 
-namespace Ivy\Domain\Policy;
+namespace Ivy\Template\Domain\Policy;
 
-use Ivy\Domain\Model\TemplateModel;
+use Ivy\Plugin\Domain\Entity\TemplateModel;
 use Ivy\Shared\Base\Policy;
 
 class TemplatePolicy extends Policy

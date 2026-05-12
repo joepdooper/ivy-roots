@@ -1,8 +1,8 @@
 <?php
 
-namespace Ivy\Domain\Policy;
+namespace Ivy\User\Domain\Policy;
 
-use Ivy\Domain\Model\ProfileModel;
+use Ivy\Plugin\Domain\Entity\ProfileModel;
 use Ivy\Shared\Base\Policy;
 
 class ProfilePolicy extends Policy

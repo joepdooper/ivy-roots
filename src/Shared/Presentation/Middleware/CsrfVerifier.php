@@ -1,8 +1,8 @@
 <?php
 
-namespace Ivy\Presentation\Middleware;
+namespace Ivy\Shared\Presentation\Middleware;
 
-use Ivy\Infrastructure\Manager\SessionManager;
+use Ivy\Plugin\Infrastructure\Manager\SessionManager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 

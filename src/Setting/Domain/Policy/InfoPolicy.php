@@ -2,7 +2,7 @@
 
 namespace Ivy\Domain\Policy;
 
-use Ivy\Domain\Model\InfoModel;
+use Ivy\Plugin\Domain\Entity\InfoModel;
 use Ivy\Shared\Base\Policy;
 
 class InfoPolicy extends Policy

@@ -4,8 +4,8 @@ namespace Ivy\Shared\Base;
 
 use Illuminate\Container\Container;
 use Ivy\Shared\Core\Path;
-use Ivy\Infrastructure\Manager\SessionManager;
-use Ivy\Application\Service\AuthApplicationService;
+use Ivy\Plugin\Infrastructure\Manager\SessionManager;
+use Ivy\Template\Application\Asset\AuthApplicationService;
 use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;

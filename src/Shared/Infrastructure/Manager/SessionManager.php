@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Infrastructure\Manager;
+namespace Ivy\Shared\Infrastructure\Manager;
 
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\HttpFoundation\Session\Session;

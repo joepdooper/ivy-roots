@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Presentation\Controller;
+namespace Ivy\User\Presentation\Controller;
 
 use Delight\Auth\AttemptCancelledException;
 use Delight\Auth\AuthError;
@@ -16,17 +16,17 @@ use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
-use Ivy\Domain\Model\ProfileModel;
-use Ivy\Domain\Model\SettingModel;
-use Ivy\Domain\Model\UserModel;
+use Ivy\Plugin\Domain\Entity\ProfileModel;
+use Ivy\Plugin\Domain\Entity\SettingModel;
+use Ivy\Plugin\Domain\Entity\UserModel;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
-use Ivy\Presentation\Form\LoginForm;
-use Ivy\Presentation\Form\RegisterForm;
-use Ivy\Presentation\Form\ResetForm;
-use Ivy\Presentation\Form\UserForm;
-use Ivy\Infrastructure\Service\MailService;
-use Ivy\Presentation\View\View;
+use Ivy\Plugin\Presentation\Form\LoginForm;
+use Ivy\Plugin\Presentation\Form\RegisterForm;
+use Ivy\Plugin\Presentation\Form\ResetForm;
+use Ivy\Plugin\Presentation\Form\UserForm;
+use Ivy\Shared\Infrastructure\Service\MailService;
+use Ivy\Template\Presentation\View\View;
 
 class UserController extends Controller
 {

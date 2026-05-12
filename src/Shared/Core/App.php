@@ -5,27 +5,18 @@ namespace Ivy\Shared\Core;
 use Bramus\Router\Router;
 use Dotenv\Dotenv;
 use Illuminate\Container\Container;
-use Ivy\Domain\Model\InfoModel;
-use Ivy\Domain\Model\PluginModel;
-use Ivy\Domain\Model\SettingModel;
-use Ivy\Shared\Contracts\PluginInterface;
-use Ivy\Domain\Exception\AuthorizationException;
-use Ivy\Application\Handler\MinifyCssHandler;
-use Ivy\Application\Handler\MinifyJsHandler;
-use Ivy\Infrastructure\Manager\DatabaseManager;
-use Ivy\Infrastructure\Manager\ErrorManager;
-use Ivy\Infrastructure\Manager\LanguageManager;
-use Ivy\Infrastructure\Manager\RouterManager;
-use Ivy\Infrastructure\Manager\SecurityManager;
-use Ivy\Infrastructure\Manager\TemplateManager;
-use Ivy\Presentation\Middleware\CsrfVerifier;
-use Ivy\Presentation\Middleware\MiddlewarePipeline;
-use Ivy\Presentation\Middleware\RequestNormalizer;
-use Ivy\Infrastructure\Registry\PluginRegistry;
-use Ivy\Infrastructure\Registry\SettingRegistry;
-use Ivy\Application\Service\AuthApplicationService;
-use Ivy\Presentation\View\Engine\LatteEngine;
-use Ivy\Presentation\View\View;
+use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Contracts\PluginInterface;
+use Ivy\User\Domain\Exception\AuthorizationException;
+use Ivy\Template\Application\Handler\MinifyCssHandler;
+use Ivy\Template\Application\Handler\MinifyJsHandler;
+use Ivy\Shared\Presentation\Middleware\CsrfVerifier;
+use Ivy\Shared\Presentation\Middleware\MiddlewarePipeline;
+use Ivy\Shared\Presentation\Middleware\RequestNormalizer;
+use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
+use Ivy\Template\Application\Asset\AuthApplicationService;
+use Ivy\Template\Presentation\View\Engine\LatteEngine;
+use Ivy\Template\Presentation\View\View;
 use Symfony\Component\HttpFoundation\Request;
 
 class App
@@ -59,7 +50,7 @@ class App
 
     private function initPlugins(): void
     {
-        $plugins = PluginModel::select('name', 'interface')
+        $plugins = Plugin::select('name', 'interface')
             ->where('active', 1)
             ->get();
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace Ivy\Application\Handler;
+namespace Ivy\Template\Application\Handler;
 
-use Ivy\Domain\Model\SettingModel;
+use Ivy\Plugin\Domain\Entity\SettingModel;
 use Ivy\Shared\Config\Environment;
-use Ivy\Shared\Contracts\SettingInterface;
+use Ivy\Plugin\Contracts\SettingInterface;
 use Ivy\Shared\Core\Path;
-use Ivy\Infrastructure\Manager\AssetManager;
+use Ivy\Plugin\Infrastructure\Manager\AssetManager;
 use MatthiasMullie\Minify\CSS;
 
 class MinifyCssHandler implements SettingInterface

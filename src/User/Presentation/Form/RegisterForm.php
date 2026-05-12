@@ -1,12 +1,12 @@
 <?php
 
-namespace Ivy\Presentation\Form;
+namespace Ivy\User\Presentation\Form;
 
-use Ivy\Domain\Model\UserModel;
+use Ivy\Plugin\Domain\Entity\UserModel;
 use Ivy\Shared\Base\Form;
-use Ivy\Presentation\Rule\PasswordRule;
-use Ivy\Presentation\Rule\UniqueRule;
-use Ivy\Presentation\Rule\UserNameRule;
+use Ivy\Setting\Presentation\Rule\PasswordRule;
+use Ivy\Setting\Presentation\Rule\UniqueRule;
+use Ivy\Setting\Presentation\Rule\UserNameRule;
 
 class RegisterForm extends Form
 {

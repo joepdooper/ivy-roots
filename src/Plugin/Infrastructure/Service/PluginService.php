@@ -1,12 +1,12 @@
 <?php
 
-namespace Ivy\Infrastructure\Helper;
+namespace Ivy\Plugin\Infrastructure\Service;
 
-use Ivy\Domain\Model\PluginModel;
+use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Shared\Core\Path;
 use Symfony\Component\HttpFoundation\File\File;
 
-class PluginHelper
+class PluginService
 {
     /**
      * @param string $path
@@ -73,7 +73,7 @@ class PluginHelper
     public static function getMissingDependencies(array $dependencies): array
     {
         return array_filter($dependencies, function ($dependency) {
-            return ! PluginModel::where('name', $dependency)->pluck('id');
+            return ! Plugin::where('name', $dependency)->pluck('id');
         });
     }
 }

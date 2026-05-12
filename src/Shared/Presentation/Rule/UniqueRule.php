@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Presentation\Rule;
+namespace Ivy\Shared\Presentation\Rule;
 
 use BlakvGhost\PHPValidator\Contracts\Rule;
 use Ivy\Shared\Core\Language;

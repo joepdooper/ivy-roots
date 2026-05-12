@@ -1,13 +1,13 @@
 <?php
 
-namespace Ivy\Domain\Model;
+namespace Ivy\Setting\Domain\Entity;
 
 use Illuminate\Database\Eloquent\Model;
-use Ivy\Infrastructure\Registry\SettingRegistry;
+use Ivy\Setting\Infrastructure\Registry\SettingRegistry;
 use Ivy\Shared\Traits\HasPolicies;
 use Ivy\Shared\Traits\Stash;
 
-class SettingModel extends Model
+class Setting extends Model
 {
     use Stash, HasPolicies;
 
@@ -22,7 +22,7 @@ class SettingModel extends Model
 
     protected static function booted(): void
     {
-        static::updated(function (SettingModel $setting) {
+        static::updated(function (Setting $setting) {
             $key = strtolower(str_replace(' ', '_', $setting->name));
 
             $definition = SettingRegistry::get($key);

@@ -1,8 +1,6 @@
 <?php
 
-namespace Ivy\Infrastructure\Factory;
-
-use Ivy\Infrastructure\Helper\PluginInfo;
+namespace Ivy\Plugin\Infrastructure\Metadata;
 
 class PluginInfoFactory
 {

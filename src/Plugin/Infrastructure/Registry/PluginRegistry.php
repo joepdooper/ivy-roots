@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Infrastructure\Registry;
+namespace Ivy\Plugin\Infrastructure\Registry;
 
 class PluginRegistry
 {

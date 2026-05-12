@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Presentation\Controller;
+namespace Ivy\User\Presentation\Controller;
 
 use Delight\Auth\EmailNotVerifiedException;
 use Delight\Auth\InvalidEmailException;
@@ -9,12 +9,12 @@ use Delight\Auth\NotLoggedInException;
 use Delight\Auth\TokenExpiredException;
 use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UserAlreadyExistsException;
-use Ivy\Domain\Model\ProfileModel;
+use Ivy\Plugin\Domain\Entity\ProfileModel;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
-use Ivy\Presentation\Form\ProfileForm;
-use Ivy\Infrastructure\Registry\PluginRegistry;
-use Ivy\Presentation\View\View;
+use Ivy\Plugin\Presentation\Form\ProfileForm;
+use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
+use Ivy\Template\Presentation\View\View;
 
 class ProfileController extends Controller
 {

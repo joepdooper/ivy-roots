@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Infrastructure\Helper;
+namespace Ivy\Plugin\Infrastructure\Metadata;
 
 final readonly class PluginInfo
 {

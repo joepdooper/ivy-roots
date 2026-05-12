@@ -1,9 +1,9 @@
 <?php
 
-namespace Ivy\Application\Service;
+namespace Ivy\Template\Application\Asset;
 
 use FilesystemIterator;
-use Ivy\Domain\Model\TemplateModel;
+use Ivy\Plugin\Domain\Entity\TemplateModel;
 use Ivy\Shared\Core\Path;
 
 class AssetPublisherApplicationService

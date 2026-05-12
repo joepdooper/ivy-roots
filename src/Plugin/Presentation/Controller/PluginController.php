@@ -1,19 +1,19 @@
 <?php
 
-namespace Ivy\Presentation\Controller;
+namespace Ivy\Plugin\Presentation\Controller;
 
-use Ivy\Domain\Model\PluginModel;
+use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
-use Ivy\Infrastructure\Factory\PluginInfoFactory;
-use Ivy\Presentation\Form\PluginForm;
-use Ivy\Infrastructure\Helper\PluginInfoLoader;
-use Ivy\Infrastructure\Manager\PluginManager;
-use Ivy\Presentation\View\View;
+use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
+use Ivy\Plugin\Presentation\Form\PluginForm;
+use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
+use Ivy\Plugin\Infrastructure\Manager\PluginManager;
+use Ivy\Template\Presentation\View\View;
 
 class PluginController extends Controller
 {
-    private PluginModel $plugin;
+    private Plugin $plugin;
     private PluginForm $pluginForm;
     private PluginManager $pluginManager;
 
@@ -22,7 +22,7 @@ class PluginController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->plugin = new PluginModel();
+        $this->plugin = new Plugin();
         $this->pluginForm = new PluginForm();
     }
 
@@ -42,13 +42,13 @@ class PluginController extends Controller
         $this->plugin->authorize('index');
 
         $parentId = $id
-            ? PluginModel::where('url', $id)->value('id')
+            ? Plugin::where('url', $id)->value('id')
             : null;
 
         $loader = new PluginInfoLoader();
         $factory = new PluginInfoFactory();
 
-        $installedPlugins = PluginModel::all()->map(function ($plugin) use ($loader, $factory, &$installedUrls) {
+        $installedPlugins = Plugin::all()->map(function ($plugin) use ($loader, $factory, &$installedUrls) {
             $data = $loader->load($plugin->url);
             $data['url'] = $plugin->url;
 
@@ -101,17 +101,17 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('install');
 
-        $plugin = new PluginModel();
+        $plugin = new Plugin();
 
         $this->pluginManager = new PluginManager($plugin->fill($data));
         $this->responses[] = $this->pluginManager->install();
     }
 
-    public function update(PluginModel|int $plugin, mixed $data): void
+    public function update(Plugin|int $plugin, mixed $data): void
     {
 
         if (is_int($plugin)) {
-            $plugin = PluginModel::find($plugin);
+            $plugin = Plugin::find($plugin);
         }
 
         $plugin->fill($data);
@@ -130,10 +130,10 @@ class PluginController extends Controller
         );
     }
 
-    public function delete(PluginModel|int $plugin): void
+    public function delete(Plugin|int $plugin): void
     {
         if (is_int($plugin)) {
-            $plugin = PluginModel::find($plugin);
+            $plugin = Plugin::find($plugin);
         }
 
         if (! $plugin) {

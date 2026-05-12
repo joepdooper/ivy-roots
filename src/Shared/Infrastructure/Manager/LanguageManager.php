@@ -1,8 +1,8 @@
 <?php
 
-namespace Ivy\Infrastructure\Manager;
+namespace Ivy\Shared\Infrastructure\Manager;
 
-use Ivy\Domain\Model\InfoModel;
+use Ivy\Plugin\Domain\Entity\InfoModel;
 use Ivy\Shared\Core\Language;
 
 class LanguageManager

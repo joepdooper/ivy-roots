@@ -4,8 +4,8 @@ namespace Ivy\Shared\Traits;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Ivy\Domain\Exception\AuthorizationException;
-use Ivy\Application\Service\AuthApplicationService;
+use Ivy\User\Domain\Exception\AuthorizationException;
+use Ivy\Template\Application\Asset\AuthApplicationService;
 use ReflectionClass;
 use ReflectionException;
 

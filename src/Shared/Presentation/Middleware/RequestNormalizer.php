@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Presentation\Middleware;
+namespace Ivy\Shared\Presentation\Middleware;
 
 use Symfony\Component\HttpFoundation\Request;
 
