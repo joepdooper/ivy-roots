@@ -2,6 +2,7 @@
 
 namespace Ivy\User\Presentation\Controller;
 
+use Delight\Auth\AuthError;
 use Delight\Auth\EmailNotVerifiedException;
 use Delight\Auth\InvalidEmailException;
 use Delight\Auth\InvalidSelectorTokenPairException;
@@ -9,22 +10,23 @@ use Delight\Auth\NotLoggedInException;
 use Delight\Auth\TokenExpiredException;
 use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UserAlreadyExistsException;
-use Ivy\Plugin\Domain\Entity\ProfileModel;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
-use Ivy\Plugin\Presentation\Form\ProfileForm;
 use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
+use Ivy\Shared\Infrastructure\Service\MailService;
 use Ivy\Template\Presentation\View\View;
+use Ivy\User\Domain\Entity\Profile;
+use Ivy\User\Presentation\Form\ProfileForm;
 
 class ProfileController extends Controller
 {
-    private ProfileModel $profile;
+    private Profile $profile;
     private ProfileForm $profileForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->profile = new ProfileModel();
+        $this->profile = new Profile();
         $this->profileForm = new ProfileForm;
     }
 
@@ -43,7 +45,7 @@ class ProfileController extends Controller
 
         if ($result->valid) {
 
-            $profile = ProfileModel::with('user')
+            $profile = Profile::with('user')
                 ->where('user_id', $_SESSION['auth_user_id'])
                 ->first();
 
@@ -76,7 +78,7 @@ class ProfileController extends Controller
                                     . urlencode($selector) . '/'
                                     . urlencode($token);
 
-                                $mail = new Mail;
+                                $mail = new MailService();
                                 $mail->addAddress($result->data['email'], $result->data['username']);
                                 $mail->setSubject('Reset email address');
                                 $mail->setBody('Reset your email address with this link: ' . $url);
@@ -139,14 +141,14 @@ class ProfileController extends Controller
 
     public function user(): void
     {
-        $profile = ProfileModel::where('user_id', $_SESSION['auth_user_id'])->first();
+        $profile = Profile::where('user_id', $_SESSION['auth_user_id'])->first();
 
         View::render('admin/profile.latte', ['profile' => $profile]);
     }
 
     public function public(int $id): void
     {
-        $profile = ProfileModel::where('id', $id)->first();
+        $profile = Profile::where('id', $id)->first();
 
         View::render('include/profile.latte', ['profile' => $profile]);
     }
@@ -158,14 +160,14 @@ class ProfileController extends Controller
                 $this->authService->auth()->confirmEmail($selector, $token);
                 $this->flashBag->add('success', 'Email address has been verified');
 
-            } catch (InvalidSelectorTokenPairException) {
+            } catch (InvalidSelectorTokenPairException|TooManyRequestsException) {
                 $this->flashBag->add('error', 'Invalid token');
             } catch (TokenExpiredException) {
                 $this->flashBag->add('error', 'Token expired');
             } catch (UserAlreadyExistsException) {
                 $this->flashBag->add('warning', 'Email address already exists');
-            } catch (TooManyRequestsException) {
-                $this->flashBag->add('error', 'Invalid token');
+            } catch (AuthError $e) {
+                $this->flashBag->add('error', 'An error occurred while confirming the email address');
             }
         }
 

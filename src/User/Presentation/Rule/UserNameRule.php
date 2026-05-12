@@ -15,7 +15,7 @@ class UserNameRule implements Rule
     {
         $this->field = $field;
 
-        return preg_match('/^(?!.*[.-]{2})[a-zA-Z](?:[a-zA-Z0-9._-]{1,18}[a-zA-Z0-9])$/', $value) === 1;
+        return preg_match('/^(?!.*[.-]{2})[a-zA-Z][a-zA-Z0-9._-]{1,18}[a-zA-Z0-9]$/', $value) === 1;
     }
 
     public function message(): string

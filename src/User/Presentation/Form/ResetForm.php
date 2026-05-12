@@ -3,7 +3,7 @@
 namespace Ivy\User\Presentation\Form;
 
 use Ivy\Shared\Base\Form;
-use Ivy\Setting\Presentation\Rule\PasswordRule;
+use Ivy\User\Presentation\Rule\PasswordRule;
 
 class ResetForm extends Form
 {

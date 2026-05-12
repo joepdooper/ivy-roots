@@ -16,27 +16,28 @@ use Delight\Auth\TooManyRequestsException;
 use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use Delight\Db\Throwable\IntegrityConstraintViolationException;
-use Ivy\Plugin\Domain\Entity\ProfileModel;
-use Ivy\Plugin\Domain\Entity\SettingModel;
-use Ivy\Plugin\Domain\Entity\UserModel;
+use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
-use Ivy\Plugin\Presentation\Form\LoginForm;
-use Ivy\Plugin\Presentation\Form\RegisterForm;
-use Ivy\Plugin\Presentation\Form\ResetForm;
-use Ivy\Plugin\Presentation\Form\UserForm;
 use Ivy\Shared\Infrastructure\Service\MailService;
 use Ivy\Template\Presentation\View\View;
+use Ivy\User\Domain\Entity\Profile;
+use Ivy\User\Domain\Entity\User;
+use Ivy\User\Presentation\Form\LoginForm;
+use Ivy\User\Presentation\Form\RegisterForm;
+use Ivy\User\Presentation\Form\ResetForm;
+use Ivy\User\Presentation\Form\UserForm;
+use JetBrains\PhpStorm\NoReturn;
 
 class UserController extends Controller
 {
-    private UserModel $user;
+    private User $user;
     private UserForm $userForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->user = new UserModel();
+        $this->user = new User();
         $this->userForm = new UserForm();
     }
 
@@ -55,14 +56,17 @@ class UserController extends Controller
     {
         $this->user->authorize('index');
 
-        $users = (new UserModel)->all();
+        $users = User::all();
         View::render('admin/user.latte', ['users' => $users]);
     }
 
-    public function update(UserModel|int $user, mixed $data): void
+    /**
+     * @throws UnknownIdException
+     */
+    public function update(User|int $user, mixed $data): void
     {
         if (is_int($user)) {
-            $user = UserModel::find($user);
+            $user = User::find($user);
         }
 
         if (!$user) {
@@ -93,10 +97,10 @@ class UserController extends Controller
         );
     }
 
-    public function delete(UserModel|int $user): void
+    public function delete(User|int $user): void
     {
         if (is_int($user)) {
-            $user = UserModel::find($user);
+            $user = User::find($user);
         }
 
         if (!$user) {
@@ -111,7 +115,7 @@ class UserController extends Controller
             $this->flashBag->add('error', 'Something went wrong: ' . $e);
         }
 
-        ProfileModel::where('user_id', $user->id)->delete();
+        Profile::where('user_id', $user->id)->delete();
 
         $this->flashBag->add(
             'success',
@@ -119,11 +123,15 @@ class UserController extends Controller
         );
     }
 
+    /**
+     * @throws UnknownIdException
+     */
+    #[NoReturn]
     public function sync(): void
     {
         $this->user->authorize('sync');
 
-        foreach ($this->request->request->get('user') as $index => $data) {
+        foreach ($this->request->request->get('user') as $data) {
 
             $result = $this->userForm->validate($data);
 
@@ -160,21 +168,21 @@ class UserController extends Controller
         }
 
         try {
-            $userId = $this->authService->auth()->register($this->request->get('email'), $this->request->get('password'), $this->request->get('username'), function ($selector, $token) {
+            $userId = $this->authService->auth()->register($this->request->request->get('email'), $this->request->request->get('password'), $this->request->request->get('username'), function ($selector, $token) {
                 $url = Path::get('PUBLIC_URL') . 'user/login/' . urlencode($selector) . '/' . urlencode($token);
                 // send email
                 $mail = new MailService;
-                $mail->addAddress($this->request->get('email'), $this->request->get('username'));
+                $mail->addAddress($this->request->request->get('email'), $this->request->request->get('username'));
                 $mail->setSubject('Activate account');
                 $mail->setBody('Activate your account with this link: ' . $url);
                 $mail->send();
             });
 
-            ProfileModel::create(['user_id' => $userId]);
+            Profile::create(['user_id' => $userId]);
 
             // Set role to registered user
-            if (SettingModel::stashGet('registration_role')->bool && isset(SettingModel::stashGet('registration_role')->value)) {
-                $role = strtoupper(SettingModel::stashGet('registration_role')->value);
+            if (Setting::stashGet('registration_role')->bool && isset(Setting::stashGet('registration_role')->value)) {
+                $role = strtoupper(Setting::stashGet('registration_role')->value);
                 $roleConstant = "\Delight\Auth\Role::$role";
                 $this->authService->auth()->admin()->addRoleForUserById($userId, constant($roleConstant));
             }
@@ -193,7 +201,7 @@ class UserController extends Controller
             $this->redirect('user/register');
         }
 
-        $this->flashBag->add('success', 'An email has been sent to ' . $this->request->get('email') . ' with a link to activate your account');
+        $this->flashBag->add('success', 'An email has been sent to ' . $this->request->request->get('email') . ' with a link to activate your account');
         $this->redirect('user/login');
     }
 
@@ -215,20 +223,18 @@ class UserController extends Controller
      */
     public function login(): void
     {
-        $result = (new LoginForm)->validate($this->request->request->all());
+        $form = new LoginForm();
+        $result = $form->validate($this->request->request->all());
 
         if (!$result->valid) {
             $this->redirectToFormWithErrors($result);
         }
 
         try {
-            $this->authService->auth()->login($this->request->get('email'), $this->request->get('password'));
+            $this->authService->auth()->login($this->request->request->get('email'), $this->request->request->get('password'));
             $this->flashBag->add('success', 'Welcome ' . $this->authService->auth()->getUsername());
             $this->redirect('admin/profile');
-        } catch (InvalidEmailException) {
-            $this->flashBag->add('error', 'Wrong login credentials');
-            $this->redirect('user/login');
-        } catch (InvalidPasswordException) {
+        } catch (InvalidEmailException|InvalidPasswordException) {
             $this->flashBag->add('error', 'Wrong login credentials');
             $this->redirect('user/login');
         } catch (EmailNotVerifiedException) {
@@ -278,6 +284,7 @@ class UserController extends Controller
     /**
      * @throws AuthError
      */
+    #[NoReturn]
     public function logout(): void
     {
         $this->authService->auth()->logOut();
@@ -302,19 +309,20 @@ class UserController extends Controller
      */
     public function reset(): void
     {
-        $result = (new ResetForm)->validate($this->request->request->all());
+        $form = new ResetForm();
+        $result = $form->validate($this->request->request->all());
 
         if (!$result->valid) {
             $this->redirectToFormWithErrors($result);
         }
 
-        if ($this->request->get('email')) {
+        if ($this->request->request->get('email')) {
             try {
-                $this->authService->auth()->forgotPassword($this->request->get('email'), function ($selector, $token) {
+                $this->authService->auth()->forgotPassword($this->request->request->get('email'), function ($selector, $token) {
                     $url = Path::get('PUBLIC_URL') . 'user/reset/' . urlencode($selector) . '/' . urlencode($token);
                     // send email
                     $mail = new MailService;
-                    $mail->addAddress($this->request->get('email'));
+                    $mail->addAddress($this->request->request->get('email'));
                     $mail->setSubject('Reset password');
                     $mail->setBody('Reset password with this link: ' . $url);
                     $mail->send();
@@ -332,12 +340,12 @@ class UserController extends Controller
                 $this->flashBag->add('error', 'Too many requests');
                 $this->redirect('user/reset');
             }
-            $this->flashBag->add('success', 'An email has been sent to ' . $this->request->get('email') . ' with a link to reset your password');
+            $this->flashBag->add('success', 'An email has been sent to ' . $this->request->request->get('email') . ' with a link to reset your password');
             $this->redirect('user/reset');
         }
-        if ($this->request->get('password')) {
+        if ($this->request->request->get('password')) {
             try {
-                $this->authService->auth()->resetPassword($this->request->get('selector'), $this->request->get('token'), $this->request->get('password'));
+                $this->authService->auth()->resetPassword($this->request->request->get('selector'), $this->request->request->get('token'), $this->request->request->get('password'));
                 $this->flashBag->add('success', 'Password has been reset');
                 $this->redirect('user/login');
             } catch (InvalidSelectorTokenPairException) {

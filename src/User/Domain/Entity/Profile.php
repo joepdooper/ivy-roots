@@ -10,7 +10,7 @@ class Profile extends Model
 {
     use HasPolicies;
 
-    private static ?ProfileModel $currentProfile = null;
+    private static ?Profile $currentProfile = null;
 
     protected $fillable = [
         'user_id',
@@ -19,7 +19,7 @@ class Profile extends Model
 
     public function user(): HasOne
     {
-        return $this->hasOne(UserModel::class, 'id', 'user_id');
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
 
     public static function lastSeen(int $last_login): string

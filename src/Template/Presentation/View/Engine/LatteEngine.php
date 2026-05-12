@@ -3,26 +3,28 @@
 namespace Ivy\Template\Presentation\View\Engine;
 
 use Carbon\Carbon;
-use Ivy\Plugin\Domain\Entity\InfoModel;
-use Ivy\Plugin\Domain\Entity\SettingModel;
-use Ivy\Plugin\Infrastructure\Manager\CsrfManager;
-use Ivy\Plugin\Contracts\ViewEngineInterface;
+use Ivy\Setting\Domain\Entity\Info;
+use Ivy\Setting\Domain\Entity\Setting;
+use Ivy\Shared\Infrastructure\Manager\CsrfManager;
+use Ivy\Shared\Infrastructure\Manager\HookManager;
+use Ivy\Shared\Infrastructure\Manager\SecurityManager;
+use Ivy\Template\Contracts\ViewEngineInterface;
+use Ivy\Template\Infrastructure\Manager\TemplateManager;
+use Ivy\Template\Presentation\View\View;
+use Ivy\User\Application\Service\AuthService;
 use Latte\Engine;
+use Latte\Extension;
 use Latte\Runtime\Html;
 use Ivy\Shared\Config\Environment;
 use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
-use Ivy\Plugin\Infrastructure\Manager\HookManager;
-use Ivy\Plugin\Infrastructure\Manager\SecurityManager;
-use Ivy\Plugin\Infrastructure\Manager\TemplateManager;
 use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
-use Ivy\Template\Application\Asset\AuthApplicationService;
 use Ivy\Template\Presentation\Tag\ButtonTag;
 
 class LatteEngine implements ViewEngineInterface
 {
     private Engine $latte;
-    private AuthApplicationService $auth;
+    private AuthService $auth;
 
 
     public function __construct()
@@ -30,7 +32,7 @@ class LatteEngine implements ViewEngineInterface
         $this->latte = new Engine();
     }
 
-    public function setAuth(AuthApplicationService $auth): void
+    public function setAuth(AuthService $auth): void
     {
         $this->auth = $auth;
     }
@@ -55,7 +57,7 @@ class LatteEngine implements ViewEngineInterface
         $this->latte->addFunction($name, $callback);
     }
 
-    public function addExtension(object $extension): void
+    public function addExtension(Extension $extension): void
     {
         $this->latte->addExtension($extension);
     }
@@ -90,19 +92,19 @@ class LatteEngine implements ViewEngineInterface
         );
 
         $this->latte->addFunction('render', fn ($key, $vars = []) =>
-        \Ivy\Template\Presentation\View\View::render($key, $vars)
+        View::render($key, $vars)
         );
 
         $this->latte->addFunction('info', fn ($key) =>
-            InfoModel::stashGet($key)->value ?? ''
+            Info::stashGet($key)->value ?? ''
         );
 
         $this->latte->addFunction('setting', fn ($key) =>
-            SettingModel::stashGet($key)->value ?? ''
+            Setting::stashGet($key)->value ?? ''
         );
 
         $this->latte->addFunction('enabled', fn ($key) =>
-            SettingModel::stashGet($key)->bool ?? false
+            Setting::stashGet($key)->bool ?? false
         );
 
         $this->latte->addFunction('isPluginActive', fn (string $key): bool =>
@@ -145,8 +147,7 @@ class LatteEngine implements ViewEngineInterface
         Carbon::class
         );
 
-        $this->latte->addFunction('value', fn ($key, $default = null) =>
-        isset($key) ? $key : $default
+        $this->latte->addFunction('value', fn ($key, $default = null) => $key ?? $default
         );
     }
 

@@ -3,8 +3,8 @@
 namespace Ivy\User\Presentation\Form;
 
 use Ivy\Shared\Base\Form;
-use Ivy\Setting\Presentation\Rule\UserImageRule;
-use Ivy\Setting\Presentation\Rule\UserNameRule;
+use Ivy\User\Presentation\Rule\UserImageRule;
+use Ivy\User\Presentation\Rule\UserNameRule;
 
 class ProfileForm extends Form
 {

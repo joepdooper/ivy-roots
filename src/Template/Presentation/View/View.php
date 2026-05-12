@@ -2,10 +2,9 @@
 
 namespace Ivy\Template\Presentation\View;
 
-use Ivy\Plugin\Contracts\ViewEngineInterface;
-use Ivy\Plugin\Infrastructure\Manager\SessionManager;
-use Ivy\Plugin\Infrastructure\Manager\TemplateManager;
-use Ivy\Template\Application\Asset\AuthApplicationService;
+use Ivy\Shared\Infrastructure\Manager\SessionManager;
+use Ivy\Template\Contracts\ViewEngineInterface;
+use Ivy\Template\Infrastructure\Manager\TemplateManager;
 
 class View
 {

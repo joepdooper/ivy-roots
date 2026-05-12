@@ -99,13 +99,7 @@ abstract class File
 
     protected function isMimeAllowed(): bool
     {
-        foreach ($this->getAllowedMimeTypes() as $allowed) {
-            if ($allowed === $this->mimeType || (str_ends_with($allowed, '/*') && str_starts_with($this->mimeType, substr($allowed, 0, strpos($allowed, '/')).'/'))) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->getAllowedMimeTypes(), fn($allowed) => $allowed === $this->mimeType || (str_ends_with($allowed, '/*') && str_starts_with($this->mimeType, substr($allowed, 0, strpos($allowed, '/')) . '/')));
     }
 
     public function remove(?string $fileName = null): void
