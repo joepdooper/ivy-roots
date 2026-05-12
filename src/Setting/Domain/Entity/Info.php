@@ -17,9 +17,4 @@ class Info extends Model
         'plugin_id',
         'is_default',
     ];
-
-    protected function getPath(): string
-    {
-        return 'admin/info';
-    }
 }

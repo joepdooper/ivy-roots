@@ -3,7 +3,7 @@
 namespace Ivy\Plugin\Infrastructure\Manager;
 
 use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Plugin\Infrastructure\Metadata\PluginHelper;
+use Ivy\Plugin\Infrastructure\Service\PluginService;
 
 readonly class PluginCollectionManager
 {
@@ -11,11 +11,17 @@ readonly class PluginCollectionManager
         private Plugin $plugin
     ) {}
 
+    /**
+     * @throws \Exception
+     */
     public function install(): void
     {
         $this->processCollection('install');
     }
 
+    /**
+     * @throws \Exception
+     */
     public function uninstall(): void
     {
         $this->processCollection('uninstall');
@@ -26,7 +32,7 @@ readonly class PluginCollectionManager
      */
     private function processCollection(string $action): void
     {
-        $paths = glob(PluginHelper::getCollectionDirectory($this->plugin->url) . '[a-zA-Z0-9_-]*');
+        $paths = glob(PluginService::getCollectionDirectory($this->plugin->url) . '[a-zA-Z0-9_-]*');
 
         if ($paths === false) {
             return;
@@ -35,7 +41,7 @@ readonly class PluginCollectionManager
         $subfolders = array_filter($paths, 'is_dir');
 
         foreach ($subfolders as $subfolder) {
-            $relativePath = PluginHelper::getRelativePath($subfolder);
+            $relativePath = PluginService::getRelativePath($subfolder);
 
             if ($action === 'install') {
                 $data = ['url' => $relativePath];

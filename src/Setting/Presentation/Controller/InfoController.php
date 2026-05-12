@@ -8,6 +8,7 @@ use Ivy\Setting\Domain\Entity\Info;
 use Ivy\Setting\Presentation\Form\InfoForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Template\Presentation\View\View;
+use JetBrains\PhpStorm\NoReturn;
 
 class InfoController extends Controller
 {
@@ -104,6 +105,7 @@ class InfoController extends Controller
     /**
      * @throws AuthorizationException
      */
+    #[NoReturn]
     public function sync(): void
     {
         $this->info->authorize('sync');
@@ -148,7 +150,7 @@ class InfoController extends Controller
     {
         $refererPath = $this->getRefererPath();
 
-        if ($refererPath != $this->info->getPath()) {
+        if ($refererPath != 'admin/info') {
 
             $segments = explode('/', (string) $refererPath);
 

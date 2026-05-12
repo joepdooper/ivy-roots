@@ -4,14 +4,14 @@ namespace Ivy\Plugin\Infrastructure\Manager;
 
 use Exception;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Ivy\Plugin\Infrastructure\Service\PluginService;
+use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Template\Application\Asset\AssetPublisherApplicationService;
 use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Plugin\Domain\Entity\SettingModel;
 use Ivy\Plugin\Contracts\PluginInterface;
 use Ivy\Shared\Core\Language;
 use Ivy\Plugin\Presentation\Form\PluginInfoForm;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
-use Ivy\Plugin\Infrastructure\Metadata\PluginHelper;
 
 class PluginManager
 {
@@ -63,7 +63,7 @@ class PluginManager
         $this->plugin->fill($result->data);
 
         if (isset($info['dependencies']) && is_array($info['dependencies'])) {
-            $missing = PluginHelper::getMissingDependencies($info['dependencies']);
+            $missing = PluginService::getMissingDependencies($info['dependencies']);
             if (!empty($missing)) {
                 return [
                     'status' => 'warning',
@@ -80,7 +80,7 @@ class PluginManager
 
                 if (isset($info['settings'])) {
                     foreach ($info['settings'] as $setting) {
-                        new SettingModel()->fill([
+                        new Setting()->fill([
                             ...$setting,
                             'plugin_id' => $this->plugin->id,
                             'is_default' => 1,
@@ -139,7 +139,7 @@ class PluginManager
                     new PluginCollectionManager($this->plugin)->uninstall();
                 }
 
-                SettingModel::where('plugin_id', $this->plugin->id)->delete();
+                Setting::where('plugin_id', $this->plugin->id)->delete();
                 $this->plugin->delete();
             });
         } catch (Exception $e) {

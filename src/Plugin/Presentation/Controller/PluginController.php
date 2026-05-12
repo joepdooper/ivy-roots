@@ -2,6 +2,7 @@
 
 namespace Ivy\Plugin\Presentation\Controller;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
@@ -10,6 +11,8 @@ use Ivy\Plugin\Presentation\Form\PluginForm;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
 use Ivy\Plugin\Infrastructure\Manager\PluginManager;
 use Ivy\Template\Presentation\View\View;
+use Ivy\User\Domain\Exception\AuthorizationException;
+use JetBrains\PhpStorm\NoReturn;
 
 class PluginController extends Controller
 {
@@ -26,10 +29,15 @@ class PluginController extends Controller
         $this->pluginForm = new PluginForm();
     }
 
+    /**
+     * @throws \ReflectionException
+     * @throws AuthorizationException
+     * @throws BindingResolutionException
+     */
     public function before(): void
     {
-        if ($this->auth->isLoggedIn()) {
-            if($this->plugin->authorize('index')) {
+        if ($this->authService->isLoggedIn()) {
+            if($this->plugin->policy('index')) {
                 $this->redirect();
             }
         } else {
@@ -97,6 +105,9 @@ class PluginController extends Controller
         ]);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function add(mixed $data): void
     {
         $this->plugin->authorize('install');
@@ -130,6 +141,9 @@ class PluginController extends Controller
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     public function delete(Plugin|int $plugin): void
     {
         if (is_int($plugin)) {
@@ -146,6 +160,7 @@ class PluginController extends Controller
         $this->responses[] = $this->pluginManager->uninstall();
     }
 
+    #[NoReturn]
     public function sync(): void
     {
         $this->plugin->authorize('sync');

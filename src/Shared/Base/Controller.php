@@ -4,8 +4,8 @@ namespace Ivy\Shared\Base;
 
 use Illuminate\Container\Container;
 use Ivy\Shared\Core\Path;
-use Ivy\Plugin\Infrastructure\Manager\SessionManager;
-use Ivy\Template\Application\Asset\AuthApplicationService;
+use Ivy\Shared\Infrastructure\Manager\SessionManager;
+use Ivy\User\Application\Service\AuthService;
 use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -15,14 +15,14 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 abstract class Controller
 {
     protected FlashBagInterface $flashBag;
-    protected AuthApplicationService $authService;
+    protected AuthService $authService;
     protected Request $request;
 
     public function __construct()
     {
         $this->request = Container::getInstance()->make(Request::class);
         $this->flashBag = SessionManager::getFlashBag();
-        $this->authService = new AuthApplicationService();
+        $this->authService = new AuthService();
     }
 
     #[NoReturn]
@@ -55,7 +55,9 @@ abstract class Controller
         return ltrim(substr($path, strlen($basePath)), '/');
     }
 
-    protected function redirectToFormWithErrors($result) {
+    #[NoReturn]
+    protected function redirectToFormWithErrors($result): void
+    {
         $this->flashBag->set('errors', $result->errors);
         $this->flashBag->set('old', $result->old);
         $this->redirect($this->getRefererPath());

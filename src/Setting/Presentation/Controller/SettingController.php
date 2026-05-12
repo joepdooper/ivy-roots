@@ -7,6 +7,7 @@ use Ivy\Setting\Presentation\Form\SettingForm;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Controller;
 use Ivy\Template\Presentation\View\View;
+use JetBrains\PhpStorm\NoReturn;
 
 class SettingController extends Controller
 {
@@ -91,6 +92,7 @@ class SettingController extends Controller
         }
     }
 
+    #[NoReturn]
     public function sync(): void
     {
         $this->setting->authorize('sync');
@@ -135,7 +137,7 @@ class SettingController extends Controller
     {
         $refererPath = $this->getRefererPath();
 
-        if ($refererPath != $this->setting->getPath()) {
+        if ($refererPath != 'admin/setting') {
 
             $segments = explode('/', (string) $refererPath);
 

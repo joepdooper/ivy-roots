@@ -1,38 +1,38 @@
 <?php
 
-namespace Ivy\Domain\Policy;
+namespace Ivy\Setting\Domain\Policy;
 
-use Ivy\Plugin\Domain\Entity\InfoModel;
+use Ivy\Setting\Domain\Entity\Info;
 use Ivy\Shared\Base\Policy;
 
 class InfoPolicy extends Policy
 {
-    public function index(InfoModel $info): bool
+    public function index(Info $info): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function sync(InfoModel $info): bool
+    public function sync(Info $info): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function save(InfoModel $info): bool
+    public function save(Info $info): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function add(InfoModel $info): bool
+    public function add(Info $info): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function update(InfoModel $info): bool
+    public function update(Info $info): bool
     {
         return $this->canEditAsAdmin();
     }
 
-    public function delete(InfoModel $info): bool
+    public function delete(Info $info): bool
     {
         if (! $info->is_default && $this->canEditAsAdmin()) {
             return true;
