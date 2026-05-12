@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Ivy\Plugin\Infrastructure\Service\PluginService;
 use Ivy\Setting\Domain\Entity\Setting;
-use Ivy\Template\Application\Asset\AssetPublisherApplicationService;
+use Ivy\Template\Application\Asset\AssetPublisher;
 use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Plugin\Contracts\PluginInterface;
 use Ivy\Shared\Core\Language;
@@ -88,7 +88,7 @@ class PluginManager
                     }
                 }
 
-                new AssetPublisherApplicationService()->publishPlugin($this->plugin->url);
+                new AssetPublisher()->publishPlugin($this->plugin->url);
 
                 if (!empty($info['collection'])) {
                     new PluginCollectionManager($this->plugin)->install();

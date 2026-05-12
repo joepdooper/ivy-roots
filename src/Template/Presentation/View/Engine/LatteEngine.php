@@ -39,7 +39,7 @@ class LatteEngine implements ViewEngineInterface
 
     public function boot(): void
     {
-        $this->latte->setTempDirectory(Path::get('PROJECT_PATH') . 'cache/templates');
+        $this->latte->setCacheDirectory(Path::get('PROJECT_PATH') . 'cache/templates');
         $this->latte->setAutoRefresh(Environment::isDev());
 
         $this->registerFunctions();

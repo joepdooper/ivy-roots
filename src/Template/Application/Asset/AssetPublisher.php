@@ -3,10 +3,10 @@
 namespace Ivy\Template\Application\Asset;
 
 use FilesystemIterator;
-use Ivy\Plugin\Domain\Entity\TemplateModel;
 use Ivy\Shared\Core\Path;
+use Ivy\Template\Domain\Entity\Template;
 
-class AssetPublisherApplicationService
+class AssetPublisher
 {
     public function publishTemplate(): void
     {
@@ -15,7 +15,7 @@ class AssetPublisherApplicationService
         $this->removeDirectory($target . 'css');
         $this->removeDirectory($target . 'js');
 
-        $templates = TemplateModel::whereIn('type', ['base', 'sub'])
+        $templates = Template::whereIn('type', ['base', 'sub'])
             ->orderByRaw("FIELD(type, 'base', 'sub')")
             ->get();
 
@@ -93,7 +93,7 @@ class AssetPublisherApplicationService
         }
 
         $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            new \RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
             \RecursiveIteratorIterator::CHILD_FIRST
         );
 

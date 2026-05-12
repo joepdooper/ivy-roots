@@ -2,18 +2,18 @@
 
 namespace Ivy\Template\Application\Handler;
 
-use Ivy\Plugin\Domain\Entity\SettingModel;
+use Ivy\Setting\Contracts\SettingInterface;
+use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Config\Environment;
-use Ivy\Plugin\Contracts\SettingInterface;
 use Ivy\Shared\Core\Path;
-use Ivy\Plugin\Infrastructure\Manager\AssetManager;
+use Ivy\Template\Infrastructure\Manager\AssetManager;
 use MatthiasMullie\Minify\CSS;
 
 class MinifyCssHandler implements SettingInterface
 {
-    private $minifiedCssPath = '/css/minified.css';
+    private string $minifiedCssPath = '/css/minified.css';
 
-    public function handle(SettingModel $setting, bool $bool): void
+    public function handle(Setting $setting, bool $bool): void
     {
         if ($bool && Environment::isProd()) {
             $minifier = new CSS;

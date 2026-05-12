@@ -2,30 +2,30 @@
 
 namespace Ivy\Template\Presentation\Controller;
 
-use Ivy\Template\Application\Asset\AssetPublisherApplicationService;
-use Ivy\Plugin\Domain\Entity\SettingModel;
-use Ivy\Plugin\Domain\Entity\TemplateModel;
+use Ivy\Setting\Domain\Entity\Setting;
+use Ivy\Template\Application\Asset\AssetPublisher;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
-use Ivy\Plugin\Presentation\Form\TemplateForm;
-use Ivy\Plugin\Infrastructure\Manager\TemplateManager;
+use Ivy\Template\Domain\Entity\Template;
+use Ivy\Template\Infrastructure\Manager\TemplateManager;
+use Ivy\Template\Presentation\Form\TemplateForm;
 use Ivy\Template\Presentation\View\View;
 
 class TemplateController extends Controller
 {
-    protected TemplateModel $template;
+    protected Template $template;
     protected TemplateForm $templateForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->template = new TemplateModel();
+        $this->template = new Template();
         $this->templateForm = new TemplateForm();
     }
 
     public function before(): void
     {
-        if (! $this->authService->isLoggedIn() && SettingModel::stashGet('private')->bool) {
+        if (! $this->authService->isLoggedIn() && Setting::stashGet('private')->bool) {
 
             if (! $this->isAlwaysPublicPath(Path::get('CURRENT_PAGE'))) {
                 $this->redirect('user/login');
@@ -43,10 +43,10 @@ class TemplateController extends Controller
         ]);
     }
 
-    public function update(TemplateModel|int $template, mixed $data): void
+    public function update(Template|int $template, mixed $data): void
     {
         if (is_int($template)) {
-            $template = TemplateModel::find($template);
+            $template = Template::find($template);
         }
 
         if (! $template) {
@@ -93,7 +93,7 @@ class TemplateController extends Controller
         }
 
         TemplateManager::init(true);
-        new AssetPublisherApplicationService()->publishTemplate();
+        new AssetPublisher()->publishTemplate();
 
         $this->redirect('admin/template');
     }
@@ -106,12 +106,6 @@ class TemplateController extends Controller
             Path::get('PUBLIC_URL') . 'user/register',
         ];
 
-        foreach ($allowed as $prefix) {
-            if ($current === $prefix || str_starts_with($current, $prefix . '/')) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($allowed, fn($prefix) => $current === $prefix || str_starts_with($current, $prefix . '/'));
     }
 }
