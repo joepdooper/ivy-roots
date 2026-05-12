@@ -32,8 +32,7 @@
     "blakvghost/php-validator": "^2.3",
     "nesbot/carbon": "^3.11",
     "illuminate/database": "^13.5",
-    "illuminate/events": "^13.5",
-    "ext-gd": "*"
+    "illuminate/events": "^13.5"
   },
   "require-dev": {
     "phpstan/phpstan": "^2.1",
