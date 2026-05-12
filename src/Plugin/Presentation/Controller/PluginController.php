@@ -2,6 +2,7 @@
 
 namespace Ivy\Plugin\Presentation\Controller;
 
+use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Shared\Base\Controller;
@@ -13,6 +14,7 @@ use Ivy\Plugin\Infrastructure\Manager\PluginManager;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use JetBrains\PhpStorm\NoReturn;
+use ReflectionException;
 
 class PluginController extends Controller
 {
@@ -20,6 +22,9 @@ class PluginController extends Controller
     private PluginForm $pluginForm;
     private PluginManager $pluginManager;
 
+    /**
+     * @var list<array{status: string, message: string|array<string, mixed>}>
+     */
     private array $responses = [];
 
     public function __construct()
@@ -30,7 +35,7 @@ class PluginController extends Controller
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws AuthorizationException
      * @throws BindingResolutionException
      */
@@ -53,10 +58,10 @@ class PluginController extends Controller
             ? Plugin::where('url', $id)->value('id')
             : null;
 
-        $loader = new PluginInfoLoader();
-        $factory = new PluginInfoFactory();
+        $installedPlugins = Plugin::all()->map(function ($plugin) use (&$installedUrls) {
+            $loader = new PluginInfoLoader();
+            $factory = new PluginInfoFactory();
 
-        $installedPlugins = Plugin::all()->map(function ($plugin) use ($loader, $factory, &$installedUrls) {
             $data = $loader->load($plugin->url);
             $data['url'] = $plugin->url;
 
@@ -106,9 +111,11 @@ class PluginController extends Controller
     }
 
     /**
-     * @throws \Exception
+     * @param array<string, mixed> $data
+     *
+     * @throws Exception
      */
-    public function add(mixed $data): void
+    public function add(array $data): void
     {
         $this->plugin->authorize('install');
 
@@ -142,7 +149,7 @@ class PluginController extends Controller
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function delete(Plugin|int $plugin): void
     {

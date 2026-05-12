@@ -62,7 +62,7 @@ class PluginManager
 
         $this->plugin->fill($result->data);
 
-        if (isset($info['dependencies']) && is_array($info['dependencies'])) {
+        if (isset($info['dependencies'])) {
             $missing = PluginService::getMissingDependencies($info['dependencies']);
             if (!empty($missing)) {
                 return [

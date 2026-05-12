@@ -7,6 +7,9 @@ use Ivy\Setting\Infrastructure\Registry\SettingRegistry;
 use Ivy\Shared\Traits\HasPolicies;
 use Ivy\Shared\Traits\Stash;
 
+/**
+ * @property bool|int $is_default
+ */
 class Setting extends Model
 {
     use Stash, HasPolicies;
