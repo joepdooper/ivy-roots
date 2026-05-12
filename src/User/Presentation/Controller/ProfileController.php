@@ -13,10 +13,13 @@ use Delight\Auth\UserAlreadyExistsException;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
 use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
+use Ivy\Shared\Domain\ValueObject\ImageFile;
+use Ivy\Shared\Infrastructure\Service\ImageFileService;
 use Ivy\Shared\Infrastructure\Service\MailService;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Entity\Profile;
 use Ivy\User\Presentation\Form\ProfileForm;
+use Random\RandomException;
 
 class ProfileController extends Controller
 {
@@ -37,6 +40,10 @@ class ProfileController extends Controller
         }
     }
 
+    /**
+     * @throws AuthError
+     * @throws RandomException
+     */
     public function save(): void
     {
         $this->profile->authorize('save');

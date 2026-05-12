@@ -1,0 +1,41 @@
+<?php
+
+namespace Ivy\Shared\Domain\ValueObject;
+
+use Ivy\Shared\Base\File;
+use Ivy\Shared\Core\Path;
+
+class ImageFile extends File
+{
+    protected ?int $imageWidth;
+
+    public function getAllowedMimeTypes(): array
+    {
+        return ['image/jpeg', 'image/png', 'image/gif'];
+    }
+
+    public function getAllowedExtensions(): array
+    {
+        return ['jpg', 'jpeg', 'png', 'gif'];
+    }
+
+    public function getImageWidth(): ?int
+    {
+        return $this->imageWidth;
+    }
+
+    public function setImageWidth(?int $width = null): static
+    {
+        $this->imageWidth = $width;
+
+        return $this;
+    }
+
+    public function remove(?string $fileName = null): void
+    {
+        if ($fileName) {
+            unlink(Path::get('MEDIA_PATH').trim($this->getUploadPath(), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$fileName);
+            unlink(Path::get('MEDIA_PATH').trim($this->getUploadPath(), DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.pathinfo($fileName)['filename'].'.webp');
+        }
+    }
+}

@@ -2,7 +2,6 @@
 
 namespace Ivy\Shared\Infrastructure\Service;
 
-use Ivy\Plugin\Domain\Entity\UserModel;
 use Ivy\Shared\Base\File;
 use Ivy\Shared\Core\Path;
 
@@ -43,10 +42,6 @@ class FileService
 
     public function upload(): void
     {
-        if (! UserModel::getAuth()->isLoggedIn()) {
-            throw new \RuntimeException('You must be logged in to upload files.');
-        }
-
         foreach ($this->files as $file) {
             $file->validate();
 
