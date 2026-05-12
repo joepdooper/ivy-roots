@@ -4,6 +4,12 @@ namespace Ivy\Plugin\Infrastructure\Metadata;
 
 final readonly class PluginInfo
 {
+    /**
+     * @param array<string> $collection
+     * @param array<string, mixed> $settings
+     * @param array<string, mixed> $actions
+     * @param array<string> $dependencies
+     */
     public function __construct(
         public string  $name,
         public string  $interface,
