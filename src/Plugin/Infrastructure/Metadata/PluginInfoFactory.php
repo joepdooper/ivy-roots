@@ -17,6 +17,7 @@ class PluginInfoFactory
      *     actions?: array<string, mixed>,
      *     dependencies?: array<string, mixed>
      * } $data
+      * @return PluginInfo
      */
     public function make(array $data): PluginInfo
     {
