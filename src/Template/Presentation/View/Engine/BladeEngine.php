@@ -3,7 +3,7 @@
 namespace Ivy\Template\Presentation\View\Engine;
 
 use Exception;
-use Ivy\Template\Contracts\ViewEngineInterface;
+use Ivy\Template\Application\Contracts\ViewEngineInterface;
 use Latte\Extension;
 
 class BladeEngine implements ViewEngineInterface

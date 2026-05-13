@@ -6,7 +6,7 @@ use Bramus\Router\Router;
 use Dotenv\Dotenv;
 use Illuminate\Container\Container;
 use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Plugin\Contracts\PluginInterface;
+use Ivy\Plugin\Application\Contracts\PluginInterface;
 use Ivy\Setting\Domain\Entity\Info;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Setting\Infrastructure\Registry\SettingRegistry;

@@ -2,7 +2,7 @@
 
 namespace Ivy\Template\Application\Handler;
 
-use Ivy\Setting\Contracts\SettingInterface;
+use Ivy\Setting\Application\Contracts\SettingInterface;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Config\Environment;
 use Ivy\Shared\Core\Path;

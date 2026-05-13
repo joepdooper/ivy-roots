@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Plugin\Contracts;
+namespace Ivy\Plugin\Application\Contracts;
 
 interface PluginInterface {
     public function register(): void;

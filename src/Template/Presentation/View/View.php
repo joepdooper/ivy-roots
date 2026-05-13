@@ -3,7 +3,7 @@
 namespace Ivy\Template\Presentation\View;
 
 use Ivy\Shared\Infrastructure\Manager\SessionManager;
-use Ivy\Template\Contracts\ViewEngineInterface;
+use Ivy\Template\Application\Contracts\ViewEngineInterface;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
 
 class View

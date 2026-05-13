@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Template\Contracts;
+namespace Ivy\Template\Application\Contracts;
 
 use Latte\Extension;
 

@@ -8,7 +8,7 @@ use Ivy\Plugin\Infrastructure\Service\PluginService;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Template\Application\Asset\AssetPublisher;
 use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Plugin\Contracts\PluginInterface;
+use Ivy\Plugin\Application\Contracts\PluginInterface;
 use Ivy\Shared\Core\Language;
 use Ivy\Plugin\Presentation\Form\PluginInfoForm;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;

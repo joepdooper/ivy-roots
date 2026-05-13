@@ -8,7 +8,7 @@ use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Infrastructure\Manager\CsrfManager;
 use Ivy\Shared\Infrastructure\Manager\HookManager;
 use Ivy\Shared\Infrastructure\Manager\SecurityManager;
-use Ivy\Template\Contracts\ViewEngineInterface;
+use Ivy\Template\Application\Contracts\ViewEngineInterface;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Application\Service\AuthService;

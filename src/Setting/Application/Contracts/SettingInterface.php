@@ -1,6 +1,6 @@
 <?php
 
-namespace Ivy\Setting\Contracts;
+namespace Ivy\Setting\Application\Contracts;
 
 use Ivy\Setting\Domain\Entity\Setting;
 
