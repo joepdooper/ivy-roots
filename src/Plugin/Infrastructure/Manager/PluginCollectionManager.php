@@ -2,6 +2,7 @@
 
 namespace Ivy\Plugin\Infrastructure\Manager;
 
+use Exception;
 use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Plugin\Infrastructure\Service\PluginService;
 
@@ -12,7 +13,7 @@ readonly class PluginCollectionManager
     ) {}
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function install(): void
     {
@@ -20,7 +21,7 @@ readonly class PluginCollectionManager
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function uninstall(): void
     {
@@ -28,7 +29,7 @@ readonly class PluginCollectionManager
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function processCollection(string $action): void
     {
