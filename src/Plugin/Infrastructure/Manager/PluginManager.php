@@ -124,14 +124,6 @@ class PluginManager
         $this->plugin->authorize('uninstall');
 
         $info = (new PluginInfoLoader)->load($this->plugin->url);
-        $result = (new PluginInfoForm)->validate($info);
-
-        if(!$result->valid) {
-            return [
-                'status' => 'error',
-                'message' => 'Invalid info.json: ' . implode(', ', $result->errors),
-            ];
-        }
 
         try {
             Capsule::connection()->transaction(function () use ($info) {
