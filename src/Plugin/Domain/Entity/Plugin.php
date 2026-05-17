@@ -9,6 +9,7 @@ use Ivy\Shared\Traits\HasPolicies;
 /**
  * @method static static where(string $column, mixed $value = null)
  * @method static static find(int $id)
+ * @method static static first()
  *
  * @property int $id
  * @property int|null $parent_id
