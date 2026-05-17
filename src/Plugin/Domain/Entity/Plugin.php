@@ -7,6 +7,11 @@ use Ivy\Plugin\Infrastructure\Metadata\PluginInfo;
 use Ivy\Shared\Traits\HasPolicies;
 
 /**
+ * @method static static where(string $column, mixed $value = null)
+ * @method static static create(array $attributes)
+ * @method static static find(int $id))
+ * @method static static all
+ *
  * @property int $id
  * @property int|null $parent_id
  * @property string $name
