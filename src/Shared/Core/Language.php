@@ -2,6 +2,8 @@
 
 namespace Ivy\Shared\Core;
 
+use Ivy\Template\Infrastructure\Manager\TemplateManager;
+
 class Language
 {
     protected static string $defaultLang = 'en';

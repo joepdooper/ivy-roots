@@ -120,8 +120,9 @@ class PluginController extends Controller
         $this->plugin->authorize('install');
 
         $plugin = new Plugin();
+        $plugin->fill($data);
 
-        $this->pluginManager = new PluginManager($plugin->fill($data));
+        $this->pluginManager = new PluginManager($plugin);
         $this->responses[] = $this->pluginManager->install();
     }
 
