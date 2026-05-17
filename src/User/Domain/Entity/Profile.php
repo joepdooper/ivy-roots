@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Ivy\Shared\Traits\HasPolicies;
 
+/**
+ * @method static static where(string $column, mixed $value = null)
+ * @method static static find(int $id)
+ * @method static static first()
+ *
+ * @property int $user_id
+ * @property string $user_image
+ */
 class Profile extends Model
 {
     use HasPolicies;

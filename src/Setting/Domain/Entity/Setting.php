@@ -8,6 +8,10 @@ use Ivy\Shared\Traits\HasPolicies;
 use Ivy\Shared\Traits\Stash;
 
 /**
+ * @method static static where(string $column, mixed $value = null)
+ * @method static static find(int $id)
+ * @method static static first()
+ *
  * @property string $name
  * @property bool|int $bool
  * @property string $value
