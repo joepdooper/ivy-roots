@@ -25,7 +25,6 @@ abstract class Controller
         $this->authService = new AuthService();
     }
 
-    #[NoReturn]
     protected function redirect(string $url = '', int $statusCode = 302): void
     {
         new RedirectResponse(Path::get('BASE_PATH').$url, $statusCode)->send();
@@ -55,7 +54,6 @@ abstract class Controller
         return ltrim(substr($path, strlen($basePath)), '/');
     }
 
-    #[NoReturn]
     protected function redirectToFormWithErrors($result): void
     {
         $this->flashBag->set('errors', $result->errors);

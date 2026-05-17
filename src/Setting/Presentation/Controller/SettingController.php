@@ -92,7 +92,6 @@ class SettingController extends Controller
         }
     }
 
-    #[NoReturn]
     public function sync(): void
     {
         $this->setting->authorize('sync');

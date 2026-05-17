@@ -4,10 +4,18 @@ namespace Ivy\Template\Presentation\View\Engine;
 
 use Exception;
 use Ivy\Template\Application\Contracts\ViewEngineInterface;
+use Ivy\User\Application\Service\AuthService;
 use Latte\Extension;
 
 class BladeEngine implements ViewEngineInterface
 {
+    private AuthService $auth;
+
+
+    public function setAuth(AuthService $auth): void
+    {
+        $this->auth = $auth;
+    }
     /**
      * @throws Exception
      */

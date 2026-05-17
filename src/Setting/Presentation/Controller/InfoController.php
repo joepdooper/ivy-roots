@@ -105,7 +105,6 @@ class InfoController extends Controller
     /**
      * @throws AuthorizationException
      */
-    #[NoReturn]
     public function sync(): void
     {
         $this->info->authorize('sync');
