@@ -2,7 +2,7 @@
 
 namespace Ivy\Shared\Presentation\Routing;
 
-use Ivy\Plugin\Infrastructure\Manager\RouterManager;
+use Ivy\Shared\Infrastructure\Manager\RouterManager;
 
 class Route
 {

@@ -9,6 +9,7 @@ use Ivy\Shared\Infrastructure\Manager\CsrfManager;
 use Ivy\Shared\Infrastructure\Manager\HookManager;
 use Ivy\Shared\Infrastructure\Manager\SecurityManager;
 use Ivy\Template\Application\Contracts\ViewEngineInterface;
+use Ivy\Template\Infrastructure\Manager\AssetManager;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Application\Service\AuthService;
@@ -141,6 +142,18 @@ class LatteEngine implements ViewEngineInterface
 
         $this->latte->addFunction('csp', fn () =>
         SecurityManager::getNonce()
+        );
+
+        $this->latte->addFunction('cssFiles', fn () =>
+        AssetManager::getCSS()
+        );
+
+        $this->latte->addFunction('jsFiles', fn () =>
+        AssetManager::getJS()
+        );
+
+        $this->latte->addFunction('moduleFiles', fn () =>
+        AssetManager::getModules()
         );
 
         $this->latte->addFunction('datetime', fn () =>
