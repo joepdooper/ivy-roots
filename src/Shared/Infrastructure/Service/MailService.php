@@ -64,7 +64,7 @@ class MailService
         $this->mailer->AltBody = $altBody;
     }
 
-    public function isHTML(?bool $bool = null): void
+    public function isHTML(bool $bool = false): void
     {
         $this->mailer->isHTML($bool);
     }
