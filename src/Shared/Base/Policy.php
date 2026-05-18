@@ -21,19 +21,19 @@ abstract class Policy
 
     public function canEditAsEditor(): bool
     {
-        return $this->auth->hasAnyRole([
+        return $this->auth->hasAnyRole(
             Role::EDITOR,
             Role::ADMIN,
             Role::SUPER_ADMIN
-        ]);
+        );
     }
 
     public function canEditAsAdmin(): bool
     {
-        return $this->auth->hasAnyRole([
+        return $this->auth->hasAnyRole(
             Role::ADMIN,
             Role::SUPER_ADMIN
-        ]);
+        );
     }
 
     public function canEditAsSuperAdmin(): bool

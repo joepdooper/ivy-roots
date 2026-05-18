@@ -6,6 +6,12 @@ use Delight\Auth\Role;
 use Illuminate\Database\Eloquent\Model;
 use Ivy\Shared\Traits\HasPolicies;
 
+/**
+ * @method static static where(string $column, mixed $value = null)
+ * @method static static select(string ...$columns)
+ * @method static static find(int $id)
+ * @method static static first()
+ */
 class User extends Model
 {
     use HasPolicies;

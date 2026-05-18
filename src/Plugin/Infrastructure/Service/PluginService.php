@@ -76,7 +76,7 @@ class PluginService
     /**
      * @param list<string> $dependencies
      *
-     * @return list<string>
+     * @return array<int<0, max>, string>
      */
     public static function getMissingDependencies(array $dependencies): array
     {

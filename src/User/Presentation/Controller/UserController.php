@@ -126,12 +126,11 @@ class UserController extends Controller
     /**
      * @throws UnknownIdException
      */
-    #[NoReturn]
     public function sync(): void
     {
         $this->user->authorize('sync');
 
-        foreach ($this->request->request->get('user') as $data) {
+        foreach ($this->request->get('user') as $data) {
 
             $result = $this->userForm->validate($data);
 
@@ -168,11 +167,11 @@ class UserController extends Controller
         }
 
         try {
-            $userId = $this->authService->auth()->register($this->request->request->get('email'), $this->request->request->get('password'), $this->request->request->get('username'), function ($selector, $token) {
+            $userId = $this->authService->auth()->register($result->data['email'], $result->data['password'], $result->data['username'], function ($selector, $token) use ($result) {
                 $url = Path::get('PUBLIC_URL') . 'user/login/' . urlencode($selector) . '/' . urlencode($token);
                 // send email
                 $mail = new MailService;
-                $mail->addAddress($this->request->request->get('email'), $this->request->request->get('username'));
+                $mail->addAddress($result->data['email'], $result->data['username']);
                 $mail->setSubject('Activate account');
                 $mail->setBody('Activate your account with this link: ' . $url);
                 $mail->send();
@@ -284,7 +283,6 @@ class UserController extends Controller
     /**
      * @throws AuthError
      */
-    #[NoReturn]
     public function logout(): void
     {
         $this->authService->auth()->logOut();
@@ -316,13 +314,13 @@ class UserController extends Controller
             $this->redirectToFormWithErrors($result);
         }
 
-        if ($this->request->request->get('email')) {
+        if ($result->data['email']) {
             try {
-                $this->authService->auth()->forgotPassword($this->request->request->get('email'), function ($selector, $token) {
+                $this->authService->auth()->forgotPassword($result->data['email'], function ($selector, $token) {
                     $url = Path::get('PUBLIC_URL') . 'user/reset/' . urlencode($selector) . '/' . urlencode($token);
                     // send email
                     $mail = new MailService;
-                    $mail->addAddress($this->request->request->get('email'));
+                    $mail->addAddress($result->data['email']);
                     $mail->setSubject('Reset password');
                     $mail->setBody('Reset password with this link: ' . $url);
                     $mail->send();
@@ -343,7 +341,7 @@ class UserController extends Controller
             $this->flashBag->add('success', 'An email has been sent to ' . $this->request->request->get('email') . ' with a link to reset your password');
             $this->redirect('user/reset');
         }
-        if ($this->request->request->get('password')) {
+        if ($result->data['password']) {
             try {
                 $this->authService->auth()->resetPassword($this->request->request->get('selector'), $this->request->request->get('token'), $this->request->request->get('password'));
                 $this->flashBag->add('success', 'Password has been reset');

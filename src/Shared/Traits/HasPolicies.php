@@ -4,8 +4,8 @@ namespace Ivy\Shared\Traits;
 
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Ivy\User\Application\Service\AuthService;
 use Ivy\User\Domain\Exception\AuthorizationException;
-use Ivy\Template\Application\Asset\AuthApplicationService;
 use ReflectionClass;
 use ReflectionException;
 
@@ -22,18 +22,19 @@ trait HasPolicies
         $modelName = new ReflectionClass($modelClass)->getShortName();
 
         $namespace = str_replace(
-            'Model',
+            'Entity',
             'Policy',
             new ReflectionClass($modelClass)->getNamespaceName()
         );
 
-        $policyClassName = str_replace('Model', 'Policy', $modelName);
+        $policyClassName = $modelName . 'Policy';
         $policyClass = "{$namespace}\\{$policyClassName}";
 
         if (!class_exists($policyClass)) {
             throw new AuthorizationException("Policy not found: {$policyClass}");
         }
-        return new $policyClass(Container::getInstance()->make(AuthApplicationService::class)->auth());
+
+        return new $policyClass(Container::getInstance()->make(AuthService::class)->auth());
     }
 
     /**

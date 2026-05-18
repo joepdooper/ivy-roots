@@ -28,17 +28,17 @@ abstract class File
         }
     }
 
-    public function getUploadFile(): UploadedFile
+    public function getUploadFile(): UploadedFile|null
     {
         return $this->uploadFile;
     }
 
-    public function getExtension(): string
+    public function getExtension(): string|null
     {
         return $this->extension;
     }
 
-    public function getMimeType(): string
+    public function getMimeType(): string|null
     {
         return $this->mimeType;
     }
@@ -48,7 +48,7 @@ abstract class File
         return $this->uploadPath;
     }
 
-    public function setUploadPath($uploadPath): static
+    public function setUploadPath(string $uploadPath): static
     {
         $this->uploadPath = $uploadPath;
 
@@ -60,7 +60,7 @@ abstract class File
         return $this->fileName;
     }
 
-    public function setFileName($fileName): static
+    public function setFileName(string $fileName): static
     {
         $this->fileName = $fileName;
 

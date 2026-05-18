@@ -2,7 +2,7 @@
 
 namespace Ivy\Shared\Presentation\Middleware;
 
-use Ivy\Plugin\Infrastructure\Manager\SessionManager;
+use Ivy\Shared\Infrastructure\Manager\SessionManager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 

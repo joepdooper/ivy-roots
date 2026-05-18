@@ -2,6 +2,8 @@
 
 namespace Ivy\Shared\Core;
 
+use Ivy\Template\Infrastructure\Manager\TemplateManager;
+
 class Language
 {
     protected static string $defaultLang = 'en';
@@ -26,6 +28,7 @@ class Language
      */
     public static function translate(string $key, ?array $variables = []): array|string
     {
+        $translation = $key;
         $keys = explode('.', $key);
         $firstKey = array_shift($keys);
 

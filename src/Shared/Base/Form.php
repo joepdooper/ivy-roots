@@ -18,7 +18,7 @@ abstract class Form
 
     abstract protected function rules(): array;
 
-    public function validate($data): ValidationResult
+    public function validate(array $data): ValidationResult
     {
         $rules = array_merge(
             $this->defaultRules(),

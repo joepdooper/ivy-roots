@@ -9,7 +9,7 @@ class PluginInfoLoader
 {
     /**
      * @param string $url
-     * @return array|null
+     * @return array<string, mixed>|null
      *
      * @throws Exception
      */

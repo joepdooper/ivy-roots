@@ -92,7 +92,13 @@ class PluginController extends Controller
                         continue;
                     }
 
-                    $info = json_decode(file_get_contents($infoPath));
+                    $contents = file_get_contents($infoPath);
+
+                    if($contents) {
+                        $info = json_decode($contents);
+                    } else {
+                        $info = null;
+                    }
 
                     if ($info === null) {
                         continue;
@@ -120,8 +126,9 @@ class PluginController extends Controller
         $this->plugin->authorize('install');
 
         $plugin = new Plugin();
+        $plugin->fill($data);
 
-        $this->pluginManager = new PluginManager($plugin->fill($data));
+        $this->pluginManager = new PluginManager($plugin);
         $this->responses[] = $this->pluginManager->install();
     }
 
@@ -167,7 +174,6 @@ class PluginController extends Controller
         $this->responses[] = $this->pluginManager->uninstall();
     }
 
-    #[NoReturn]
     public function sync(): void
     {
         $this->plugin->authorize('sync');
