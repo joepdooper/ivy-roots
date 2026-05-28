@@ -18,7 +18,6 @@ use Ivy\Shared\Infrastructure\Manager\SecurityManager;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
 use Ivy\Template\Presentation\View\Engine\BladeEngine;
 use Ivy\User\Application\Service\AuthService;
-use Ivy\User\Domain\Exception\AuthorizationException;
 use Ivy\Template\Application\Handler\MinifyCssHandler;
 use Ivy\Template\Application\Handler\MinifyJsHandler;
 use Ivy\Shared\Presentation\Middleware\CsrfVerifier;
