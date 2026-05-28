@@ -58,10 +58,8 @@ readonly class PluginCollectionManager
                     ->where('parent_id', $this->plugin->id)
                     ->first();
 
-                if ($plugin) {
-                    $pluginManager = new PluginManager($plugin);
-                    $pluginManager->uninstall();
-                }
+                $pluginManager = new PluginManager($plugin);
+                $pluginManager->uninstall();
             }
         }
     }
