@@ -11,6 +11,8 @@ use Ivy\Shared\Traits\HasPolicies;
  * @method static static select(string ...$columns)
  * @method static static find(int $id)
  * @method static static first()
+ * @method static static pluck(string $column, ?string $key = null)
+ * @method static static value(string $column)
  *
  * @property int $id
  * @property int|null $parent_id

@@ -51,6 +51,14 @@ class PluginManager
         $this->plugin->authorize('install');
 
         $info = (new PluginInfoLoader)->load($this->plugin->url);
+
+        if(!$info) {
+            return [
+                'status' => 'error',
+                'message' => 'info.json not found',
+            ];
+        }
+
         $result = (new PluginInfoForm)->validate($info);
 
         if(!$result->valid) {

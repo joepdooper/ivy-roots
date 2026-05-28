@@ -164,10 +164,6 @@ class PluginController extends Controller
             $plugin = Plugin::find($plugin);
         }
 
-        if (! $plugin) {
-            return;
-        }
-
         $plugin->authorize('uninstall');
 
         $this->pluginManager = new PluginManager($plugin);
