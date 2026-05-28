@@ -11,6 +11,19 @@ use Ivy\Shared\Traits\HasPolicies;
  * @method static static select(string ...$columns)
  * @method static static find(int $id)
  * @method static static first()
+ * @method static static pluck(string $column, ?string $key = null)
+ * @method static static value(string $column)
+ * @method static static create(array $attributes)
+ *
+ * @property int $id
+ * @property string $email
+ * @property string $username
+ * @property int $status
+ * @property int $verified
+ * @property int $resettable
+ * @property int $roles_mask
+ * @property int $registered
+ * @property int $last_login
  */
 class User extends Model
 {

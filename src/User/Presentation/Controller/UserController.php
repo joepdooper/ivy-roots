@@ -69,10 +69,6 @@ class UserController extends Controller
             $user = User::find($user);
         }
 
-        if (!$user) {
-            return;
-        }
-
         $user->authorize('update');
 
         if ($data['editor']) {
@@ -101,10 +97,6 @@ class UserController extends Controller
     {
         if (is_int($user)) {
             $user = User::find($user);
-        }
-
-        if (!$user) {
-            return;
         }
 
         $user->authorize('delete');
