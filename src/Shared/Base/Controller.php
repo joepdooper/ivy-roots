@@ -5,8 +5,8 @@ namespace Ivy\Shared\Base;
 use Illuminate\Container\Container;
 use Ivy\Shared\Core\Path;
 use Ivy\Shared\Infrastructure\Manager\SessionManager;
+use Ivy\Shared\Presentation\Validation\ValidationResult;
 use Ivy\User\Application\Service\AuthService;
-use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,6 +31,9 @@ abstract class Controller
         exit;
     }
 
+    /**
+     * @param mixed[]  $data
+     */
     protected function json(array $data, int $status = 200): JsonResponse
     {
         return new JsonResponse($data, $status);
@@ -45,6 +48,11 @@ abstract class Controller
     {
         $referer = $this->request->headers->get('referer');
         $basePath = $this->request->getBasePath();
+
+        if(!$referer) {
+            return null;
+        }
+
         $path = parse_url($referer, PHP_URL_PATH);
 
         if (! $path || ! str_starts_with($path, $basePath)) {
@@ -54,7 +62,7 @@ abstract class Controller
         return ltrim(substr($path, strlen($basePath)), '/');
     }
 
-    protected function redirectToFormWithErrors($result): void
+    protected function redirectToFormWithErrors(ValidationResult $result): void
     {
         $this->flashBag->set('errors', $result->errors);
         $this->flashBag->set('old', $result->old);
