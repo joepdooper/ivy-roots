@@ -12,12 +12,11 @@ use Throwable;
 
 class CryptedCast implements CastsAttributes
 {
-    /**
-     * @throws BindingResolutionException
-     */
+    private ?CryptedService $crypto = null;
+
     private function crypto(): CryptedService
     {
-        return Container::getInstance()->make(CryptedService::class);
+        return $this->crypto ??= Container::getInstance()->make(CryptedService::class);
     }
 
     public function get($model, string $key, $value, array $attributes)
