@@ -14,9 +14,6 @@ class CryptedCast implements CastsAttributes
 {
     private ?CryptedService $crypto = null;
 
-    /**
-     * @throws BindingResolutionException
-     */
     private function crypto(): CryptedService
     {
         return $this->crypto ??= Container::getInstance()->make(CryptedService::class);
