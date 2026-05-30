@@ -1,0 +1,15 @@
+<?php
+
+namespace Ivy\Template\Presentation\Tag;
+
+use Latte\Extension;
+
+class ButtonTag extends Extension
+{
+    public function getTags(): array
+    {
+        return [
+            'button' => [ButtonNode::class, 'create'],
+        ];
+    }
+}

@@ -1,0 +1,22 @@
+<?php
+
+namespace Ivy\User\Presentation\Form;
+
+use Ivy\Shared\Base\Form;
+
+class UserForm extends Form
+{
+    /**
+     * @return array<string, mixed>
+     */
+    protected function rules(): array
+    {
+        return [
+            'id'=> ['required', 'numeric'],
+            'super_admin' => ['in:0,1'],
+            'admin' => ['in:0,1'],
+            'editor' => ['in:0,1'],
+            'delete' => ['string']
+        ];
+    }
+}
