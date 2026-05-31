@@ -39,6 +39,9 @@ class PluginManager
         return $instance;
     }
 
+    /**
+     * @return mixed[]
+     */
     private function getPluginInfo(): array
     {
         $info = (new PluginInfoLoader)->load($this->plugin->url);

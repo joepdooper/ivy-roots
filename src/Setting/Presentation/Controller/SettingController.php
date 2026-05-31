@@ -54,10 +54,6 @@ class SettingController extends Controller
             $setting = Setting::find($setting);
         }
 
-        if (! $setting) {
-            return;
-        }
-
         $setting->fill($data);
 
         if (! $setting->isDirty()) {
@@ -80,7 +76,7 @@ class SettingController extends Controller
             $setting = Setting::find($setting);
         }
 
-        $setting?->authorize('delete');
+        $setting->authorize('delete');
 
         if ($setting) {
             $setting->delete();
@@ -143,7 +139,7 @@ class SettingController extends Controller
             if ($segments[0] === 'plugin') {
 
                 $this->setting->plugin_id = Plugin::where('url', $segments[1])
-                    ->value('id');
+                    ->first()->value('id');
             }
         }
 

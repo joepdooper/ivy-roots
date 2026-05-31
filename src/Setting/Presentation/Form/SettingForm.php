@@ -16,6 +16,7 @@ class SettingForm extends Form
     {
         return [
             'name' => ['required', 'not_nullable', new InfoSettingRule, new UniqueRule([Setting::class])],
+            'bool' => ['in:0,1'],
             'value' => new InfoSettingRule,
             'info' => ['string', 'max:50'],
             'plugin_id' => 'numeric',

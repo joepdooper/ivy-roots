@@ -61,10 +61,6 @@ class InfoController extends Controller
             $info = Info::find($info);
         }
 
-        if (! $info) {
-            return;
-        }
-
         $info->fill($data);
 
         if (! $info->isDirty()) {
@@ -90,16 +86,14 @@ class InfoController extends Controller
             $info = Info::find($info);
         }
 
-        $info?->authorize('delete');
+        $info->authorize('delete');
 
-        if ($info) {
-            $info->delete();
+        $info->delete();
 
-            $this->flashBag->add(
-                'success',
-                'Info ' . $info->name . ' deleted successfully.'
-            );
-        }
+        $this->flashBag->add(
+            'success',
+            'Info ' . $info->name . ' deleted successfully.'
+        );
     }
 
     /**
@@ -154,9 +148,7 @@ class InfoController extends Controller
             $segments = explode('/', (string) $refererPath);
 
             if ($segments[0] === 'plugin') {
-
-                $this->info->plugin_id = Plugin::where('url', $segments[1])
-                    ->value('id');
+                $this->info->plugin_id = Plugin::where('url', $segments[1])->first()->value('id');
             }
         }
 

@@ -5,18 +5,7 @@ namespace Ivy\Plugin\Infrastructure\Metadata;
 class PluginInfoFactory
 {
     /**
-     * @param array{
-     *     name: string,
-     *     interface: string,
-     *     version: ?string,
-     *     description: ?string,
-     *     url: string,
-     *     type: ?string,
-     *     collection?: array<string, mixed>,
-     *     settings?: array<string, mixed>,
-     *     actions?: array<string, mixed>,
-     *     dependencies?: array<string, mixed>
-     * } $data
+     * @param mixed[] $data
       * @return PluginInfo
      */
     public function make(array $data): PluginInfo

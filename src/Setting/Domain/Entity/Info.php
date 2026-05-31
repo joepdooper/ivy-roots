@@ -11,6 +11,12 @@ use Ivy\Shared\Traits\Stash;
  * @method static static select(string ...$columns)
  * @method static static find(int $id)
  * @method static static first()
+ * @method static static pluck(string $column, ?string $key = null)
+ * @method static static value(string $column)
+ * @method static static create(array $attributes)
+ * @method static static handle(Info $info, bool $bool)
+ * @method static static get()
+ * @method static static all()
  *
  * @property string $name
  * @property string $value

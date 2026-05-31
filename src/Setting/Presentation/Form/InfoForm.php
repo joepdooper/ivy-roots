@@ -17,6 +17,7 @@ class InfoForm extends Form
         return [
             'name' => ['required', 'not_nullable', new InfoSettingRule(), new UniqueRule([Info::class])],
             'value' => new InfoSettingRule(),
+            'info' => ['string', 'max:50'],
             'plugin_id' => 'numeric',
             'delete' => ['string']
         ];
