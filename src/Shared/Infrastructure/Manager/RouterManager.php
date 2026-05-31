@@ -8,6 +8,8 @@ class RouterManager
 {
     private static ?Router $router = null;
 
+    private static array $errorHandlers = [];
+
     public static function router(): Router
     {
         if (! self::$router) {
@@ -47,5 +49,20 @@ class RouterManager
         }
 
         throw new \InvalidArgumentException('Invalid handler');
+    }
+
+    public static function error(int $code, callable $handler): void
+    {
+        self::$errorHandlers[$code] = $handler;
+    }
+
+    public static function triggerError(int $code, string $message): void
+    {
+        if (isset(self::$errorHandlers[$code])) {
+            call_user_func(self::$errorHandlers[$code], $message);
+            return;
+        }
+
+        http_response_code($code);
     }
 }

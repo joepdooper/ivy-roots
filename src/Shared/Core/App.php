@@ -26,6 +26,7 @@ use Ivy\Shared\Presentation\Middleware\RequestNormalizer;
 use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
 use Ivy\Template\Presentation\View\Engine\LatteEngine;
 use Ivy\Template\Presentation\View\View;
+use Ivy\User\Domain\Exception\AuthorizationException;
 use Symfony\Component\HttpFoundation\Request;
 
 class App
@@ -137,12 +138,20 @@ class App
             'handler' => MinifyJsHandler::class,
         ]);
 
-        $pipeline->handle($request, function () {
-            if(!$this->router->run()){
-                View::render('errors/forbidden.latte', [
-                    'message' => 'forbidden',
-                ]);
-            }
-        });
+        try {
+            $pipeline->handle($request, function () {
+                if (!$this->router->run()) {
+                    $this->router->trigger404();
+                }
+            });
+        } catch (AuthorizationException $e) {
+            http_response_code(403);
+            RouterManager::triggerError(403, $e->getMessage());
+            exit;
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            RouterManager::triggerError(500, $e->getMessage());
+            exit;
+        }
     }
 }
