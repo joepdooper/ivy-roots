@@ -108,14 +108,14 @@ class SettingController extends Controller
 
             if ($result->valid) {
 
-                if (empty($data['id'])) {
-                    $this->add($data);
+                if (empty($result->data['id'])) {
+                    $this->add($result->data);
 
                 } elseif (isset($data['delete'])) {
-                    $this->delete($data['id']);
+                    $this->delete($result->data['id']);
 
                 } else {
-                    $this->update($data['id'], $data);
+                    $this->update($result->data['id'], $result->data);
                 }
 
             } else {

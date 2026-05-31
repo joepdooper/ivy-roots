@@ -124,7 +124,7 @@ class InfoController extends Controller
                 if (empty($result->data['id'])) {
                     $this->add($result->data);
 
-                } elseif (isset($result->data['delete'])) {
+                } elseif (isset($data['delete'])) {
                     $this->delete($result->data['id']);
 
                 } else {
