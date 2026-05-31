@@ -55,14 +55,10 @@ trait HasPolicies
 
     public function authorize(string $action): void
     {
-        try {
-            if (!$this->policy($action)) {
-                throw new AuthorizationException(
-                    "Not authorized to perform [{$action}] on " . static::class
-                );
-            }
-        } catch (BindingResolutionException|AuthorizationException|ReflectionException $e) {
-
+        if (!$this->policy($action)) {
+            throw new AuthorizationException(
+                "Not authorized to perform [{$action}] on " . static::class
+            );
         }
     }
 }
