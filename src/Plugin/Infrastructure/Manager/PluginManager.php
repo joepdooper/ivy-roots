@@ -39,6 +39,33 @@ class PluginManager
         return $instance;
     }
 
+    private function getPluginInfo(): array
+    {
+        $info = (new PluginInfoLoader)->load($this->plugin->url);
+
+        if (!$info) {
+            throw new Exception('info.json not found');
+        }
+
+        $result = (new PluginInfoForm)->validate($info);
+
+        if (!$result->valid) {
+            $errors = [];
+
+            foreach ($result->errors as $error) {
+                if (is_array($error)) {
+                    $errors[] = $error[0];
+                }
+            }
+
+            throw new Exception(
+                'Invalid info.json: ' . implode(' ', $errors)
+            );
+        }
+
+        return $result->data;
+    }
+
     /**
      * @return array{
      *     status: string,
@@ -50,25 +77,16 @@ class PluginManager
     {
         $this->plugin->authorize('install');
 
-        $info = (new PluginInfoLoader)->load($this->plugin->url);
-
-        if(!$info) {
+        try {
+            $info = $this->getPluginInfo();
+        } catch (Exception $e) {
             return [
                 'status' => 'error',
-                'message' => 'info.json not found',
+                'message' => $e->getMessage(),
             ];
         }
 
-        $result = (new PluginInfoForm)->validate($info);
-
-        if(!$result->valid) {
-            return [
-                'status' => 'error',
-                'message' => 'Invalid info.json: ' . implode(', ', $result->errors),
-            ];
-        }
-
-        $this->plugin->fill($result->data);
+        $this->plugin->fill($info);
 
         if (isset($info['dependencies'])) {
             $missing = PluginService::getMissingDependencies($info['dependencies']);
