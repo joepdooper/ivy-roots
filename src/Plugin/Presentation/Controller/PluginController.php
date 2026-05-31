@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Shared\Base\Controller;
+use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
 use Ivy\Plugin\Presentation\Form\PluginForm;
@@ -125,11 +126,27 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('install');
 
-        $plugin = new Plugin();
-        $plugin->fill($data);
+        try {
+            $plugin = new Plugin();
+            $plugin->fill($data);
 
-        $this->pluginManager = new PluginManager($plugin);
-        $this->responses[] = $this->pluginManager->install();
+            $this->pluginManager = new PluginManager($plugin);
+            $this->pluginManager->install();
+
+            $this->responses[] = [
+                'status' => 'success',
+                'message' => Language::translate(
+                    'plugin.installed_successfully',
+                    ['plugin' => $plugin->name]
+                )
+            ];
+
+        } catch (\Throwable $e) {
+            $this->responses[] = [
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ];
+        }
     }
 
     public function update(Plugin|int $plugin, mixed $data): void
@@ -166,8 +183,24 @@ class PluginController extends Controller
 
         $plugin->authorize('uninstall');
 
-        $this->pluginManager = new PluginManager($plugin);
-        $this->responses[] = $this->pluginManager->uninstall();
+        try {
+            $this->pluginManager = new PluginManager($plugin);
+            $this->pluginManager->uninstall();
+
+            $this->responses[] = [
+                'status' => 'success',
+                'message' => Language::translate(
+                    'plugin.uninstalled_successfully',
+                    ['plugin' => $plugin->name]
+                )
+            ];
+
+        } catch (\Throwable $e) {
+            $this->responses[] = [
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ];
+        }
     }
 
     public function sync(): void
