@@ -22,8 +22,6 @@ class Profile extends Model
 {
     use HasPolicies;
 
-    private static ?Profile $currentProfile = null;
-
     protected $fillable = [
         'user_id',
         'user_image',

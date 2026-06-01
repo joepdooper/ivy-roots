@@ -4,42 +4,34 @@ namespace Ivy\Shared\Base;
 
 use Delight\Auth\Auth;
 use Delight\Auth\Role;
+use Ivy\User\Application\Service\AuthService;
 
 abstract class Policy
 {
-    protected Auth $auth;
+    protected AuthService $authService;
 
-    public function __construct(Auth $auth)
+    public function __construct(AuthService $authService)
     {
-        $this->auth = $auth;
+        $this->authService = $authService;
     }
 
     public function isLoggedIn(): bool
     {
-        return $this->auth->isLoggedIn();
+        return $this->authService->isLoggedIn();
     }
 
     public function canEditAsEditor(): bool
     {
-        return $this->auth->hasAnyRole(
-            Role::EDITOR,
-            Role::ADMIN,
-            Role::SUPER_ADMIN
-        );
+        return $this->authService->canEditAsEditor();
     }
 
     public function canEditAsAdmin(): bool
     {
-        return $this->auth->hasAnyRole(
-            Role::ADMIN,
-            Role::SUPER_ADMIN
-        );
+        return $this->authService->canEditAsAdmin();
     }
 
     public function canEditAsSuperAdmin(): bool
     {
-        return $this->auth->hasRole(
-            Role::SUPER_ADMIN
-        );
+        return $this->authService->canEditAsSuperAdmin();
     }
 }

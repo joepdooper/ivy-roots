@@ -116,6 +116,18 @@ class LatteEngine implements ViewEngineInterface
         new Html('<input type="hidden" name="csrf_token" value="' . CsrfManager::token() . '">')
         );
 
+        $this->latte->addFunction('canEditAsEditor', fn () =>
+        $this->auth->canEditAsEditor()
+        );
+
+        $this->latte->addFunction('canEditAsAdmin', fn () =>
+        $this->auth->canEditAsAdmin()
+        );
+
+        $this->latte->addFunction('canEditAsSuperAdmin', fn () =>
+        $this->auth->canEditAsSuperAdmin()
+        );
+
         $this->latte->addFunction('doesUserHaveRole', fn ($user, $role) =>
         $this->auth->auth()->admin()->doesUserHaveRole($user, $role)
         );

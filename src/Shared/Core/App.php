@@ -57,7 +57,7 @@ class App
         $databaseManager->boot();
     }
 
-    private function initPlugins(): void
+    private function initPlugins(AuthService $auth): void
     {
         $plugins = Plugin::select('name', 'interface')
             ->where('active', 1)
@@ -80,7 +80,7 @@ class App
             $plugin = new $class();
 
             if ($plugin instanceof PluginInterface) {
-                $plugin->register();
+                $plugin->register($auth);
             }
         }
 
@@ -126,7 +126,7 @@ class App
 
         View::setEngine($engine);
 
-        $this->initPlugins();
+        $this->initPlugins($auth);
 
         TemplateManager::require('template.php');
 

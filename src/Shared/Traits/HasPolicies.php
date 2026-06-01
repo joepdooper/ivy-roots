@@ -34,7 +34,7 @@ trait HasPolicies
             throw new AuthorizationException("Policy not found: {$policyClass}");
         }
 
-        return new $policyClass(Container::getInstance()->make(AuthService::class)->auth());
+        return new $policyClass(Container::getInstance()->make(AuthService::class));
     }
 
     /**

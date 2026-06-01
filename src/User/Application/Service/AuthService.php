@@ -3,6 +3,7 @@
 namespace Ivy\User\Application\Service;
 
 use Delight\Auth\Auth;
+use Delight\Auth\Role;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Ivy\User\Domain\Entity\User;
 
@@ -39,6 +40,30 @@ class AuthService
         $userId = $this->auth->getUserId();
 
         return User::find($userId);
+    }
+
+    public function canEditAsEditor(): bool
+    {
+        return $this->auth->hasAnyRole(
+            Role::EDITOR,
+            Role::ADMIN,
+            Role::SUPER_ADMIN
+        );
+    }
+
+    public function canEditAsAdmin(): bool
+    {
+        return $this->auth->hasAnyRole(
+            Role::ADMIN,
+            Role::SUPER_ADMIN
+        );
+    }
+
+    public function canEditAsSuperAdmin(): bool
+    {
+        return $this->auth->hasRole(
+            Role::SUPER_ADMIN
+        );
     }
 
     public function can(string $action, $model): bool
