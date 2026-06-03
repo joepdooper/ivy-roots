@@ -30,11 +30,8 @@ class TemplateManager
             return;
         }
 
-        $templateBase = Template::where('type', 'base')
-            ->value('value');
-
-        $templateSub = Template::where('type', 'sub')
-            ->value('value');
+        $templateBase = Template::where('type', 'base')->value('value');
+        $templateSub = Template::where('type', 'sub')->value('value');
 
         self::$templateBase = Path::get('TEMPLATES_PATH') . $templateBase . DIRECTORY_SEPARATOR;
         self::$templateSub = Path::get('TEMPLATES_PATH') . $templateSub . DIRECTORY_SEPARATOR;
@@ -67,7 +64,7 @@ class TemplateManager
         }
 
         $projectPath = Path::get('PROJECT_PATH') . $filename;
-
+        
         if (file_exists($projectPath)) {
             return self::$cache[$filename] = $projectPath;
         }

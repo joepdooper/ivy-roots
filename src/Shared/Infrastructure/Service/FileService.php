@@ -29,7 +29,7 @@ class FileService
                 $this->files[] = $file;
             }
         }
-
+        
         return $this;
     }
 

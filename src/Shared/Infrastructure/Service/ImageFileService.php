@@ -25,64 +25,120 @@ class ImageFileService extends FileService
             }
 
             $tmpPath = $file->getUploadFile()->getPathname();
-            [$origWidth, $origHeight, $type] = getimagesize($tmpPath);
 
-            if (! $origWidth || ! $origHeight) {
-                throw new RuntimeException('Failed to read image dimensions');
+            $imageInfo = getimagesize($tmpPath);
+
+            if ($imageInfo === false) {
+                throw new RuntimeException('Failed to read image information');
             }
+
+            [$origWidth, $origHeight, $type] = $imageInfo;
 
             $src = match ($type) {
                 IMAGETYPE_JPEG => imagecreatefromjpeg($tmpPath),
-                IMAGETYPE_PNG => imagecreatefrompng($tmpPath),
-                IMAGETYPE_GIF => imagecreatefromgif($tmpPath),
+                IMAGETYPE_PNG  => imagecreatefrompng($tmpPath),
+                IMAGETYPE_GIF  => imagecreatefromgif($tmpPath),
+                IMAGETYPE_WEBP => imagecreatefromwebp($tmpPath),
                 default => throw new RuntimeException('Unsupported image type'),
             };
 
-            $targetDir = Path::get('MEDIA_PATH').DIRECTORY_SEPARATOR.trim($file->getUploadPath(), DIRECTORY_SEPARATOR);
+            if (! $src) {
+                throw new RuntimeException('Failed to create image resource');
+            }
+
+            $targetDir = rtrim(Path::get('MEDIA_PATH'), DIRECTORY_SEPARATOR)
+                . DIRECTORY_SEPARATOR
+                . trim($file->getUploadPath(), DIRECTORY_SEPARATOR);
+
             if (! is_dir($targetDir)) {
                 mkdir($targetDir, 0755, true);
             }
 
-            $targetPath = $targetDir.DIRECTORY_SEPARATOR.$file->getFileName();
+            @chmod($targetDir, 0777);
 
-            if (empty($file->getImageWidth())) {
-                copy($tmpPath, $targetPath);
-                $webpPath = $targetDir.DIRECTORY_SEPARATOR.pathinfo($file->getFileName(), PATHINFO_FILENAME).'.webp';
-                imagewebp($src, $webpPath, 80);
-
-                continue;
+            if (! is_writable($targetDir)) {
+                throw new RuntimeException('Upload directory is not writable: ' . $targetDir);
             }
 
+            $fileName = $file->getFileName();
+
+            $targetPath = $targetDir . DIRECTORY_SEPARATOR . $fileName;
+
+            $webpPath = $targetDir
+                . DIRECTORY_SEPARATOR
+                . pathinfo($fileName, PATHINFO_FILENAME)
+                . '.webp';
+
             $maxWidth = (int) $file->getImageWidth();
+
+            $writeOriginal = function ($resource) use ($type, $targetPath) {
+                return match ($type) {
+                    IMAGETYPE_JPEG => imagejpeg($resource, $targetPath, 90),
+                    IMAGETYPE_PNG  => imagepng($resource, $targetPath),
+                    IMAGETYPE_GIF  => imagegif($resource, $targetPath),
+                    IMAGETYPE_WEBP => imagewebp($resource, $targetPath, 80),
+                    default => false,
+                };
+            };
+
+            if ($maxWidth <= 0) {
+                copy($tmpPath, $targetPath);
+
+                if (! imagewebp($src, $webpPath, 80)) {
+                    throw new RuntimeException('Failed to write webp: ' . $webpPath);
+                }
+
+                return;
+            }
+
+            if ($origWidth <= $maxWidth) {
+                copy($tmpPath, $targetPath);
+
+                if (! imagewebp($src, $webpPath, 80)) {
+                    throw new RuntimeException('Failed to write webp: ' . $webpPath);
+                }
+
+                return;
+            }
+
             $ratio = $origWidth / $origHeight;
             $newWidth = $maxWidth;
-            $newHeight = (int) round($maxWidth / $ratio);
+            $newHeight = (int) round($newWidth / $ratio);
 
             $dst = imagecreatetruecolor($newWidth, $newHeight);
 
-            if (in_array($type, [IMAGETYPE_PNG, IMAGETYPE_GIF], true)) {
-                imagecolortransparent($dst, imagecolorallocatealpha($dst, 0, 0, 0, 127));
+            if (! $dst) {
+                throw new RuntimeException('Failed to create destination image');
+            }
+
+            if (in_array($type, [IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP], true)) {
                 imagealphablending($dst, false);
                 imagesavealpha($dst, true);
+
+                $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+                imagefill($dst, 0, 0, $transparent);
             }
 
-            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
+            imagecopyresampled(
+                $dst,
+                $src,
+                0,
+                0,
+                0,
+                0,
+                $newWidth,
+                $newHeight,
+                $origWidth,
+                $origHeight
+            );
 
-            switch ($type) {
-                case IMAGETYPE_JPEG: imagejpeg($dst, $targetPath, 90);
-                    break;
-                case IMAGETYPE_PNG:  imagepng($dst, $targetPath, 8);
-                    break;
-                case IMAGETYPE_GIF:  imagegif($dst, $targetPath);
-                    break;
+            if (! $writeOriginal($dst)) {
+                throw new RuntimeException('Failed to write original image: ' . $targetPath);
             }
 
-            $webpPath = $targetDir.DIRECTORY_SEPARATOR.pathinfo($file->getFileName(), PATHINFO_FILENAME).'.webp';
-            imagewebp($dst, $webpPath, 80);
-
-            imagedestroy($dst);
+            if (! imagewebp($dst, $webpPath, 80)) {
+                throw new RuntimeException('Failed to write webp: ' . $webpPath);
+            }
         }
-
-        imagedestroy($src);
     }
 }

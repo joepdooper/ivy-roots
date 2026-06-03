@@ -112,23 +112,28 @@ class ProfileController extends Controller
                     }
                 }
 
-                if (PluginRegistry::isActive('Image')) {
+                    if ($this->request->files->has('user_image')) {
 
-                    if ($this->request->files->get('avatar')) {
-
-                        $file = new ImageFile($this->request->files->get('avatar'));
+                        $file = new ImageFile($this->request->files->get('user_image'));
 
                         $profile->user_image = $file
                             ->setUploadPath('profile')
                             ->setImageWidth(120)
                             ->generateFileName();
 
-                        (new ImageFileService)->add($file)->upload();
+                        $imageFileService = new ImageFileService;
+                        $imageFileService->add($file);
+
+                        try {
+                            $imageFileService->upload();
+                        } catch(\RuntimeException $e) {
+                            $this->flashBag->add('error', $e->getMessage());
+                        }
 
                         $profile->save();
                     }
 
-                    if ($this->request->get('avatar') === 'delete') {
+                    if ($this->request->get('user_image') === 'delete') {
 
                         $file = new ImageFile;
                         $file->setUploadPath('profile')->remove($profile->user_image);
@@ -136,7 +141,6 @@ class ProfileController extends Controller
                         $profile->user_image = null;
                         $profile->save();
                     }
-                }
             }
         } else {
             $this->flashBag->set('errors', $result->errors);
