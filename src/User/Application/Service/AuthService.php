@@ -5,6 +5,7 @@ namespace Ivy\User\Application\Service;
 use Delight\Auth\Auth;
 use Delight\Auth\Role;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Ivy\User\Domain\Entity\Profile;
 use Ivy\User\Domain\Entity\User;
 
 class AuthService
@@ -40,6 +41,17 @@ class AuthService
         $userId = $this->auth->getUserId();
 
         return User::find($userId);
+    }
+
+    public function authProfile(): ?Profile
+    {
+        if (! $this->auth->isLoggedIn()) {
+            return null;
+        }
+
+        $userId = $this->auth->getUserId();
+
+        return Profile::where('user_id', $userId)->first();
     }
 
     public function canEditAsEditor(): bool

@@ -140,6 +140,10 @@ class LatteEngine implements ViewEngineInterface
         $this->auth->authUser()
         );
 
+        $this->latte->addFunction('authProfile', fn () =>
+        $this->auth->authProfile()
+        );
+
         $this->latte->addFunction('isLoggedIn', fn () =>
         $this->auth->isLoggedIn()
         );

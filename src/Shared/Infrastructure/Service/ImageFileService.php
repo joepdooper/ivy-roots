@@ -50,12 +50,6 @@ class ImageFileService extends FileService
                 . DIRECTORY_SEPARATOR
                 . trim($file->getUploadPath(), DIRECTORY_SEPARATOR);
 
-            if (! is_dir($targetDir)) {
-                mkdir($targetDir, 0755, true);
-            }
-
-            @chmod($targetDir, 0777);
-
             if (! is_writable($targetDir)) {
                 throw new RuntimeException('Upload directory is not writable: ' . $targetDir);
             }

@@ -16,7 +16,7 @@ class ProfileForm extends Form
         return [
             'username' => ['required', 'not_nullable', new UserNameRule],
             'email' => ['required', 'not_nullable', 'email'],
-            'delete_user_image' => ['bool'],
+            'delete_user_image' => ['in:delete'],
             'user_image' => ['file', new UserImageRule],
         ];
     }

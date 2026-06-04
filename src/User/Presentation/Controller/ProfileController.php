@@ -133,11 +133,9 @@ class ProfileController extends Controller
                         $profile->save();
                     }
 
-                    if ($this->request->get('user_image') === 'delete') {
-
+                    if ($this->request->request->has('delete_user_image')) {
                         $file = new ImageFile;
                         $file->setUploadPath('profile')->remove($profile->user_image);
-
                         $profile->user_image = null;
                         $profile->save();
                     }
