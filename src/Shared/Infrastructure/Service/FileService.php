@@ -4,6 +4,7 @@ namespace Ivy\Shared\Infrastructure\Service;
 
 use Ivy\Shared\Base\File;
 use Ivy\Shared\Core\Path;
+use Ivy\Shared\Domain\Exception\FileException;
 
 class FileService
 {
@@ -29,14 +30,14 @@ class FileService
                 $this->files[] = $file;
             }
         }
-        
+
         return $this;
     }
 
     private function assertFile(mixed $file): void
     {
         if (! $file instanceof File) {
-            throw new \InvalidArgumentException('All elements must be instances of '.File::class);
+            throw new FileException('All elements must be instances of '.File::class);
         }
     }
 

@@ -7,17 +7,23 @@ use Delight\Auth\EmailNotVerifiedException;
 use Delight\Auth\InvalidEmailException;
 use Delight\Auth\InvalidSelectorTokenPairException;
 use Delight\Auth\NotLoggedInException;
+use Delight\Auth\Role;
 use Delight\Auth\TokenExpiredException;
 use Delight\Auth\TooManyRequestsException;
+use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use Ivy\Shared\Base\Controller;
+use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
 use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
+use Ivy\Shared\Domain\Exception\FileException;
+use Ivy\Shared\Domain\Exception\ImageFileException;
 use Ivy\Shared\Domain\ValueObject\ImageFile;
 use Ivy\Shared\Infrastructure\Service\ImageFileService;
 use Ivy\Shared\Infrastructure\Service\MailService;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Entity\Profile;
+use Ivy\User\Domain\Entity\User;
 use Ivy\User\Presentation\Form\ProfileForm;
 use Random\RandomException;
 
@@ -60,19 +66,16 @@ class ProfileController extends Controller
 
                 $profile->user->fill([
                     'username' => $result->data['username'],
+                    'email' => $result->data['email']
                 ]);
 
                 if ($profile->user->isDirty('username')) {
                     $profile->user->save();
                     $this->flashBag->add(
                         'success',
-                        'Username ' . $result->data['username'] . ' succesfull updated'
+                        Language::translate('user.username.updated', ['username' => $result->data['username']])
                     );
                 }
-
-                $profile->user->fill([
-                    'email' => $result->data['email']
-                ]);
 
                 if ($profile->user->isDirty('email')) {
                     try {
@@ -85,60 +88,67 @@ class ProfileController extends Controller
                                     . urlencode($selector) . '/'
                                     . urlencode($token);
 
+                                $subject = Language::translate('mail.reset.subject');
+                                $body = Language::translate('mail.reset.body', ['url' => $url]);
+
                                 $mail = new MailService();
                                 $mail->addAddress($result->data['email'], $result->data['username']);
-                                $mail->setSubject('Reset email address');
-                                $mail->setBody('Reset your email address with this link: ' . $url);
-                                $mail->setAltBody('Reset your email address with this link: ' . $url);
+                                $mail->setSubject($subject);
+                                $mail->setBody($body);
+                                $mail->setAltBody($body);
                                 $mail->send();
                             }
                         );
 
                         $this->flashBag->add(
                             'success',
-                            'An email has been sent to ' . $result->data['email'] . ' with a link to confirm the email address'
+                            Language::translate('mail.reset.confirm', ['email' => $result->data['email']])
                         );
 
                     } catch (InvalidEmailException) {
-                        $this->flashBag->add('error', 'Invalid email address');
+                        $this->flashBag->add('error', Language::translate('error.email.invalid'));
                     } catch (UserAlreadyExistsException) {
-                        $this->flashBag->add('error', 'Email address already exists');
+                        $this->flashBag->add('error', Language::translate('error.email.exists'));
                     } catch (EmailNotVerifiedException) {
-                        $this->flashBag->add('error', 'Account not verified');
+                        $this->flashBag->add('error', Language::translate('error.email.unverified'));
                     } catch (NotLoggedInException) {
-                        $this->flashBag->add('error', 'Not logged in');
+                        $this->flashBag->add('error', Language::translate('error.not_logged_in'));
                     } catch (TooManyRequestsException) {
-                        $this->flashBag->add('error', 'Too many requests');
+                        $this->flashBag->add('error', Language::translate('error.too_many_requests'));
                     }
                 }
 
-                    if ($this->request->files->has('user_image')) {
+                if ($this->request->files->get('user_image')) {
+                    $file = new ImageFile($this->request->files->get('user_image'));
 
-                        $file = new ImageFile($this->request->files->get('user_image'));
+                    $profile->user_image = $file
+                        ->setUploadPath('profile')
+                        ->setImageWidth(120)
+                        ->generateFileName();
 
-                        $profile->user_image = $file
-                            ->setUploadPath('profile')
-                            ->setImageWidth(120)
-                            ->generateFileName();
-
+                    try {
                         $imageFileService = new ImageFileService;
-                        $imageFileService->add($file);
-
-                        try {
-                            $imageFileService->upload();
-                        } catch(\RuntimeException $e) {
-                            $this->flashBag->add('error', $e->getMessage());
-                        }
-
+                        $imageFileService->add($file)->upload();
                         $profile->save();
+                        $this->flashBag->add(
+                            'success',
+                            Language::translate('profile.image.saved')
+                        );
+                    } catch(FileException $e) {
+                        $this->flashBag->add('error', $e->getMessage());
                     }
+                }
 
-                    if ($this->request->request->has('delete_user_image')) {
-                        $file = new ImageFile;
-                        $file->setUploadPath('profile')->remove($profile->user_image);
-                        $profile->user_image = null;
-                        $profile->save();
-                    }
+                if ($this->request->request->has('delete_user_image')) {
+                    $file = new ImageFile;
+                    $file->setUploadPath('profile')->remove($profile->user_image);
+                    $profile->user_image = null;
+                    $profile->save();
+                    $this->flashBag->add(
+                        'success',
+                        Language::translate('profile.image.deleted')
+                    );
+                }
             }
         } else {
             $this->flashBag->set('errors', $result->errors);

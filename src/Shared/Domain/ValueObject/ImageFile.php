@@ -11,12 +11,21 @@ class ImageFile extends File
 
     public function getAllowedMimeTypes(): array
     {
-        return ['image/jpeg', 'image/png', 'image/gif'];
+        return [
+            'image/jpeg',
+            'image/png',
+            'image/gif'
+        ];
     }
 
     public function getAllowedExtensions(): array
     {
-        return ['jpg', 'jpeg', 'png', 'gif'];
+        return [
+            'jpg',
+            'jpeg',
+            'png',
+            'gif'
+        ];
     }
 
     public function getImageWidth(): ?int

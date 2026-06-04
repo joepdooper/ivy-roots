@@ -10,6 +10,7 @@ use Ivy\Plugin\Application\Contracts\PluginInterface;
 use Ivy\Setting\Domain\Entity\Info;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Setting\Infrastructure\Registry\SettingRegistry;
+use Ivy\Shared\Domain\Exception\FileException;
 use Ivy\Shared\Infrastructure\Manager\DatabaseManager;
 use Ivy\Shared\Infrastructure\Manager\ErrorManager;
 use Ivy\Shared\Infrastructure\Manager\LanguageManager;
@@ -27,12 +28,31 @@ use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
 use Ivy\Template\Presentation\View\Engine\LatteEngine;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class App
 {
     private Router $router;
     protected Container $container;
+
+    private function guardUploadLimits(): void
+    {
+        $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+
+        $postMaxRaw = ini_get('post_max_size');
+
+        $postMax = (int) $postMaxRaw * match (strtolower(substr(trim($postMaxRaw), -1))) {
+                'g' => 1024 * 1024 * 1024,
+                'm' => 1024 * 1024,
+                'k' => 1024,
+                default => 1,
+            };
+
+        if ($contentLength > $postMax && empty($_FILES)) {
+            throw new FileException('Upload exceeds server limit');
+        }
+    }
 
     private function initDatabase(): void
     {
@@ -89,6 +109,8 @@ class App
 
     public function run(): void
     {
+        $this->guardUploadLimits();
+
         (Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
 
         $this->container = new Container();
@@ -147,6 +169,10 @@ class App
         } catch (AuthorizationException $e) {
             http_response_code(403);
             RouterManager::triggerError(403, $e->getMessage());
+            exit;
+        } catch (FileException $e) {
+            http_response_code(413);
+            RouterManager::triggerError(413, $e->getMessage());
             exit;
         } catch (\Throwable $e) {
             http_response_code(500);

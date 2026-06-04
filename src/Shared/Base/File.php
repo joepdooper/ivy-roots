@@ -3,6 +3,7 @@
 namespace Ivy\Shared\Base;
 
 use Ivy\Shared\Core\Path;
+use Ivy\Shared\Domain\Exception\FileException;
 use Random\RandomException;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -78,20 +79,20 @@ abstract class File
     }
 
     /**
-     * @throws RuntimeException
+     * @throws FileException
      */
     public function validate(): static
     {
         if (! $this->uploadFile->isValid()) {
-            throw new RuntimeException('Upload failed with error: '.$this->uploadFile->getError());
+            throw new FileException('Upload failed with error: '.$this->uploadFile->getError());
         }
 
         if (! $this->isMimeAllowed()) {
-            throw new RuntimeException("File type not allowed: $this->mimeType");
+            throw new FileException("File type not allowed: $this->mimeType");
         }
 
         if (! in_array($this->extension, $this->getAllowedExtensions(), true)) {
-            throw new RuntimeException("File extension not allowed: .$this->extension");
+            throw new FileException("File extension not allowed: .$this->extension");
         }
 
         return $this;
