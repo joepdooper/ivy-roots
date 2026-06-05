@@ -5,7 +5,6 @@ namespace Ivy\Shared\Base;
 use Ivy\Shared\Core\Path;
 use Ivy\Shared\Domain\Exception\FileException;
 use Random\RandomException;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 abstract class File

@@ -5,6 +5,7 @@ namespace Ivy\Shared\Infrastructure\Service;
 use Ivy\Shared\Base\File;
 use Ivy\Shared\Core\Path;
 use Ivy\Shared\Domain\Exception\FileException;
+use Ivy\Shared\Domain\ValueObject\ImageFile;
 
 class FileService
 {
@@ -12,9 +13,7 @@ class FileService
     protected array $files = [];
 
     /**
-     * Add one or more files.
-     *
-     * @param File|array ...$files
+     * @param File|File[] ...$files
      * @return $this
      */
     public function add(File|array ...$files): static
@@ -52,7 +51,7 @@ class FileService
                 mkdir($destination, 0755, true);
             }
 
-            $file->getUploadFile()->move($destination, $file->getFileName());
+            $file->getUploadFile()?->move($destination, $file->getFileName());
         }
     }
 }
