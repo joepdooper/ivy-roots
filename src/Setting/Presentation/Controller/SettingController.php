@@ -7,6 +7,7 @@ use Ivy\Setting\Presentation\Form\SettingForm;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Controller;
 use Ivy\Template\Presentation\View\View;
+use Ivy\User\Domain\Exception\AuthorizationException;
 use JetBrains\PhpStorm\NoReturn;
 
 class SettingController extends Controller
@@ -21,6 +22,9 @@ class SettingController extends Controller
         $this->settingForm = new SettingForm();
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function index(?string $url = null): void
     {
         $this->setting->authorize('index');
@@ -34,6 +38,9 @@ class SettingController extends Controller
         View::render('admin/setting.latte', ['settings' => $settings]);
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function add(mixed $data): void
     {
         $setting = new Setting();
@@ -48,6 +55,9 @@ class SettingController extends Controller
         );
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function update(Setting|int $setting, mixed $data): void
     {
         if (is_int($setting)) {
@@ -70,6 +80,9 @@ class SettingController extends Controller
         );
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function delete(Setting|int $setting): void
     {
         if (is_int($setting)) {
@@ -78,16 +91,17 @@ class SettingController extends Controller
 
         $setting->authorize('delete');
 
-        if ($setting) {
-            $setting->delete();
+        $setting->delete();
 
-            $this->flashBag->add(
-                'success',
-                'Setting ' . $setting->name . ' deleted successfully.'
-            );
-        }
+        $this->flashBag->add(
+            'success',
+            'Setting ' . $setting->name . ' deleted successfully.'
+        );
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function sync(): void
     {
         $this->setting->authorize('sync');
@@ -138,8 +152,7 @@ class SettingController extends Controller
 
             if ($segments[0] === 'plugin') {
 
-                $this->setting->plugin_id = Plugin::where('url', $segments[1])
-                    ->first()->value('id');
+                $this->setting->plugin_id = Plugin::where('url', $segments[1])->value('id');
             }
         }
 

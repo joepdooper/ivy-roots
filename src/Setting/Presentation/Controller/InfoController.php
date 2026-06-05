@@ -148,7 +148,7 @@ class InfoController extends Controller
             $segments = explode('/', (string) $refererPath);
 
             if ($segments[0] === 'plugin') {
-                $this->info->plugin_id = Plugin::where('url', $segments[1])->first()->value('id');
+                $this->info->plugin_id = Plugin::where('url', $segments[1])->value('id');
             }
         }
 

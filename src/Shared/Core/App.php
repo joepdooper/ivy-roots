@@ -28,8 +28,8 @@ use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
 use Ivy\Template\Presentation\View\Engine\LatteEngine;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Throwable;
 
 class App
 {
@@ -38,19 +38,17 @@ class App
 
     private function guardUploadLimits(): void
     {
-        $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+        if($postMaxRaw = ini_get('post_max_size')) {
+            $postMax = (int) $postMaxRaw * match (strtolower(substr(trim($postMaxRaw), -1))) {
+                    'g' => 1024 * 1024 * 1024,
+                    'm' => 1024 * 1024,
+                    'k' => 1024,
+                    default => 1,
+                };
 
-        $postMaxRaw = ini_get('post_max_size');
-
-        $postMax = (int) $postMaxRaw * match (strtolower(substr(trim($postMaxRaw), -1))) {
-                'g' => 1024 * 1024 * 1024,
-                'm' => 1024 * 1024,
-                'k' => 1024,
-                default => 1,
-            };
-
-        if ($contentLength > $postMax && empty($_FILES)) {
-            throw new FileException('Upload exceeds server limit');
+            if (((int) ($_SERVER['CONTENT_LENGTH'] ?? 0)) > $postMax && empty($_FILES)) {
+                throw new FileException('Upload exceeds server limit');
+            }
         }
     }
 
@@ -174,7 +172,7 @@ class App
             http_response_code(413);
             RouterManager::triggerError(413, $e->getMessage());
             exit;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             http_response_code(500);
             RouterManager::triggerError(500, $e->getMessage());
             exit;

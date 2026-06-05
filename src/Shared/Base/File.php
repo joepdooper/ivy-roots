@@ -82,8 +82,8 @@ abstract class File
      */
     public function validate(): static
     {
-        if (! $this->uploadFile->isValid()) {
-            throw new FileException('Upload failed with error: '.$this->uploadFile->getError());
+        if (! $this->uploadFile?->isValid()) {
+            throw new FileException('Upload failed with error: '.$this->uploadFile?->getError());
         }
 
         if (! $this->isMimeAllowed()) {

@@ -3,6 +3,7 @@
 namespace Ivy\Shared\Base;
 
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Ivy\Shared\Core\Path;
 use Ivy\Shared\Infrastructure\Manager\SessionManager;
 use Ivy\Shared\Presentation\Validation\ValidationResult;
@@ -18,6 +19,9 @@ abstract class Controller
     protected AuthService $authService;
     protected Request $request;
 
+    /**
+     * @throws BindingResolutionException
+     */
     public function __construct()
     {
         $this->request = Container::getInstance()->make(Request::class);
@@ -66,6 +70,6 @@ abstract class Controller
     {
         $this->flashBag->set('errors', $result->errors);
         $this->flashBag->set('old', $result->old);
-        $this->redirect($this->getRefererPath());
+        $this->redirect($this->getRefererPath() ?? $this->request->getPathInfo());
     }
 }
