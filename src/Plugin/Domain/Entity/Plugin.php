@@ -2,19 +2,11 @@
 
 namespace Ivy\Plugin\Domain\Entity;
 
-use Illuminate\Database\Eloquent\Model;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfo;
+use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Traits\HasPolicies;
 
 /**
- * @method static static where(string $column, mixed $value = null)
- * @method static static select(string ...$columns)
- * @method static static find(int $id)
- * @method static static first()
- * @method static static pluck(string $column, ?string $key = null)
- * @method static static value(string $column)
- *
- * @property int $id
  * @property int|null $parent_id
  * @property string $name
  * @property string $interface
@@ -24,7 +16,7 @@ use Ivy\Shared\Traits\HasPolicies;
  * @property bool $active
  * @property string $url
  */
-class Plugin extends Model
+class Plugin extends Entity
 {
     use HasPolicies;
     
