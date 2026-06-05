@@ -7,6 +7,7 @@ use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Traits\HasPolicies;
 
 /**
+ * @property int $id
  * @property int|null $parent_id
  * @property string $name
  * @property string $interface
