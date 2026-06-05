@@ -7,23 +7,19 @@ use Delight\Auth\EmailNotVerifiedException;
 use Delight\Auth\InvalidEmailException;
 use Delight\Auth\InvalidSelectorTokenPairException;
 use Delight\Auth\NotLoggedInException;
-use Delight\Auth\Role;
 use Delight\Auth\TokenExpiredException;
 use Delight\Auth\TooManyRequestsException;
-use Delight\Auth\UnknownIdException;
 use Delight\Auth\UserAlreadyExistsException;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
-use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
-use Ivy\Shared\Domain\Exception\FileException;
 use Ivy\Shared\Domain\Exception\ImageFileException;
 use Ivy\Shared\Domain\ValueObject\ImageFile;
 use Ivy\Shared\Infrastructure\Service\ImageFileService;
 use Ivy\Shared\Infrastructure\Service\MailService;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Entity\Profile;
-use Ivy\User\Domain\Entity\User;
+use Ivy\User\Domain\Exception\AuthorizationException;
 use Ivy\User\Presentation\Form\ProfileForm;
 use Random\RandomException;
 
@@ -48,7 +44,7 @@ class ProfileController extends Controller
 
     /**
      * @throws AuthError
-     * @throws RandomException
+     * @throws RandomException|AuthorizationException
      */
     public function save(): void
     {
@@ -134,7 +130,7 @@ class ProfileController extends Controller
                             'success',
                             Language::translate('profile.image.saved')
                         );
-                    } catch(FileException $e) {
+                    } catch(ImageFileException $e) {
                         $this->flashBag->add('error', $e->getMessage());
                     }
                 }
