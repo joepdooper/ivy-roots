@@ -16,6 +16,7 @@ use Ivy\Shared\Infrastructure\Manager\ErrorManager;
 use Ivy\Shared\Infrastructure\Manager\LanguageManager;
 use Ivy\Shared\Infrastructure\Manager\RouterManager;
 use Ivy\Shared\Infrastructure\Manager\SecurityManager;
+use Ivy\Shared\Infrastructure\Service\SortService;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
 use Ivy\Template\Presentation\View\Engine\BladeEngine;
 use Ivy\User\Application\Service\AuthService;
@@ -115,6 +116,8 @@ class App
         $request = Request::createFromGlobals();
         $this->container->instance(Request::class, $request);
         Container::setInstance($this->container);
+
+        $this->container->singleton(SortService::class);
 
         $pipeline = new MiddlewarePipeline;
         $pipeline->add(new RequestNormalizer());

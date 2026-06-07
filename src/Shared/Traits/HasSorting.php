@@ -3,7 +3,9 @@
 namespace Ivy\Shared\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
+use Ivy\Shared\Infrastructure\Service\SortService;
 use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Container\Container;
 
 trait HasSorting
 {
@@ -13,29 +15,24 @@ trait HasSorting
         string $defaultColumn = 'id',
         string $defaultDirection = 'asc'
     ): Builder {
-        $columns = static::$sortable ?? ['id'];
 
-        if (!in_array($defaultColumn, $columns, true) && $defaultColumn !== 'id') {
-            throw new \InvalidArgumentException(
-                "Invalid default sort column [$defaultColumn]"
-            );
-        }
+        $columns = static::$sortable ?? ['id'];
 
         $column = $request->query->get('sort', $defaultColumn);
         $direction = strtolower(
             $request->query->get('direction', $defaultDirection)
         );
 
-        if (!in_array($column, $columns, true)) {
-            $column = $defaultColumn;
-        }
-
         if (!in_array($direction, ['asc', 'desc'], true)) {
             $direction = $defaultDirection;
         }
 
-        return $query
-            ->reorder()
-            ->orderBy($column, $direction);
+        return Container::getInstance()->get(SortService::class)->apply(
+            $query,
+            $column,
+            $columns,
+            $defaultColumn,
+            $direction
+        );
     }
 }
