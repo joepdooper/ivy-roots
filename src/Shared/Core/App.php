@@ -138,11 +138,9 @@ class App
         LanguageManager::init();
 
         $engine = match ($_ENV['VIEW_ENGINE'] ?? 'latte') {
-            'blade' => new BladeEngine(),
-            default => new LatteEngine(),
+            'blade' => new BladeEngine($auth, $request),
+            default => new LatteEngine($auth, $request),
         };
-
-        $engine->setAuth($auth);
 
         View::setEngine($engine);
 

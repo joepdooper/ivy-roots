@@ -22,7 +22,17 @@ class ButtonNode extends StatementNode
     public function print(PrintContext $context): string
     {
         return $context->format(
-            'echo ($this->global->customButtonRender)(%node);',
+            <<<'PHP'
+$args = %node;
+
+$file = \Ivy\Template\Infrastructure\Manager\TemplateManager::file(
+    'buttons/button.' . ($args['type'] ?? 'default') . '.latte'
+);
+
+if ($file) {
+    $this->createTemplate($file, $args, 'include')->render();
+}
+PHP,
             $this->args
         );
     }
