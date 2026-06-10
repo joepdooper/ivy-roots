@@ -3,6 +3,7 @@
 namespace Ivy\Shared\Base;
 
 use Illuminate\Database\Eloquent\Model;
+use Ivy\Shared\Domain\Collection\EntityCollection;
 
 /**
  * @method static static where(string $column, mixed $value = null)
@@ -19,5 +20,17 @@ use Illuminate\Database\Eloquent\Model;
  */
 abstract class Entity extends Model
 {
+    public function newCollection(array $models = []): EntityCollection
+    {
+        $collection = new EntityCollection($models);
 
+        if (
+            method_exists(static::class, 'pagination') &&
+            static::pagination()
+        ) {
+            $collection->setPagination(static::pagination());
+        }
+
+        return $collection;
+    }
 }

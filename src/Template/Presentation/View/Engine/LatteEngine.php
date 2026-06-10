@@ -178,21 +178,17 @@ class LatteEngine implements ViewEngineInterface
             $key ?? $default
         );
 
-        $this->latte->addFunction('sortUrl', function (string $column) {
+        $this->latte->addFunction('queryUrl', function (array $replace = [], array $remove = []) {
 
             $query = $this->request->query->all();
 
-            $currentSort = $query['sort'] ?? null;
-            $currentDirection = $query['direction'] ?? 'asc';
+            foreach ($replace as $key => $value) {
+                $query[$key] = $value;
+            }
 
-            $query['sort'] = $column;
-
-            $query['direction'] =
-                ($currentSort === $column && $currentDirection === 'asc')
-                    ? 'desc'
-                    : 'asc';
-
-            unset($query['page']);
+            foreach ($remove as $key) {
+                unset($query[$key]);
+            }
 
             return '?' . http_build_query($query);
         });
@@ -205,6 +201,6 @@ class LatteEngine implements ViewEngineInterface
 
     private function registerProviders(): void
     {
-        
+
     }
 }
