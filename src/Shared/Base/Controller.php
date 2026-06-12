@@ -53,17 +53,23 @@ abstract class Controller
         $referer = $this->request->headers->get('referer');
         $basePath = $this->request->getBasePath();
 
-        if(!$referer) {
+        if (!$referer) {
             return null;
         }
 
-        $path = parse_url($referer, PHP_URL_PATH);
+        $parts = parse_url($referer);
 
-        if (! $path || ! str_starts_with($path, $basePath)) {
+        $path = $parts['path'] ?? null;
+
+        if (!$path || !str_starts_with($path, $basePath)) {
             return null;
         }
 
-        return ltrim(substr($path, strlen($basePath)), '/');
+        $relativePath = ltrim(substr($path, strlen($basePath)), '/');
+
+        $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+
+        return $relativePath . $query;
     }
 
     protected function redirectToFormWithErrors(ValidationResult $result): void
