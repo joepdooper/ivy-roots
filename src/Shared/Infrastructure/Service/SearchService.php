@@ -25,7 +25,6 @@ class SearchService
 
             foreach ($columns as $column) {
 
-                // local column
                 if (!str_contains($column, '.')) {
 
                     if ($isFirst) {
@@ -46,7 +45,6 @@ class SearchService
                     continue;
                 }
 
-                // relation column
                 $this->applyRelationSearch($q, $column, $term, $isFirst);
 
                 $isFirst = false;

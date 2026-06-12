@@ -8,6 +8,7 @@ use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Infrastructure\Manager\CsrfManager;
 use Ivy\Shared\Infrastructure\Manager\HookManager;
 use Ivy\Shared\Infrastructure\Manager\SecurityManager;
+use Ivy\Shared\Presentation\Routing\QueryBuilder;
 use Ivy\Template\Application\Contracts\ViewEngineInterface;
 use Ivy\Template\Infrastructure\Manager\AssetManager;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
@@ -28,11 +29,13 @@ class LatteEngine implements ViewEngineInterface
     private Engine $latte;
     private AuthService $auth;
     private Request $request;
+    private QueryBuilder $queryBuilder;
 
     public function __construct(AuthService $auth, Request $request)
     {
         $this->latte = new Engine();
         $this->auth = $auth;
+        $this->queryBuilder = new QueryBuilder();
         $this->request = $request;
     }
 
@@ -178,20 +181,15 @@ class LatteEngine implements ViewEngineInterface
             $key ?? $default
         );
 
-        $this->latte->addFunction('queryUrl', function (array $replace = [], array $remove = []) {
-
-            $query = $this->request->query->all();
-
-            foreach ($replace as $key => $value) {
-                $query[$key] = $value;
-            }
-
-            foreach ($remove as $key) {
-                unset($query[$key]);
-            }
-
-            return '?' . http_build_query($query);
-        });
+        $this->latte->addFunction(
+            'queryUrl',
+            fn(array $replace = [], array $remove = [])
+            => $this->queryBuilder->build(
+                $this->request->query->all(),
+                $replace,
+                $remove
+            )
+        );
     }
 
     private function registerExtensions(): void
