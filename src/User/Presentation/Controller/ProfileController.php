@@ -114,10 +114,10 @@ class ProfileController extends Controller
                     }
                 }
 
-                if ($this->request->files->get('user_image')) {
-                    $file = new ImageFile($this->request->files->get('user_image'));
+                if ($this->request->files->get('image')) {
+                    $file = new ImageFile($this->request->files->get('image'));
 
-                    $profile->user_image = $file
+                    $profile->image = $file
                         ->setUploadPath('profile')
                         ->setImageWidth(120)
                         ->generateFileName();
@@ -135,10 +135,10 @@ class ProfileController extends Controller
                     }
                 }
 
-                if ($this->request->request->has('delete_user_image')) {
+                if ($this->request->request->has('delete_image')) {
                     $file = new ImageFile;
-                    $file->setUploadPath('profile')->remove($profile->user_image);
-                    $profile->user_image = null;
+                    $file->setUploadPath('profile')->remove($profile->image);
+                    $profile->image = null;
                     $profile->save();
                     $this->flashBag->add(
                         'success',

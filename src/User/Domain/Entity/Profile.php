@@ -8,7 +8,7 @@ use Ivy\Shared\Traits\HasPolicies;
 
 /**
  * @property int $user_id
- * @property string $user_image
+ * @property string $image
  */
 class Profile extends Entity
 {
@@ -16,7 +16,7 @@ class Profile extends Entity
 
     protected $fillable = [
         'user_id',
-        'user_image',
+        'image',
     ];
 
     public function user(): HasOne
