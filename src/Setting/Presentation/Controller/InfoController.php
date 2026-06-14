@@ -105,7 +105,7 @@ class InfoController extends Controller
 
         $errors = $old = [];
 
-        foreach ($this->request->get('info') as $index => $data) {
+        foreach ($this->request->request->all('info') as $index => $data) {
 
             if (empty($data['name'])) {
                 continue;

@@ -75,7 +75,7 @@ class TemplateController extends Controller
 
         $errors = $old = [];
 
-        foreach ($this->request->get('template') as $index => $data) {
+        foreach ($this->request->request->all('template') as $index => $data) {
 
             $result = $this->templateForm->validate($data);
 

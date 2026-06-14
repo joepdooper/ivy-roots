@@ -108,7 +108,7 @@ class SettingController extends Controller
 
         $errors = $old = [];
 
-        foreach ($this->request->get('setting') as $index => $data) {
+        foreach ($this->request->request->all('setting') as $index => $data) {
 
             if (empty($data['name']) && !isset($data['id'])) {
                 continue;

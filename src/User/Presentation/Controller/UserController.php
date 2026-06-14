@@ -122,7 +122,7 @@ class UserController extends Controller
     {
         $this->user->authorize('sync');
 
-        foreach ($this->request->get('user') as $data) {
+        foreach ($this->request->request->all('user') as $data) {
 
             $result = $this->userForm->validate($data);
 

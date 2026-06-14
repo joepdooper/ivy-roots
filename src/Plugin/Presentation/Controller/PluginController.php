@@ -208,7 +208,7 @@ class PluginController extends Controller
         $this->plugin->authorize('sync');
 
         if($this->request->request->has('plugin')){
-            foreach ($this->request->get('plugin') as $index => $data) {
+            foreach ($this->request->request->all('plugin') as $index => $data) {
 
                 $result = $this->pluginForm->validate($data);
 
