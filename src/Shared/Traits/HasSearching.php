@@ -13,17 +13,8 @@ trait HasSearching
         Builder $query,
         Request $request,
     ): Builder {
-
         $columns = static::$searchable ?? [];
 
-        $term = trim((string) (
-            $request->query->get('search') ?? $request->request->get('search') ?? ''
-        ));
-
-        if ($term === '' || empty($columns)) {
-            return $query;
-        }
-
-        return Container::getInstance()->get(SearchService::class)->apply($query, $term, $columns);
+        return Container::getInstance()->get(SearchService::class)->apply($query, $request, $columns);
     }
 }
