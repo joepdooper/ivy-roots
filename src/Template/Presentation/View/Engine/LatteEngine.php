@@ -183,12 +183,28 @@ class LatteEngine implements ViewEngineInterface
 
         $this->latte->addFunction(
             'queryUrl',
-            fn(array $replace = [], array $remove = [])
-            => $this->queryBuilder->build(
-                $this->request->query->all(),
-                $replace,
-                $remove
-            )
+            function (array $params = []) {
+
+                $query = $this->request->query->all();
+
+                foreach ($query as $key => $value) {
+                    if (is_array($value)) {
+                        $query[$key] = end($value);
+                    }
+                }
+
+                foreach ($params as $key => $value) {
+
+                    if (is_int($key)) {
+                        unset($query[$value]);
+                        continue;
+                    }
+
+                    $query[$key] = $value;
+                }
+
+                return $query ? '?' . http_build_query($query) : '';
+            }
         );
     }
 

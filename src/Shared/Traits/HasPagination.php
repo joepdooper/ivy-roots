@@ -22,7 +22,7 @@ trait HasPagination
         static::$pagination = $pagination;
     }
 
-    public function scopePaged(
+    public function scopePages(
         Builder $query,
         Request $request,
     ): Builder {
