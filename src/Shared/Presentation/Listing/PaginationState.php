@@ -1,10 +1,10 @@
 <?php
 
-namespace Ivy\Shared\Domain\Data;
+namespace Ivy\Shared\Presentation\Listing;
 
 use Illuminate\Support\Collection;
 
-class PaginationResult
+class PaginationState
 {
     public function __construct(
         public readonly int $currentPage,

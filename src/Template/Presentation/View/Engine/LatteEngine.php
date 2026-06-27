@@ -182,6 +182,43 @@ class LatteEngine implements ViewEngineInterface
         );
 
         $this->latte->addFunction(
+            'route',
+            function (
+                ?string $path = null,
+                array $params = [],
+            ): string {
+
+                $query = $this->request->query->all();
+
+                foreach ($query as $key => $value) {
+                    if (is_array($value)) {
+                        $query[$key] = end($value);
+                    }
+                }
+
+                foreach ($params as $key => $value) {
+                    if (is_int($key)) {
+                        unset($query[$value]);
+                        continue;
+                    }
+                    $query[$key] = $value;
+                }
+
+                if ($path === null) {
+                    $url = $this->request->getBaseUrl() . $this->request->getPathInfo();
+                } else {
+                    $url = Path::get('BASE_PATH') . '/' . ltrim($path, '/');
+                }
+
+                if (!empty($query)) {
+                    $url .= '?' . http_build_query($query);
+                }
+
+                return $url;
+            }
+        );
+
+        $this->latte->addFunction(
             'queryUrl',
             function (array $params = []) {
 

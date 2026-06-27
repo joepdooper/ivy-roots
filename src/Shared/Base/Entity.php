@@ -4,6 +4,8 @@ namespace Ivy\Shared\Base;
 
 use Illuminate\Database\Eloquent\Model;
 use Ivy\Shared\Domain\Collection\EntityCollection;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Ivy\Shared\Infrastructure\Database\EntityBuilder;
 
 /**
  * @method static static where(string $column, mixed $value = null)
@@ -20,15 +22,27 @@ use Ivy\Shared\Domain\Collection\EntityCollection;
  */
 abstract class Entity extends Model
 {
+    public function newEloquentBuilder($query): EntityBuilder
+    {
+        return new EntityBuilder($query);
+    }
+
     public function newCollection(array $models = []): EntityCollection
     {
         $collection = new EntityCollection($models);
 
         if (
-            method_exists(static::class, 'pagination') &&
-            static::pagination()
+            method_exists(static::class, 'paginationState') &&
+            static::paginationState()
         ) {
-            $collection->setPagination(static::pagination());
+            $collection->setPaginationState(static::paginationState());
+        }
+
+        if (
+            method_exists(static::class, 'searchState') &&
+            static::searchState()
+        ) {
+            $collection->setSearchState(static::searchState());
         }
 
         return $collection;

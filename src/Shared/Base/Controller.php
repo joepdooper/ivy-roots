@@ -78,4 +78,11 @@ abstract class Controller
         $this->flashBag->set('old', $result->old);
         $this->redirect($this->getRefererPath() ?? $this->request->getPathInfo());
     }
+
+    protected function setPagination(ValidationResult $result): void
+    {
+        $this->flashBag->set('pagination', $result->errors);
+        $this->flashBag->set('old', $result->old);
+        $this->redirect($this->getRefererPath() ?? $this->request->getPathInfo());
+    }
 }

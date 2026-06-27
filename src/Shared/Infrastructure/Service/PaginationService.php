@@ -3,7 +3,7 @@
 namespace Ivy\Shared\Infrastructure\Service;
 
 use Illuminate\Database\Eloquent\Builder;
-use Ivy\Shared\Domain\Data\PaginationResult;
+use Ivy\Shared\Presentation\Listing\PaginationState;
 use Ivy\Shared\Traits\ResolvesRequestInput;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -23,16 +23,14 @@ class PaginationService
 
         $total = (clone $query)->count();
 
-        $modelClass = get_class($query->getModel());
-
-        $modelClass::setPagination(
-            new PaginationResult(
-                currentPage: $page,
-                perPage: $perPage,
-                total: $total,
-                lastPage: (int) ceil($total / $perPage),
-            )
+        $state = new PaginationState(
+            currentPage: $page,
+            perPage: $perPage,
+            total: $total,
+            lastPage: (int) ceil($total / $perPage),
         );
+
+        $query->setPaginationState($state);
 
         return $query
             ->offset(($page - 1) * $perPage)

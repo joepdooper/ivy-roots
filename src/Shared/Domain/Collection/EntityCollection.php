@@ -3,21 +3,36 @@
 namespace Ivy\Shared\Domain\Collection;
 
 use Illuminate\Database\Eloquent\Collection;
-use Ivy\Shared\Domain\Data\PaginationResult;
+use Ivy\Shared\Infrastructure\Service\PaginationService;
+use Ivy\Shared\Presentation\Listing\PaginationState;
+use Ivy\Shared\Presentation\Listing\SearchState;
 
 class EntityCollection extends Collection
 {
-    protected ?PaginationResult $pagination = null;
+    protected ?PaginationState $paginationState = null;
+    protected ?SearchState $searchState = null;
 
-    public function setPagination(PaginationResult $pagination): static
+    public function setPaginationState(PaginationState $paginationState): static
     {
-        $this->pagination = $pagination;
+        $this->paginationState = $paginationState;
 
         return $this;
     }
 
-    public function pagination(): ?PaginationResult
+    public function paginationState(): ?PaginationState
     {
-        return $this->pagination;
+        return $this->paginationState;
+    }
+
+    public function setSearchState(SearchState $searchState): static
+    {
+        $this->searchState = $searchState;
+
+        return $this;
+    }
+
+    public function searchState(): ?SearchState
+    {
+        return $this->searchState;
     }
 }
