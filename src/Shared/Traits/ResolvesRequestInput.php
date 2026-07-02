@@ -2,7 +2,9 @@
 
 namespace Ivy\Shared\Traits;
 
+use Ivy\Shared\Infrastructure\Manager\SessionManager;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 
 trait ResolvesRequestInput
 {

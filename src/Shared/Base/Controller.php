@@ -5,6 +5,7 @@ namespace Ivy\Shared\Base;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Ivy\Shared\Core\Path;
+use Ivy\Shared\Infrastructure\Http\Redirector;
 use Ivy\Shared\Infrastructure\Manager\SessionManager;
 use Ivy\Shared\Presentation\Validation\ValidationResult;
 use Ivy\User\Application\Service\AuthService;
@@ -18,6 +19,7 @@ abstract class Controller
     protected FlashBagInterface $flashBag;
     protected AuthService $authService;
     protected Request $request;
+    protected Redirector $redirect;
 
     /**
      * @throws BindingResolutionException
@@ -27,6 +29,7 @@ abstract class Controller
         $this->request = Container::getInstance()->make(Request::class);
         $this->flashBag = SessionManager::getFlashBag();
         $this->authService = new AuthService();
+        $this->redirect = new Redirector($this->request, $this->flashBag);
     }
 
     protected function redirect(string $url = '', int $statusCode = 302): void
@@ -75,13 +78,6 @@ abstract class Controller
     protected function redirectToFormWithErrors(ValidationResult $result): void
     {
         $this->flashBag->set('errors', $result->errors);
-        $this->flashBag->set('old', $result->old);
-        $this->redirect($this->getRefererPath() ?? $this->request->getPathInfo());
-    }
-
-    protected function setPagination(ValidationResult $result): void
-    {
-        $this->flashBag->set('pagination', $result->errors);
         $this->flashBag->set('old', $result->old);
         $this->redirect($this->getRefererPath() ?? $this->request->getPathInfo());
     }

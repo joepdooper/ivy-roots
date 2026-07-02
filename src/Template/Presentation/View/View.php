@@ -22,6 +22,7 @@ class View
 
         $params['errors'] = $flashBag->has('errors') ? $flashBag->get('errors') : [];
         $params['old'] = $flashBag->has('old') ? $flashBag->get('old') : [];
+        $params['new'] = $flashBag->has('new') ? $flashBag->get('new') : [];
         $params['flashes'] = $flashBag->all();
 
         self::$engine->render(

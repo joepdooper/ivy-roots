@@ -3,6 +3,8 @@
 namespace Ivy\Shared\Infrastructure\Service;
 
 use Illuminate\Database\Eloquent\Builder;
+use Ivy\Shared\Presentation\Listing\PaginationState;
+use Ivy\Shared\Presentation\Listing\SearchState;
 use Ivy\Shared\Traits\ResolvesRequestInput;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -42,6 +44,10 @@ class SearchService
                 $this->applyRelationSearch($q, $column, $term);
             }
         });
+
+        $state = new SearchState($term);
+
+        $query->setSearchState($state);
 
         return $query;
     }
