@@ -22,6 +22,10 @@ use Ivy\Shared\Infrastructure\Database\EntityBuilder;
  */
 abstract class Entity extends Model
 {
+    /**
+     * @param mixed $query
+     * @return EntityBuilder<Entity>
+     */
     public function newEloquentBuilder($query): EntityBuilder
     {
         return new EntityBuilder($query);

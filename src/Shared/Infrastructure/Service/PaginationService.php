@@ -2,7 +2,8 @@
 
 namespace Ivy\Shared\Infrastructure\Service;
 
-use Illuminate\Database\Eloquent\Builder;
+use Ivy\Shared\Base\Entity;
+use Ivy\Shared\Infrastructure\Database\EntityBuilder;
 use Ivy\Shared\Presentation\Listing\PaginationState;
 use Ivy\Shared\Traits\ResolvesRequestInput;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,11 +12,15 @@ class PaginationService
 {
     use ResolvesRequestInput;
 
+    /**
+     * @param EntityBuilder<Entity> $query
+     * @return EntityBuilder<Entity>
+     */
     public function apply(
-        Builder $query,
+        EntityBuilder $query,
         Request $request,
         int $defaultPerPage = 25
-    ): Builder {
+    ): EntityBuilder {
 
         $page = max(1, $this->int($request, 'page', 1));
 
@@ -32,6 +37,7 @@ class PaginationService
 
         $query->setPaginationState($state);
 
+        /** @var EntityBuilder<Entity> */
         return $query
             ->offset(($page - 1) * $perPage)
             ->limit($perPage);

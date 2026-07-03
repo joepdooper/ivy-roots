@@ -10,6 +10,9 @@ use Random\RandomException;
 use RuntimeException;
 use Throwable;
 
+/**
+ * @phpstan-implements CastsAttributes<string|null, string|null>
+ */
 class CryptedCast implements CastsAttributes
 {
     private ?CryptedService $crypto = null;

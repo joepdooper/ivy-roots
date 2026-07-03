@@ -2,11 +2,18 @@
 
 namespace Ivy\Shared\Infrastructure\Service;
 
-use Illuminate\Database\Eloquent\Builder;
+use Ivy\Shared\Base\Entity;
+use Ivy\Shared\Infrastructure\Database\EntityBuilder;
 
 class RelationPathService
 {
-    public function resolve(object $model, string $path, Builder $query): array
+    /**
+     * @param Entity $model
+     * @param string $path
+     * @param EntityBuilder<Entity> $query
+     * @return array{table: string, field: string}
+     */
+    public function resolve(Entity $model, string $path, EntityBuilder $query): array
     {
         $segments = explode('.', $path);
         $field = array_pop($segments);

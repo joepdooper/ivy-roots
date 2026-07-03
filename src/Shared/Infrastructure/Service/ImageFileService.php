@@ -25,7 +25,13 @@ class ImageFileService extends FileService
                 $file->generateFileName();
             }
 
-            $tmpPath = $file->getUploadFile()->getPathname();
+            $tmpFile = $file->getUploadFile();
+
+            if ($tmpFile === null) {
+                throw new ImageFileException('No uploaded file provided');
+            }
+
+            $tmpPath = $tmpFile->getPathname();
 
             $imageInfo = getimagesize($tmpPath);
 
@@ -66,6 +72,8 @@ class ImageFileService extends FileService
 
             $maxWidth = (int) $file->getImageWidth();
 
+            $type = (int) $type;
+
             $writeOriginal = function ($resource) use ($type, $targetPath) {
                 return match ($type) {
                     IMAGETYPE_JPEG => imagejpeg($resource, $targetPath, 90),
@@ -96,9 +104,12 @@ class ImageFileService extends FileService
                 return;
             }
 
+            $origWidth  = (int) $origWidth;
+            $origHeight = (int) $origHeight;
+
             $ratio = $origWidth / $origHeight;
             $newWidth = $maxWidth;
-            $newHeight = (int) round($newWidth / $ratio);
+            $newHeight = max(1, (int) round($newWidth / $ratio));
 
             $dst = imagecreatetruecolor($newWidth, $newHeight);
 
@@ -109,8 +120,10 @@ class ImageFileService extends FileService
             if (in_array($type, [IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP], true)) {
                 imagealphablending($dst, false);
                 imagesavealpha($dst, true);
-
                 $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+                if ($transparent === false) {
+                    throw new ImageFileException('Failed to allocate transparent color');
+                }
                 imagefill($dst, 0, 0, $transparent);
             }
 

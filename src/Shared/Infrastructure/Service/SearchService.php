@@ -3,7 +3,8 @@
 namespace Ivy\Shared\Infrastructure\Service;
 
 use Illuminate\Database\Eloquent\Builder;
-use Ivy\Shared\Presentation\Listing\PaginationState;
+use Ivy\Shared\Base\Entity;
+use Ivy\Shared\Infrastructure\Database\EntityBuilder;
 use Ivy\Shared\Presentation\Listing\SearchState;
 use Ivy\Shared\Traits\ResolvesRequestInput;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,11 +13,17 @@ class SearchService
 {
     use ResolvesRequestInput;
 
+    /**
+     * @template TModel of Entity
+     * @param EntityBuilder<TModel> $query
+     * @param array<int, string> $columns
+     * @return EntityBuilder<TModel>
+     */
     public function apply(
-        Builder $query,
+        EntityBuilder $query,
         Request $request,
         array $columns = []
-    ): Builder {
+    ): EntityBuilder {
 
         $term = $this->string($request, 'search');
 
@@ -52,12 +59,15 @@ class SearchService
         return $query;
     }
 
+    /**
+     * @template TModel of Entity
+     * @param Builder<TModel> $query
+     */
     protected function applyRelationSearch(
         Builder $query,
         string $path,
         string $term
     ): void {
-
         $segments = explode('.', $path);
         $field = array_pop($segments);
         $relation = implode('.', $segments);

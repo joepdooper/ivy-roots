@@ -8,6 +8,7 @@ class RouterManager
 {
     private static ?Router $router = null;
 
+    /** @var array<int, callable> */
     private static array $errorHandlers = [];
 
     public static function router(): Router

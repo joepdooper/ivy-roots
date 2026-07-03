@@ -3,10 +3,15 @@
 namespace Ivy\Shared\Infrastructure\Database;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Ivy\Shared\Domain\Collection\EntityCollection;
 use Ivy\Shared\Presentation\Listing\PaginationState;
 use Ivy\Shared\Presentation\Listing\SearchState;
 
+/**
+ * @template TModel of Model
+ * @extends Builder<Model>
+ */
 class EntityBuilder extends Builder
 {
     protected ?PaginationState $paginationState = null;
@@ -37,6 +42,9 @@ class EntityBuilder extends Builder
         return $this->searchState;
     }
 
+    /**
+     * @param array<int, string> $columns
+     */
     public function get($columns = ['*']): EntityCollection
     {
         /** @var EntityCollection $collection */
