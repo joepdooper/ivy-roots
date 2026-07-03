@@ -80,7 +80,7 @@ class PluginService
      */
     public static function getMissingDependencies(array $dependencies): array
     {
-        $existing = Plugin::whereIn('name', $dependencies)->pluck('name')->all();
+        $existing = Plugin::whereIn('name', $dependencies)->pluck('name')->all()->toArray();
         return array_values(array_diff($dependencies, $existing));
     }
 }

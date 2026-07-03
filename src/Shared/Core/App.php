@@ -78,7 +78,7 @@ class App
 
     private function initPlugins(AuthService $auth): void
     {
-        $plugins = Plugin::select('name', 'interface')
+        $plugins = Plugin::query()->select('name', 'interface')
             ->where('active', 1)
             ->get();
 

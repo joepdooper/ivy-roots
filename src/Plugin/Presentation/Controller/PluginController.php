@@ -59,7 +59,7 @@ class PluginController extends Controller
             ? Plugin::where('url', $id)->value('id')
             : null;
 
-        $installedPlugins = Plugin::all()->map(function ($plugin) use (&$installedUrls) {
+        $installedPlugins = collect(Plugin::all())->map(function ($plugin) use (&$installedUrls) {
             $loader = new PluginInfoLoader();
             $factory = new PluginInfoFactory();
 

@@ -8,10 +8,10 @@ class Language
 {
     protected static string $defaultLang = 'en';
 
-    /** @var array */
+    /** @var array<string, array<string, mixed>> */
     protected static array $translations = [];
 
-    /** @var array */
+    /** @var array<string, bool> */
     protected static array $loadedFiles = [];
 
     public static function load(?string $lang = null): void
@@ -24,9 +24,11 @@ class Language
     }
 
     /**
+     * @param string $key
      * @param array<string, string>|null $variables
+     * @return string
      */
-    public static function translate(string $key, ?array $variables = []): array|string
+    public static function translate(string $key, ?array $variables = []): string
     {
         $translation = $key;
         $keys = explode('.', $key);
@@ -77,6 +79,10 @@ class Language
                     },
                     $translation
                 );
+
+                if (!is_string($translation)) {
+                    $translation = '';
+                }
             }
         }
 
@@ -110,9 +116,9 @@ class Language
     }
 
     /**
-     * @param string[] $translations
-     * @param string[] $keys
-     * @return array|string
+     * @param array<string, mixed> $translations
+     * @param array<int, string> $keys
+     * @return string|array<string, mixed>
      */
     private static function getNestedTranslation(array $translations, array $keys): array|string
     {

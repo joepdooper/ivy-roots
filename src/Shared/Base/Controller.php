@@ -29,7 +29,7 @@ abstract class Controller
         $this->request = Container::getInstance()->make(Request::class);
         $this->flashBag = SessionManager::getFlashBag();
         $this->authService = new AuthService();
-        $this->redirect = new Redirector($this->request, $this->flashBag);
+        $this->redirect = new Redirector($this->request);
     }
 
     protected function redirect(string $url = '', int $statusCode = 302): void
@@ -39,7 +39,7 @@ abstract class Controller
     }
 
     /**
-     * @param mixed[]  $data
+     * @param array<int, mixed> $data
      */
     protected function json(array $data, int $status = 200): JsonResponse
     {

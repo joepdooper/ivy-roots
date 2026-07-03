@@ -9,6 +9,9 @@ abstract class Form
 {
     protected Validator $validator;
 
+    /**
+     * @return array<string, array<int, string>>
+     */
     protected function defaultRules(): array
     {
         return [
@@ -16,8 +19,14 @@ abstract class Form
         ];
     }
 
+    /**
+     * @return array<string, array<int, string>>
+     */
     abstract protected function rules(): array;
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function validate(array $data): ValidationResult
     {
         $rules = array_merge(

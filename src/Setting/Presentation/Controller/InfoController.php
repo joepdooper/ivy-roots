@@ -8,7 +8,6 @@ use Ivy\Setting\Domain\Entity\Info;
 use Ivy\Setting\Presentation\Form\InfoForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Template\Presentation\View\View;
-use JetBrains\PhpStorm\NoReturn;
 
 class InfoController extends Controller
 {
@@ -139,7 +138,7 @@ class InfoController extends Controller
         $this->redirect('admin/info');
     }
 
-    protected function resolveRefererContext(string $url = '', int $statusCode = 302): ?string
+    protected function resolveRefererContext(): ?string
     {
         $refererPath = $this->getRefererPath();
 
@@ -148,7 +147,13 @@ class InfoController extends Controller
             $segments = explode('/', (string) $refererPath);
 
             if ($segments[0] === 'plugin') {
-                $this->info->plugin_id = Plugin::where('url', $segments[1])->value('id');
+                $id = Plugin::query()
+                    ->where('url', $segments[1])
+                    ->value('id');
+
+                if ($id !== null) {
+                    $this->info->plugin_id = (int) $id;
+                }
             }
         }
 

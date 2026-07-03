@@ -2,6 +2,7 @@
 
 namespace Ivy\Setting\Domain\Entity;
 
+use Ivy\Setting\Domain\Handler\SettingHandler;
 use Ivy\Setting\Infrastructure\Registry\SettingRegistry;
 use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Traits\HasPolicies;
@@ -43,6 +44,7 @@ class Setting extends Entity
 
             foreach ($handlers as $handler) {
                 $instance = new $handler();
+                /** @var SettingHandler $instance */
                 $instance->handle(
                     setting: $setting,
                     bool: $setting->bool,

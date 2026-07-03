@@ -142,7 +142,7 @@ class SettingController extends Controller
         $this->redirect('admin/setting');
     }
 
-    protected function resolveRefererContext(string $url = '', int $statusCode = 302): ?string
+    protected function resolveRefererContext(): ?string
     {
         $refererPath = $this->getRefererPath();
 
@@ -151,8 +151,13 @@ class SettingController extends Controller
             $segments = explode('/', (string) $refererPath);
 
             if ($segments[0] === 'plugin') {
+                $id = Plugin::query()
+                    ->where('url', $segments[1])
+                    ->value('id');
 
-                $this->setting->plugin_id = Plugin::where('url', $segments[1])->value('id');
+                if ($id !== null) {
+                    $this->setting->plugin_id = (int) $id;
+                }
             }
         }
 

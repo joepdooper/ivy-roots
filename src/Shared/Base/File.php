@@ -99,7 +99,22 @@ abstract class File
 
     protected function isMimeAllowed(): bool
     {
-        return array_any($this->getAllowedMimeTypes(), fn($allowed) => $allowed === $this->mimeType || (str_ends_with($allowed, '/*') && str_starts_with($this->mimeType, substr($allowed, 0, strpos($allowed, '/')) . '/')));
+        if ($this->mimeType === null) {
+            return false;
+        }
+
+        return array_any(
+            $this->getAllowedMimeTypes(),
+            fn($allowed) =>
+                $allowed === $this->mimeType ||
+                (
+                    str_ends_with($allowed, '/*') &&
+                    str_starts_with(
+                        $this->mimeType,
+                        substr($allowed, 0, strpos($allowed, '/') ?: 0) . '/'
+                    )
+                )
+        );
     }
 
     public function remove(?string $fileName = null): void
@@ -109,7 +124,13 @@ abstract class File
         }
     }
 
+    /**
+     * @return array<int, string>
+     */
     abstract public function getAllowedMimeTypes(): array;
 
+    /**
+     * @return array<int, string>
+     */
     abstract public function getAllowedExtensions(): array;
 }

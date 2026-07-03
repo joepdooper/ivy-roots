@@ -3,13 +3,13 @@
 namespace Ivy\Shared\Base;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Ivy\Shared\Domain\Collection\EntityCollection;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Ivy\Shared\Infrastructure\Database\EntityBuilder;
 
 /**
  * @method static static where(string $column, mixed $value = null)
- * @method static static whereIn(string $column, array $values)
+ * @method static static whereIn(string $column, array<int, mixed> $values)
  * @method static static select(string ...$columns)
  * @method static static find(int $id)
  * @method static static first()
@@ -27,7 +27,11 @@ abstract class Entity extends Model
         return new EntityBuilder($query);
     }
 
-    public function newCollection(array $models = []): EntityCollection
+    /**
+     * @param array<int|string, static> $models
+     * @return EntityCollection|Collection<int|string, static>
+     */
+    public function newCollection(array $models = []): EntityCollection|Collection
     {
         $collection = new EntityCollection($models);
 
