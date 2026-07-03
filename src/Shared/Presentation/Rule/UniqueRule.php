@@ -3,18 +3,26 @@
 namespace Ivy\Shared\Presentation\Rule;
 
 use BlakvGhost\PHPValidator\Contracts\Rule;
+use Illuminate\Database\Eloquent\Model;
 use Ivy\Shared\Core\Language;
 
 class UniqueRule implements Rule
 {
     protected string $field;
 
-    public function __construct(protected array $parameters = []) {}
+    public function __construct(
+        /** @var array<int, class-string|mixed> $parameters */
+        protected array $parameters = []
+    ) {}
 
-    public function passes(string $field, $value, array $data): bool
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function passes(string $field, string $value, array $data): bool
     {
         $this->field = $field;
 
+        /** @var class-string<Model> $modelClass */
         $modelClass = $this->parameters[0] ?? null;
 
         if (!$modelClass) {

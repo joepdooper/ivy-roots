@@ -15,6 +15,13 @@ class CsrfVerifier implements MiddlewareInterface
             $csrfToken = SessionManager::get('csrf_token');
             $submitted = $request->request->get('csrf_token', '');
 
+            if (!is_string($csrfToken)) {
+                $csrfToken = '';
+            }
+            if (!is_string($submitted)) {
+                $submitted = '';
+            }
+
             if (! $csrfToken || ! hash_equals($csrfToken, $submitted)) {
 
                 SessionManager::getFlashBag()->add(
@@ -22,7 +29,10 @@ class CsrfVerifier implements MiddlewareInterface
                     'No valid security token.'
                 );
 
-                new RedirectResponse($request->headers->get('referer'))->send();
+                $referer = $request->headers->get('referer');
+                $url = is_string($referer) && $referer !== '' ? $referer : '/';
+
+                new RedirectResponse($url)->send();
                 exit;
             }
         }

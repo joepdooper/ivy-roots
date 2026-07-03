@@ -18,7 +18,7 @@ class RequestNormalizer implements MiddlewareInterface
         $request->query->replace($query);
     }
 
-    private function sanitize(&$value): void
+    private function sanitize(mixed &$value): void
     {
         if (is_string($value)) {
             $value = trim($value);

@@ -24,7 +24,7 @@ abstract class Entity extends Model
 {
     /**
      * @param mixed $query
-     * @return EntityBuilder<Entity>
+     * @return EntityBuilder<Model>
      */
     public function newEloquentBuilder($query): EntityBuilder
     {
