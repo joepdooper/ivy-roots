@@ -5,20 +5,18 @@ namespace Ivy\Shared\Infrastructure\Http;
 use Ivy\Shared\Core\Path;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 
-class Redirector
+readonly class Redirector
 {
     public function __construct(
-        private Request           $request,
-        private FlashBagInterface $flashBag
+        private Request $request,
     )
     {
     }
 
     public function to(string $url = '', int $statusCode = 302): never
     {
-        new RedirectResponse(Path::get('BASE_PATH') . $ur, $statusCode)->send();
+        new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode)->send();
         exit;
     }
 
