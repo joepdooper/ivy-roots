@@ -49,7 +49,7 @@ class EntityBuilder extends Builder
      */
     public function get($columns = ['*']): EntityCollection
     {
-        /** @var EntityCollection<Entity> $collection */
+        /** @var EntityCollection<TModel> $collection */
         $collection = parent::get($columns);
 
         if ($this->paginationState !== null) {
