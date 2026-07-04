@@ -35,11 +35,15 @@ abstract class Entity extends Model
 
     /**
      * @param array<int|string, static> $models
-     * @return EntityCollection|Collection<int|string, static>
+     * @return EntityCollection<static>|Collection<int|string, static>
      */
     public function newCollection(array $models = []): EntityCollection|Collection
     {
-        $collection = new EntityCollection($models);
+        /** @var array<int, static> $modelsIntKeys */
+        $modelsIntKeys = array_values($models);
+
+        /** @var EntityCollection<static> $collection */
+        $collection = new EntityCollection($modelsIntKeys);
 
         if (
             method_exists(static::class, 'paginationState') &&

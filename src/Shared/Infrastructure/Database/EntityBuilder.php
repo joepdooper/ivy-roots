@@ -4,6 +4,7 @@ namespace Ivy\Shared\Infrastructure\Database;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Domain\Collection\EntityCollection;
 use Ivy\Shared\Presentation\Listing\PaginationState;
 use Ivy\Shared\Presentation\Listing\SearchState;
@@ -48,7 +49,7 @@ class EntityBuilder extends Builder
      */
     public function get($columns = ['*']): EntityCollection
     {
-        /** @var EntityCollection<TModel> $collection */
+        /** @var EntityCollection<Entity> $collection */
         $collection = parent::get($columns);
 
         if ($this->paginationState !== null) {
