@@ -2,8 +2,6 @@
 
 namespace Ivy\Shared\Presentation\Listing;
 
-use Illuminate\Support\Collection;
-
 class PaginationState
 {
     public function __construct(
@@ -11,9 +9,11 @@ class PaginationState
         public readonly int $perPage,
         public readonly int $total,
         public readonly int $lastPage,
+        /** @var int[] */
         public array $perPageOptions = [5, 10, 25, 50, 100],
     ) {}
 
+    /** @return int[] */
     public function pages(): array
     {
         return range(1, $this->lastPage);

@@ -12,7 +12,10 @@ use Symfony\Component\HttpFoundation\Request;
 
 class BladeEngine implements ViewEngineInterface
 {
+    /** @phpstan-ignore-next-line property.unused */
     private AuthService $auth;
+
+    /** @phpstan-ignore-next-line property.unused */
     private Request $request;
 
 
@@ -27,8 +30,6 @@ class BladeEngine implements ViewEngineInterface
      */
     public function boot(): void
     {
-        $this->auth;
-        $this->request;
         throw new Exception('Blade engine is not implemented yet.');
     }
 

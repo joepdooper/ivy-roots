@@ -2,6 +2,7 @@
 
 namespace Ivy\Shared\Traits;
 
+/** @phpstan-ignore-next-line trait.unused */
 trait HasFilters
 {
     public function filter(array $filters): static

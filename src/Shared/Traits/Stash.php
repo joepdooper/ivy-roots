@@ -4,6 +4,7 @@ namespace Ivy\Shared\Traits;
 
 trait Stash
 {
+    /** @var array<class-string<self>, mixed> */
     private static array $stashData = [];
 
     public static function stash(): static

@@ -14,10 +14,9 @@ class SearchService
     use ResolvesRequestInput;
 
     /**
-     * @template TModel of Entity
-     * @param EntityBuilder<TModel> $query
+     * @param EntityBuilder<Entity> $query
      * @param array<int, string> $columns
-     * @return EntityBuilder<TModel>
+     * @return EntityBuilder<Entity>
      */
     public function apply(
         EntityBuilder $query,
@@ -48,6 +47,7 @@ class SearchService
                     continue;
                 }
 
+                /** @var EntityBuilder<Entity> $q */
                 $this->applyRelationSearch($q, $column, $term);
             }
         });
@@ -60,11 +60,12 @@ class SearchService
     }
 
     /**
-     * @template TModel of Entity
-     * @param Builder<TModel> $query
+     * @param EntityBuilder<Entity> $query
+     * @param string $path
+     * @param string $term
      */
     protected function applyRelationSearch(
-        Builder $query,
+        EntityBuilder $query,
         string $path,
         string $term
     ): void {

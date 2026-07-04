@@ -2,6 +2,7 @@
 
 namespace Ivy\Shared\Base;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Ivy\Shared\Domain\Collection\EntityCollection;
@@ -17,6 +18,7 @@ use Ivy\Shared\Infrastructure\Database\EntityBuilder;
  * @method static static value(string $column)
  * @method static static create(array<string, mixed> $attributes)
  * @method static static handle(Entity $entity, bool $bool)
+ * @method static Builder<static> orderByRaw(string $expression)
  * @method static static get()
  * @method static static all()
  */

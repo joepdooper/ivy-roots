@@ -10,6 +10,7 @@ use Ivy\Template\Domain\Entity\Template;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
 use Ivy\Template\Presentation\Form\TemplateForm;
 use Ivy\Template\Presentation\View\View;
+use Ivy\User\Domain\Exception\AuthorizationException;
 
 class TemplateController extends Controller
 {
@@ -33,6 +34,9 @@ class TemplateController extends Controller
         }
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function index(): void
     {
         $this->template->authorize('index');
@@ -47,10 +51,6 @@ class TemplateController extends Controller
     {
         if (is_int($template)) {
             $template = Template::find($template);
-        }
-
-        if (! $template) {
-            return;
         }
 
         $template->fill($data);
@@ -69,6 +69,9 @@ class TemplateController extends Controller
         );
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function sync(): void
     {
         $this->template->authorize('sync');

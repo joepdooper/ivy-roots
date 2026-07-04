@@ -16,6 +16,9 @@ class View
         self::$engine->boot();
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     public static function render(string $name, array $params = [], ?string $block = null): void
     {
         $flashBag = SessionManager::getFlashBag();

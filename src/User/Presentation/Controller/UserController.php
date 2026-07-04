@@ -308,7 +308,7 @@ class UserController extends Controller
 
         if ($result->data['email']) {
             try {
-                $this->authService->auth()->forgotPassword($result->data['email'], function ($selector, $token) {
+                $this->authService->auth()->forgotPassword($result->data['email'], function ($selector, $token) use($result) {
                     $url = Path::get('PUBLIC_URL') . 'user/reset/' . urlencode($selector) . '/' . urlencode($token);
                     // send email
                     $mail = new MailService;

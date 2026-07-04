@@ -7,13 +7,17 @@ use Ivy\Template\Infrastructure\Manager\TemplateManager;
 
 final class ButtonRenderer
 {
+    /** @var array<string, string> */
     private array $templateCache = [];
 
     public function __construct(
-        private Engine $latte,
-        private TemplateManager $templates
+        private readonly Engine $latte,
+        private readonly TemplateManager $templates
     ) {}
 
+    /**
+     * @param array<string, mixed> $args
+     */
     public function render(array $args): string
     {
         $type = $args['type'] ?? null;

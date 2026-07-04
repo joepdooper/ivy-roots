@@ -8,11 +8,9 @@ use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Infrastructure\Manager\CsrfManager;
 use Ivy\Shared\Infrastructure\Manager\HookManager;
 use Ivy\Shared\Infrastructure\Manager\SecurityManager;
-use Ivy\Shared\Presentation\Routing\QueryBuilder;
 use Ivy\Template\Application\Contracts\ViewEngineInterface;
 use Ivy\Template\Infrastructure\Manager\AssetManager;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
-use Ivy\Template\Presentation\View\View;
 use Ivy\User\Application\Service\AuthService;
 use Latte\Engine;
 use Latte\Extension;
@@ -29,13 +27,11 @@ class LatteEngine implements ViewEngineInterface
     private Engine $latte;
     private AuthService $auth;
     private Request $request;
-    private QueryBuilder $queryBuilder;
 
     public function __construct(AuthService $auth, Request $request)
     {
         $this->latte = new Engine();
         $this->auth = $auth;
-        $this->queryBuilder = new QueryBuilder();
         $this->request = $request;
     }
 
@@ -49,6 +45,9 @@ class LatteEngine implements ViewEngineInterface
         $this->registerProviders();
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     public function render(string $template, array $params = [], ?string $block = null): void
     {
         $this->latte->render($template, $params, $block);
@@ -76,7 +75,7 @@ class LatteEngine implements ViewEngineInterface
         );
 
         $this->latte->addFunction('text', fn ($key, $vars = null) =>
-            Language::translate($key, $vars) ?? $key
+            Language::translate($key, $vars)
         );
 
         $this->latte->addFunction('path', fn ($key) => Path::get($key));
@@ -174,7 +173,7 @@ class LatteEngine implements ViewEngineInterface
         $this->latte->addFunction('parseDate', fn ($v) => Carbon::parse($v));
 
         $this->latte->addFunction('monthName', fn ($i) =>
-            Carbon::create()->month($i)->format('F')
+            Carbon::create()?->month($i)->format('F')
         );
 
         $this->latte->addFunction('value', fn ($key, $default = null) =>
