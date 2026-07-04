@@ -8,7 +8,8 @@ use Ivy\Shared\Traits\HasPolicies;
 
 /**
  * @property int $user_id
- * @property string $image
+ * @property ?string $image
+ * @property-read User|null $user
  */
 class Profile extends Entity
 {
@@ -19,6 +20,9 @@ class Profile extends Entity
         'image',
     ];
 
+    /**
+     * @return HasOne<User, $this>
+     */
     public function user(): HasOne
     {
         return $this->hasOne(User::class, 'id', 'user_id');

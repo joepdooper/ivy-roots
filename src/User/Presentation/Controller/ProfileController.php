@@ -58,7 +58,7 @@ class ProfileController extends Controller
                 ->where('user_id', $_SESSION['auth_user_id'])
                 ->first();
 
-            if ($profile && $profile?->user) {
+            if ($profile && $profile->user) {
 
                 $profile->user->fill([
                     'username' => $result->data['username'],

@@ -5,6 +5,8 @@ namespace Ivy\User\Application\Service;
 use Delight\Auth\Auth;
 use Delight\Auth\Role;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\Eloquent\Model;
+use Ivy\Shared\Base\Entity;
 use Ivy\User\Domain\Entity\Profile;
 use Ivy\User\Domain\Entity\User;
 
@@ -78,7 +80,7 @@ class AuthService
         );
     }
 
-    public function can(string $action, $model): bool
+    public function can(string $action, mixed $model): bool
     {
         return (bool) $model->policy($action);
     }

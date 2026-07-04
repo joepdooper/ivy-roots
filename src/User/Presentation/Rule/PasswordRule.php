@@ -9,15 +9,17 @@ class PasswordRule implements Rule
 {
     protected string $field;
 
+    /**
+     * @param array<string, mixed> $parameters
+     */
     public function __construct(protected array $parameters = []) {}
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function passes(string $field, $value, array $data): bool
     {
         $this->field = $field;
-
-        if (!is_string($value)) {
-            return false;
-        }
 
         return preg_match(
                 '/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/',

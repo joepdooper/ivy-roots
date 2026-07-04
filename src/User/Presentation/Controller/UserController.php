@@ -23,6 +23,7 @@ use Ivy\Shared\Infrastructure\Service\MailService;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Entity\Profile;
 use Ivy\User\Domain\Entity\User;
+use Ivy\User\Domain\Exception\AuthorizationException;
 use Ivy\User\Presentation\Form\LoginForm;
 use Ivy\User\Presentation\Form\RegisterForm;
 use Ivy\User\Presentation\Form\ResetForm;
@@ -61,7 +62,7 @@ class UserController extends Controller
     }
 
     /**
-     * @throws UnknownIdException
+     * @throws UnknownIdException|AuthorizationException
      */
     public function update(User|int $user, mixed $data): void
     {
@@ -93,6 +94,9 @@ class UserController extends Controller
         );
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function delete(User|int $user): void
     {
         if (is_int($user)) {
@@ -116,7 +120,7 @@ class UserController extends Controller
     }
 
     /**
-     * @throws UnknownIdException
+     * @throws UnknownIdException|AuthorizationException
      */
     public function sync(): void
     {
@@ -222,7 +226,7 @@ class UserController extends Controller
         }
 
         try {
-            $this->authService->auth()->login($this->request->request->get('email'), $this->request->request->get('password'));
+            $this->authService->auth()->login((string) $this->request->request->get('email'), (string) $this->request->request->get('password'));
             $this->flashBag->add('success', 'Welcome ' . $this->authService->auth()->getUsername());
             $this->redirect('admin/profile');
         } catch (InvalidEmailException|InvalidPasswordException) {
@@ -335,7 +339,7 @@ class UserController extends Controller
         }
         if ($result->data['password']) {
             try {
-                $this->authService->auth()->resetPassword($this->request->request->get('selector'), $this->request->request->get('token'), $this->request->request->get('password'));
+                $this->authService->auth()->resetPassword((string) $this->request->request->get('selector'), (string) $this->request->request->get('token'), (string) $this->request->request->get('password'));
                 $this->flashBag->add('success', 'Password has been reset');
                 $this->redirect('user/login');
             } catch (InvalidSelectorTokenPairException) {
