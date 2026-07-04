@@ -3,12 +3,14 @@
 namespace Ivy\Shared\Domain\Collection;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Presentation\Listing\PaginationState;
 use Ivy\Shared\Presentation\Listing\SearchState;
 
 /**
- * @extends Collection<int|string, Entity>
+ * @template TModel of Model
+ * @extends Collection<int, TModel>
  */
 class EntityCollection extends Collection
 {

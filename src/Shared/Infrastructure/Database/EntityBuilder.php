@@ -10,7 +10,7 @@ use Ivy\Shared\Presentation\Listing\SearchState;
 
 /**
  * @template TModel of Model
- * @extends Builder<Model>
+ * @extends Builder<TModel>
  */
 class EntityBuilder extends Builder
 {
@@ -44,10 +44,11 @@ class EntityBuilder extends Builder
 
     /**
      * @param array<int, string> $columns
+     * @return EntityCollection<TModel>
      */
     public function get($columns = ['*']): EntityCollection
     {
-        /** @var EntityCollection $collection */
+        /** @var EntityCollection<TModel> $collection */
         $collection = parent::get($columns);
 
         if ($this->paginationState !== null) {

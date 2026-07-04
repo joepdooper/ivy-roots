@@ -79,8 +79,7 @@ class ImageFileService extends FileService
                     IMAGETYPE_JPEG => imagejpeg($resource, $targetPath, 90),
                     IMAGETYPE_PNG  => imagepng($resource, $targetPath),
                     IMAGETYPE_GIF  => imagegif($resource, $targetPath),
-                    IMAGETYPE_WEBP => imagewebp($resource, $targetPath, 80),
-                    default => false,
+                    IMAGETYPE_WEBP => imagewebp($resource, $targetPath, 80)
                 };
             };
 
