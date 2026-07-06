@@ -2,6 +2,7 @@
 
 namespace Ivy\Template\Infrastructure\Manager;
 
+use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Config\Environment;
 use Ivy\Shared\Core\Path;
 
@@ -15,9 +16,6 @@ class AssetManager
 
     /** @var array<string> */
     protected static array $module = [];
-
-    /** @var array<string> */
-    protected static array $vite = [];
 
     /**
      * Register a CSS asset.
@@ -49,6 +47,9 @@ class AssetManager
      */
     public static function getCSS(): array
     {
+        if(Environment::isProd() && Setting::stashGet('minify_css')->bool) {
+            self::$css = [Path::get('PUBLIC_URL').'css/minified.css'];
+        }
         return self::$css;
     }
 
@@ -58,6 +59,9 @@ class AssetManager
      */
     public static function getJS(): array
     {
+        if(Environment::isProd() && Setting::stashGet('minify_js')->bool) {
+            self::$js = [Path::get('PUBLIC_URL').'js/minified.js'];
+        }
         return self::$js;
     }
 
