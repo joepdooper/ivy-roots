@@ -4,9 +4,13 @@ namespace Ivy\Shared\Infrastructure\Service;
 
 use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Infrastructure\Database\EntityBuilder;
+use Ivy\Shared\Traits\ResolvesRequestInput;
+use Symfony\Component\HttpFoundation\Request;
 
-readonly class SortService
+class SortService
 {
+    use ResolvesRequestInput;
+
     public function __construct(
         private RelationPathService $relationPathService
     ) {}
@@ -18,13 +22,20 @@ readonly class SortService
      */
     public function apply(
         EntityBuilder $query,
-        string $column,
-        array $sortable,
+        Request $request,
+        array $columns = [],
         string $defaultColumn = 'id',
-        string $direction = 'asc'
+        string $defaultDirection = 'asc'
     ): EntityBuilder {
 
-        if (! in_array($column, $sortable, true)) {
+        $column = $this->string($request, 'sort', $defaultColumn);
+        $direction = strtolower($this->string($request, 'direction', $defaultDirection));
+
+        if (! in_array($direction, ['asc', 'desc'], true)) {
+            $direction = $defaultDirection;
+        }
+
+        if (! in_array($column, $columns, true)) {
             $column = $defaultColumn;
         }
 

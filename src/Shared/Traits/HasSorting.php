@@ -16,24 +16,14 @@ trait HasSorting
         string $defaultColumn = 'id',
         string $defaultDirection = 'asc'
     ): Builder {
-
         $columns = static::$sortable ?? ['id'];
-
-        $column = $request->query->get('sort', $defaultColumn);
-        $direction = strtolower(
-            $request->query->get('direction', $defaultDirection)
-        );
-
-        if (! in_array($direction, ['asc', 'desc'], true)) {
-            $direction = $defaultDirection;
-        }
 
         return Container::getInstance()->get(SortService::class)->apply(
             $query,
-            $column,
+            $request,
             $columns,
             $defaultColumn,
-            $direction
+            $defaultDirection
         );
     }
 }

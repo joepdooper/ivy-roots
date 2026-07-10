@@ -2,7 +2,6 @@
 
 namespace Ivy\Shared\Infrastructure\Service;
 
-use Illuminate\Database\Eloquent\Builder;
 use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Infrastructure\Database\EntityBuilder;
 use Ivy\Shared\Presentation\Listing\SearchState;
@@ -33,7 +32,7 @@ class SearchService
         $model = $query->getModel();
         $table = $model->getTable();
 
-        $query->where(function (Builder $q) use ($table, $term, $columns) {
+        $query->where(function (EntityBuilder $q) use ($table, $term, $columns) {
 
             foreach ($columns as $column) {
 
@@ -71,7 +70,7 @@ class SearchService
         $field = array_pop($segments);
         $relation = implode('.', $segments);
 
-        $query->orWhereHas($relation, function (Builder $q) use ($field, $term) {
+        $query->orWhereHas($relation, function (EntityBuilder $q) use ($field, $term) {
             $q->where($field, 'LIKE', "%{$term}%");
         });
     }

@@ -2,9 +2,7 @@
 
 namespace Ivy\Shared\Base;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Ivy\Shared\Domain\Collection\EntityCollection;
 use Ivy\Shared\Infrastructure\Database\EntityBuilder;
 
@@ -18,7 +16,7 @@ use Ivy\Shared\Infrastructure\Database\EntityBuilder;
  * @method static static value(string $column)
  * @method static static create(array<string, mixed> $attributes)
  * @method static static handle(Entity $entity, bool $bool)
- * @method static Builder<static> orderByRaw(string $expression)
+ * @method static EntityBuilder<static> orderByRaw(string $expression)
  * @method static static get()
  * @method static static all()
  */
@@ -35,9 +33,9 @@ abstract class Entity extends Model
 
     /**
      * @param  array<int|string, static>  $models
-     * @return EntityCollection<static>|Collection<int|string, static>
+     * @return EntityCollection<static>
      */
-    public function newCollection(array $models = []): EntityCollection|Collection
+    public function newCollection(array $models = []): EntityCollection
     {
         /** @var array<int, static> $modelsIntKeys */
         $modelsIntKeys = array_values($models);
