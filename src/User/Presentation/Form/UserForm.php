@@ -12,11 +12,11 @@ class UserForm extends Form
     protected function rules(): array
     {
         return [
-            'id'=> ['required', 'numeric'],
+            'id' => ['required', 'numeric'],
             'super_admin' => ['in:0,1'],
             'admin' => ['in:0,1'],
             'editor' => ['in:0,1'],
-            'delete' => ['string']
+            'delete' => ['string'],
         ];
     }
 }

@@ -43,8 +43,8 @@ class ImageFileService extends FileService
 
             $src = match ($type) {
                 IMAGETYPE_JPEG => imagecreatefromjpeg($tmpPath),
-                IMAGETYPE_PNG  => imagecreatefrompng($tmpPath),
-                IMAGETYPE_GIF  => imagecreatefromgif($tmpPath),
+                IMAGETYPE_PNG => imagecreatefrompng($tmpPath),
+                IMAGETYPE_GIF => imagecreatefromgif($tmpPath),
                 IMAGETYPE_WEBP => imagecreatefromwebp($tmpPath),
                 default => throw new FileException('Unsupported image type'),
             };
@@ -54,21 +54,21 @@ class ImageFileService extends FileService
             }
 
             $targetDir = rtrim(Path::get('MEDIA_PATH'), DIRECTORY_SEPARATOR)
-                . DIRECTORY_SEPARATOR
-                . trim($file->getUploadPath(), DIRECTORY_SEPARATOR);
+                .DIRECTORY_SEPARATOR
+                .trim($file->getUploadPath(), DIRECTORY_SEPARATOR);
 
             if (! is_writable($targetDir)) {
-                throw new ImageFileException('Upload directory is not writable: ' . $targetDir);
+                throw new ImageFileException('Upload directory is not writable: '.$targetDir);
             }
 
             $fileName = $file->getFileName();
 
-            $targetPath = $targetDir . DIRECTORY_SEPARATOR . $fileName;
+            $targetPath = $targetDir.DIRECTORY_SEPARATOR.$fileName;
 
             $webpPath = $targetDir
-                . DIRECTORY_SEPARATOR
-                . pathinfo($fileName, PATHINFO_FILENAME)
-                . '.webp';
+                .DIRECTORY_SEPARATOR
+                .pathinfo($fileName, PATHINFO_FILENAME)
+                .'.webp';
 
             $maxWidth = (int) $file->getImageWidth();
 
@@ -77,8 +77,8 @@ class ImageFileService extends FileService
             $writeOriginal = function ($resource) use ($type, $targetPath) {
                 return match ($type) {
                     IMAGETYPE_JPEG => imagejpeg($resource, $targetPath, 90),
-                    IMAGETYPE_PNG  => imagepng($resource, $targetPath),
-                    IMAGETYPE_GIF  => imagegif($resource, $targetPath),
+                    IMAGETYPE_PNG => imagepng($resource, $targetPath),
+                    IMAGETYPE_GIF => imagegif($resource, $targetPath),
                     IMAGETYPE_WEBP => imagewebp($resource, $targetPath, 80)
                 };
             };
@@ -87,7 +87,7 @@ class ImageFileService extends FileService
                 copy($tmpPath, $targetPath);
 
                 if (! imagewebp($src, $webpPath, 80)) {
-                    throw new ImageFileException('Failed to write webp: ' . $webpPath);
+                    throw new ImageFileException('Failed to write webp: '.$webpPath);
                 }
 
                 return;
@@ -97,13 +97,13 @@ class ImageFileService extends FileService
                 copy($tmpPath, $targetPath);
 
                 if (! imagewebp($src, $webpPath, 80)) {
-                    throw new ImageFileException('Failed to write webp: ' . $webpPath);
+                    throw new ImageFileException('Failed to write webp: '.$webpPath);
                 }
 
                 return;
             }
 
-            $origWidth  = (int) $origWidth;
+            $origWidth = (int) $origWidth;
             $origHeight = (int) $origHeight;
 
             $ratio = $origWidth / $origHeight;
@@ -140,11 +140,11 @@ class ImageFileService extends FileService
             );
 
             if (! $writeOriginal($dst)) {
-                throw new ImageFileException('Failed to write original image: ' . $targetPath);
+                throw new ImageFileException('Failed to write original image: '.$targetPath);
             }
 
             if (! imagewebp($dst, $webpPath, 80)) {
-                throw new ImageFileException('Failed to write webp: ' . $webpPath);
+                throw new ImageFileException('Failed to write webp: '.$webpPath);
             }
         }
     }

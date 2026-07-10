@@ -5,8 +5,9 @@ namespace Ivy\Shared\Core;
 use Bramus\Router\Router;
 use Dotenv\Dotenv;
 use Illuminate\Container\Container;
-use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Plugin\Application\Contracts\PluginInterface;
+use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
 use Ivy\Setting\Domain\Entity\Info;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Setting\Infrastructure\Registry\SettingRegistry;
@@ -17,17 +18,16 @@ use Ivy\Shared\Infrastructure\Manager\LanguageManager;
 use Ivy\Shared\Infrastructure\Manager\RouterManager;
 use Ivy\Shared\Infrastructure\Manager\SecurityManager;
 use Ivy\Shared\Infrastructure\Service\SortService;
-use Ivy\Template\Infrastructure\Manager\TemplateManager;
-use Ivy\Template\Presentation\View\Engine\BladeEngine;
-use Ivy\User\Application\Service\AuthService;
-use Ivy\Template\Application\Handler\MinifyCssHandler;
-use Ivy\Template\Application\Handler\MinifyJsHandler;
 use Ivy\Shared\Presentation\Middleware\CsrfVerifier;
 use Ivy\Shared\Presentation\Middleware\MiddlewarePipeline;
 use Ivy\Shared\Presentation\Middleware\RequestNormalizer;
-use Ivy\Plugin\Infrastructure\Registry\PluginRegistry;
+use Ivy\Template\Application\Handler\MinifyCssHandler;
+use Ivy\Template\Application\Handler\MinifyJsHandler;
+use Ivy\Template\Infrastructure\Manager\TemplateManager;
+use Ivy\Template\Presentation\View\Engine\BladeEngine;
 use Ivy\Template\Presentation\View\Engine\LatteEngine;
 use Ivy\Template\Presentation\View\View;
+use Ivy\User\Application\Service\AuthService;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use Symfony\Component\HttpFoundation\Request;
 use Throwable;
@@ -35,17 +35,18 @@ use Throwable;
 class App
 {
     private Router $router;
+
     protected Container $container;
 
     private function guardUploadLimits(): void
     {
-        if($postMaxRaw = ini_get('post_max_size')) {
+        if ($postMaxRaw = ini_get('post_max_size')) {
             $postMax = (int) $postMaxRaw * match (strtolower(substr(trim($postMaxRaw), -1))) {
-                    'g' => 1024 * 1024 * 1024,
-                    'm' => 1024 * 1024,
-                    'k' => 1024,
-                    default => 1,
-                };
+                'g' => 1024 * 1024 * 1024,
+                'm' => 1024 * 1024,
+                'k' => 1024,
+                default => 1,
+            };
 
             if (((int) ($_SERVER['CONTENT_LENGTH'] ?? 0)) > $postMax && empty($_FILES)) {
                 throw new FileException('Upload exceeds server limit');
@@ -55,19 +56,19 @@ class App
 
     private function initDatabase(): void
     {
-        $databaseManager = new DatabaseManager();
+        $databaseManager = new DatabaseManager;
 
         $config = [
-            'driver'    => $_ENV['DB_DRIVER'],
-            'host'      => $_ENV['DB_HOST'],
-            'port'      => $_ENV['DB_PORT'],
-            'database'  => $_ENV['DB_DATABASE'],
-            'username'  => $_ENV['DB_USERNAME'],
-            'password'  => $_ENV['DB_PASSWORD'],
+            'driver' => $_ENV['DB_DRIVER'],
+            'host' => $_ENV['DB_HOST'],
+            'port' => $_ENV['DB_PORT'],
+            'database' => $_ENV['DB_DATABASE'],
+            'username' => $_ENV['DB_USERNAME'],
+            'password' => $_ENV['DB_PASSWORD'],
         ];
 
         if ($_ENV['DB_DRIVER'] === 'mysql') {
-            $config['charset']   = 'utf8mb4';
+            $config['charset'] = 'utf8mb4';
             $config['collation'] = 'utf8mb4_unicode_ci';
         }
 
@@ -92,11 +93,11 @@ class App
                 $active[$name] = true;
             }
 
-            if (!$class || !class_exists($class)) {
+            if (! $class || ! class_exists($class)) {
                 continue;
             }
 
-            $plugin = new $class();
+            $plugin = new $class;
 
             if ($plugin instanceof PluginInterface) {
                 $plugin->register($auth);
@@ -112,7 +113,7 @@ class App
 
         (Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
 
-        $this->container = new Container();
+        $this->container = new Container;
         $request = Request::createFromGlobals();
         $this->container->instance(Request::class, $request);
         Container::setInstance($this->container);
@@ -120,15 +121,15 @@ class App
         $this->container->singleton(SortService::class);
 
         $pipeline = new MiddlewarePipeline;
-        $pipeline->add(new RequestNormalizer());
-        $pipeline->add(new CsrfVerifier());
+        $pipeline->add(new RequestNormalizer);
+        $pipeline->add(new CsrfVerifier);
 
         ErrorManager::setErrorReporting();
         SecurityManager::setSecurityHeaders();
 
         $this->initDatabase();
 
-        $auth = new AuthService();
+        $auth = new AuthService;
         $this->container->instance(AuthService::class, $auth);
 
         $this->router = RouterManager::router();
@@ -161,7 +162,7 @@ class App
 
         try {
             $pipeline->handle($request, function () {
-                if (!$this->router->run()) {
+                if (! $this->router->run()) {
                     $this->router->trigger404();
                 }
             });

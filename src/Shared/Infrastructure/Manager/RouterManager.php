@@ -61,6 +61,7 @@ class RouterManager
     {
         if (isset(self::$errorHandlers[$code])) {
             call_user_func(self::$errorHandlers[$code], $message);
+
             return;
         }
 

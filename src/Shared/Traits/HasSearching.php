@@ -2,14 +2,14 @@
 
 namespace Ivy\Shared\Traits;
 
+use Illuminate\Container\Container;
 use Illuminate\Container\EntryNotFoundException;
 use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Database\Eloquent\Builder;
+use Ivy\Shared\Infrastructure\Service\SearchService;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Illuminate\Container\Container;
-use Ivy\Shared\Infrastructure\Service\SearchService;
 
 /** @phpstan-ignore-next-line trait.unused */
 trait HasSearching

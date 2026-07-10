@@ -10,7 +10,7 @@ class SettingRegistry
     protected static array $definitions = [];
 
     /**
-     * @param array<string, mixed> $config
+     * @param  array<string, mixed>  $config
      */
     public static function define(string $key, array $config): void
     {

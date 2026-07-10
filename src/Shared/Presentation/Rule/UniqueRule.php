@@ -16,7 +16,7 @@ class UniqueRule implements Rule
     ) {}
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function passes(string $field, string $value, array $data): bool
     {
@@ -25,7 +25,7 @@ class UniqueRule implements Rule
         /** @var class-string<Model> $modelClass */
         $modelClass = $this->parameters[0] ?? null;
 
-        if (!$modelClass) {
+        if (! $modelClass) {
             throw new \InvalidArgumentException('UniqueRule requires a model class.');
         }
 
@@ -34,11 +34,11 @@ class UniqueRule implements Rule
         $query = $model->newQuery()
             ->where($field, $value);
 
-        if (!empty($data['id'])) {
+        if (! empty($data['id'])) {
             $query->where('id', '!=', $data['id']);
         }
 
-        return !$query->exists();
+        return ! $query->exists();
     }
 
     public function message(): string

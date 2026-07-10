@@ -14,7 +14,7 @@ class ResetForm extends Form
     {
         return [
             'email' => ['email'],
-            'password' => [new PasswordRule()],
+            'password' => [new PasswordRule],
         ];
     }
 }

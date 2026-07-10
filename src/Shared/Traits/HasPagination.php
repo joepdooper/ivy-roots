@@ -7,7 +7,6 @@ use Illuminate\Container\EntryNotFoundException;
 use Illuminate\Contracts\Container\CircularDependencyException;
 use Illuminate\Database\Eloquent\Builder;
 use Ivy\Shared\Infrastructure\Service\PaginationService;
-use Ivy\Shared\Presentation\Listing\PaginationState;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\HttpFoundation\Request;

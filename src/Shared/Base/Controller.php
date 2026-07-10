@@ -17,8 +17,11 @@ use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 abstract class Controller
 {
     protected FlashBagInterface $flashBag;
+
     protected AuthService $authService;
+
     protected Request $request;
+
     protected Redirector $redirect;
 
     /**
@@ -28,7 +31,7 @@ abstract class Controller
     {
         $this->request = Container::getInstance()->make(Request::class);
         $this->flashBag = SessionManager::getFlashBag();
-        $this->authService = new AuthService();
+        $this->authService = new AuthService;
         $this->redirect = new Redirector($this->request);
     }
 
@@ -39,7 +42,7 @@ abstract class Controller
     }
 
     /**
-     * @param array<int, mixed> $data
+     * @param  array<int, mixed>  $data
      */
     protected function json(array $data, int $status = 200): JsonResponse
     {
@@ -56,7 +59,7 @@ abstract class Controller
         $referer = $this->request->headers->get('referer');
         $basePath = $this->request->getBasePath();
 
-        if (!$referer) {
+        if (! $referer) {
             return null;
         }
 
@@ -64,15 +67,15 @@ abstract class Controller
 
         $path = $parts['path'] ?? null;
 
-        if (!$path || !str_starts_with($path, $basePath)) {
+        if (! $path || ! str_starts_with($path, $basePath)) {
             return null;
         }
 
         $relativePath = ltrim(substr($path, strlen($basePath)), '/');
 
-        $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+        $query = isset($parts['query']) ? '?'.$parts['query'] : '';
 
-        return $relativePath . $query;
+        return $relativePath.$query;
     }
 
     protected function redirectToFormWithErrors(ValidationResult $result): void

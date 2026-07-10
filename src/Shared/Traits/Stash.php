@@ -11,7 +11,7 @@ trait Stash
     {
         $type = static::class;
 
-        if (!isset(self::$stashData[$type])) {
+        if (! isset(self::$stashData[$type])) {
             self::$stashData[$type] = $type::all();
         }
 
@@ -22,7 +22,7 @@ trait Stash
     {
         $type = static::class;
 
-        if (!isset(self::$stashData[$type])) {
+        if (! isset(self::$stashData[$type])) {
             throw new \RuntimeException('Call stash() before keyByColumn().');
         }
 
@@ -31,6 +31,7 @@ trait Stash
             ->mapWithKeys(function ($item) use ($column) {
                 $value = $item->{$column};
                 $key = strtolower(str_replace(' ', '_', $value));
+
                 return [$key => $item];
             })
             ->all();
@@ -45,7 +46,7 @@ trait Stash
     {
         self::$stashData[static::class][$key] = $value;
     }
-    
+
     public static function stashClear(): void
     {
         unset(self::$stashData[static::class]);

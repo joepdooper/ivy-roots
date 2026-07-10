@@ -5,7 +5,6 @@ namespace Ivy\Shared\Infrastructure\Service;
 use Ivy\Shared\Base\File;
 use Ivy\Shared\Core\Path;
 use Ivy\Shared\Domain\Exception\FileException;
-use Ivy\Shared\Domain\ValueObject\ImageFile;
 
 class FileService
 {
@@ -13,7 +12,7 @@ class FileService
     protected array $files = [];
 
     /**
-     * @param File|File[] ...$files
+     * @param  File|File[]  ...$files
      * @return $this
      */
     public function add(File|array ...$files): static

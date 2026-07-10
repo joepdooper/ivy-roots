@@ -3,9 +3,9 @@
 namespace Ivy\Template\Presentation\Controller;
 
 use Ivy\Setting\Domain\Entity\Setting;
-use Ivy\Template\Application\Asset\AssetPublisher;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
+use Ivy\Template\Application\Asset\AssetPublisher;
 use Ivy\Template\Domain\Entity\Template;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
 use Ivy\Template\Presentation\Form\TemplateForm;
@@ -15,13 +15,14 @@ use Ivy\User\Domain\Exception\AuthorizationException;
 class TemplateController extends Controller
 {
     protected Template $template;
+
     protected TemplateForm $templateForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->template = new Template();
-        $this->templateForm = new TemplateForm();
+        $this->template = new Template;
+        $this->templateForm = new TemplateForm;
     }
 
     public function before(): void
@@ -43,7 +44,7 @@ class TemplateController extends Controller
 
         View::render('admin/template.latte', [
             'templateBase' => basename((string) TemplateManager::getTemplateBase()),
-            'templateSub'  => basename((string) TemplateManager::getTemplateSub()),
+            'templateSub' => basename((string) TemplateManager::getTemplateSub()),
         ]);
     }
 
@@ -65,7 +66,7 @@ class TemplateController extends Controller
 
         $this->flashBag->add(
             'success',
-            $template->type . '-template updated successfully.'
+            $template->type.'-template updated successfully.'
         );
     }
 
@@ -104,11 +105,11 @@ class TemplateController extends Controller
     private function isAlwaysPublicPath(string $current): bool
     {
         $allowed = [
-            Path::get('PUBLIC_URL') . 'user/login',
-            Path::get('PUBLIC_URL') . 'user/reset',
-            Path::get('PUBLIC_URL') . 'user/register',
+            Path::get('PUBLIC_URL').'user/login',
+            Path::get('PUBLIC_URL').'user/reset',
+            Path::get('PUBLIC_URL').'user/register',
         ];
 
-        return array_any($allowed, fn($prefix) => $current === $prefix || str_starts_with($current, $prefix . '/'));
+        return array_any($allowed, fn ($prefix) => $current === $prefix || str_starts_with($current, $prefix.'/'));
     }
 }

@@ -43,30 +43,35 @@ class AssetManager
 
     /**
      * Get compiled CSS assets.
+     *
      * @return array<string>
      */
     public static function getCSS(): array
     {
-        if(Environment::isProd() && Setting::stashGet('minify_css')->bool) {
+        if (Environment::isProd() && Setting::stashGet('minify_css')->bool) {
             self::$css = [Path::get('PUBLIC_URL').'css/minified.css'];
         }
+
         return self::$css;
     }
 
     /**
      * Get compiled JS assets.
+     *
      * @return array<string>
      */
     public static function getJS(): array
     {
-        if(Environment::isProd() && Setting::stashGet('minify_js')->bool) {
+        if (Environment::isProd() && Setting::stashGet('minify_js')->bool) {
             self::$js = [Path::get('PUBLIC_URL').'js/minified.js'];
         }
+
         return self::$js;
     }
 
     /**
      * Get compiled JS module assets.
+     *
      * @return array<string>
      */
     public static function getModules(): array
@@ -76,7 +81,8 @@ class AssetManager
 
     /**
      * Handle adding and syncing asset in dev mode.
-     * @param array<string> $collection
+     *
+     * @param  array<string>  $collection
      */
     private static function addAsset(string $path, array &$collection): void
     {

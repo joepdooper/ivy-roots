@@ -16,9 +16,9 @@ class RegisterForm extends Form
     protected function rules(): array
     {
         return [
-            'username' => ['required', new UniqueRule([User::class]), new UserNameRule()],
+            'username' => ['required', new UniqueRule([User::class]), new UserNameRule],
             'email' => ['required', 'email', new UniqueRule([User::class])],
-            'password' => ['required', new PasswordRule()],
+            'password' => ['required', new PasswordRule],
         ];
     }
 }

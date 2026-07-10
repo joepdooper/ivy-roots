@@ -18,13 +18,13 @@ class PluginService
     {
         $file = self::getRealPath(Path::get('PLUGINS_PATH').$path);
 
-        if(!$file) {
+        if (! $file) {
             throw new Exception('No JSON file found: '.$path);
         }
 
         $content = file_get_contents($file);
 
-        if(!$content) {
+        if (! $content) {
             throw new Exception('JSON file could not be read: '.$path);
         }
 
@@ -74,13 +74,13 @@ class PluginService
     }
 
     /**
-     * @param list<string> $dependencies
-     *
+     * @param  list<string>  $dependencies
      * @return array<int<0, max>, string>
      */
     public static function getMissingDependencies(array $dependencies): array
     {
         $existing = Plugin::whereIn('name', $dependencies)->pluck('name')->all()->toArray();
+
         return array_values(array_diff($dependencies, $existing));
     }
 }

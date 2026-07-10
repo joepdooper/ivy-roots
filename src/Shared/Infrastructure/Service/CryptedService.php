@@ -13,7 +13,7 @@ class CryptedService
     {
         $appKey = $_ENV['APP_KEY'] ?? null;
 
-        if (!is_string($appKey) || $appKey === '') {
+        if (! is_string($appKey) || $appKey === '') {
             throw new RuntimeException('APP_KEY is missing');
         }
 
@@ -41,7 +41,7 @@ class CryptedService
 
         $cipher = sodium_crypto_secretbox($plaintext, $nonce, $this->key);
 
-        return base64_encode($nonce . $cipher);
+        return base64_encode($nonce.$cipher);
     }
 
     public function decrypt(string $payload): string

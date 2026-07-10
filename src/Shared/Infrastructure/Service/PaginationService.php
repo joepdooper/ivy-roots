@@ -13,7 +13,7 @@ class PaginationService
     use ResolvesRequestInput;
 
     /**
-     * @param EntityBuilder<Entity> $query
+     * @param  EntityBuilder<Entity>  $query
      * @return EntityBuilder<Entity>
      */
     public function apply(

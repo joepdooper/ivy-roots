@@ -34,7 +34,7 @@ class UserPolicy extends Policy
 
     public function delete(User $user): bool
     {
-        if(($user->id != $this->authService->auth()->getUserId()) && $this->canEditAsSuperAdmin()) {
+        if (($user->id != $this->authService->auth()->getUserId()) && $this->canEditAsSuperAdmin()) {
             return true;
         }
 

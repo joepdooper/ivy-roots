@@ -25,7 +25,7 @@ use Ivy\Shared\Infrastructure\Database\EntityBuilder;
 abstract class Entity extends Model
 {
     /**
-     * @param mixed $query
+     * @param  mixed  $query
      * @return EntityBuilder<Model>
      */
     public function newEloquentBuilder($query): EntityBuilder
@@ -34,7 +34,7 @@ abstract class Entity extends Model
     }
 
     /**
-     * @param array<int|string, static> $models
+     * @param  array<int|string, static>  $models
      * @return EntityCollection<static>|Collection<int|string, static>
      */
     public function newCollection(array $models = []): EntityCollection|Collection

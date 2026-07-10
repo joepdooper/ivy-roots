@@ -10,13 +10,11 @@ readonly class Redirector
 {
     public function __construct(
         private Request $request,
-    )
-    {
-    }
+    ) {}
 
     public function to(string $url = '', int $statusCode = 302): never
     {
-        new RedirectResponse(Path::get('BASE_PATH') . $url, $statusCode)->send();
+        new RedirectResponse(Path::get('BASE_PATH').$url, $statusCode)->send();
         exit;
     }
 
@@ -24,7 +22,7 @@ readonly class Redirector
     {
         $referer = $this->request->headers->get('referer');
 
-        if (!$referer) {
+        if (! $referer) {
             $this->to($fallback ?? '', $statusCode);
         }
 
@@ -32,7 +30,7 @@ readonly class Redirector
         $basePath = $this->request->getBasePath();
         $path = $parts['path'] ?? null;
 
-        if (!$path || !str_starts_with($path, $basePath)) {
+        if (! $path || ! str_starts_with($path, $basePath)) {
             $this->to($fallback ?? '', $statusCode);
         }
 

@@ -33,23 +33,23 @@ class Profile extends Entity
         $seconds_ago = time() - $last_login;
 
         if ($seconds_ago >= 31536000) {
-            return 'seen ' . intval($seconds_ago / 31536000) . ' years ago';
+            return 'seen '.intval($seconds_ago / 31536000).' years ago';
         }
 
         if ($seconds_ago >= 2419200) {
-            return 'seen ' . intval($seconds_ago / 2419200) . ' months ago';
+            return 'seen '.intval($seconds_ago / 2419200).' months ago';
         }
 
         if ($seconds_ago >= 86400) {
-            return 'seen ' . intval($seconds_ago / 86400) . ' days ago';
+            return 'seen '.intval($seconds_ago / 86400).' days ago';
         }
 
         if ($seconds_ago >= 3600) {
-            return 'seen ' . intval($seconds_ago / 3600) . ' hours ago';
+            return 'seen '.intval($seconds_ago / 3600).' hours ago';
         }
 
         if ($seconds_ago >= 60) {
-            return 'seen ' . intval($seconds_ago / 60) . ' minutes ago';
+            return 'seen '.intval($seconds_ago / 60).' minutes ago';
         }
 
         return 'seen less than a minute ago';

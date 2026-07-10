@@ -8,9 +8,7 @@ use Ivy\Shared\Infrastructure\Database\EntityBuilder;
 class RelationPathService
 {
     /**
-     * @param Entity $model
-     * @param string $path
-     * @param EntityBuilder<Entity> $query
+     * @param  EntityBuilder<Entity>  $query
      * @return array{table: string, field: string}
      */
     public function resolve(Entity $model, string $path, EntityBuilder $query): array

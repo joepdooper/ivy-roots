@@ -27,10 +27,10 @@ trait HasPolicies
             new ReflectionClass($modelClass)->getNamespaceName()
         );
 
-        $policyClassName = $modelName . 'Policy';
+        $policyClassName = $modelName.'Policy';
         $policyClass = "{$namespace}\\{$policyClassName}";
 
-        if (!class_exists($policyClass)) {
+        if (! class_exists($policyClass)) {
             throw new AuthorizationException("Policy not found: {$policyClass}");
         }
 
@@ -46,7 +46,7 @@ trait HasPolicies
     {
         $policy = $this->policyInstance();
 
-        if (!method_exists($policy, $action)) {
+        if (! method_exists($policy, $action)) {
             return false;
         }
 
@@ -55,9 +55,9 @@ trait HasPolicies
 
     public function authorize(string $action): void
     {
-        if (!$this->policy($action)) {
+        if (! $this->policy($action)) {
             throw new AuthorizationException(
-                "Not authorized to perform [{$action}] on " . static::class
+                "Not authorized to perform [{$action}] on ".static::class
             );
         }
     }

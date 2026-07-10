@@ -12,7 +12,7 @@ use Ivy\Shared\Traits\Stash;
  */
 class Template extends Entity
 {
-    use Stash, HasPolicies;
+    use HasPolicies, Stash;
 
     protected $fillable = [
         'type',

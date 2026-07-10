@@ -8,7 +8,9 @@ use Ivy\Template\Domain\Entity\Template;
 class TemplateManager
 {
     private static ?string $templateBase = null;
+
     private static ?string $templateSub = null;
+
     private static bool $initialized = false;
 
     /** @var array<string, string> */
@@ -33,8 +35,8 @@ class TemplateManager
         $templateBase = Template::where('type', 'base')->value('value');
         $templateSub = Template::where('type', 'sub')->value('value');
 
-        self::$templateBase = Path::get('TEMPLATES_PATH') . $templateBase . DIRECTORY_SEPARATOR;
-        self::$templateSub = Path::get('TEMPLATES_PATH') . $templateSub . DIRECTORY_SEPARATOR;
+        self::$templateBase = Path::get('TEMPLATES_PATH').$templateBase.DIRECTORY_SEPARATOR;
+        self::$templateSub = Path::get('TEMPLATES_PATH').$templateSub.DIRECTORY_SEPARATOR;
 
         if ($forceRefresh) {
             self::$cache = [];
@@ -56,15 +58,15 @@ class TemplateManager
                 continue;
             }
 
-            $fullPath = $path . $filename;
+            $fullPath = $path.$filename;
 
             if (file_exists($fullPath)) {
                 return self::$cache[$filename] = $fullPath;
             }
         }
 
-        $projectPath = Path::get('PROJECT_PATH') . $filename;
-        
+        $projectPath = Path::get('PROJECT_PATH').$filename;
+
         if (file_exists($projectPath)) {
             return self::$cache[$filename] = $projectPath;
         }
@@ -72,7 +74,7 @@ class TemplateManager
         return self::$cache[$filename] = $filename;
     }
 
-    public static function require(string $filename):void
+    public static function require(string $filename): void
     {
         require self::file($filename);
     }

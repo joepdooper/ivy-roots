@@ -14,7 +14,7 @@ class ImageFile extends File
         return [
             'image/jpeg',
             'image/png',
-            'image/gif'
+            'image/gif',
         ];
     }
 
@@ -24,7 +24,7 @@ class ImageFile extends File
             'jpg',
             'jpeg',
             'png',
-            'gif'
+            'gif',
         ];
     }
 

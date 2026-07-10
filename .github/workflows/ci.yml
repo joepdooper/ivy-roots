@@ -56,3 +56,7 @@ jobs:
       
       - name: Run PHPStan
         run: phpstan analyse src/ --level=8
+
+      # Run Pint
+      - name: Run Pint
+        run: vendor/bin/pint

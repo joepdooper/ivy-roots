@@ -3,8 +3,8 @@
 namespace Ivy\Setting\Presentation\Form;
 
 use Ivy\Setting\Domain\Entity\Setting;
-use Ivy\Shared\Base\Form;
 use Ivy\Setting\Presentation\Rule\InfoSettingRule;
+use Ivy\Shared\Base\Form;
 use Ivy\Shared\Presentation\Rule\UniqueRule;
 
 class SettingForm extends Form
@@ -20,7 +20,7 @@ class SettingForm extends Form
             'value' => new InfoSettingRule,
             'info' => ['string', 'max:50'],
             'plugin_id' => 'numeric',
-            'delete' => ['string']
+            'delete' => ['string'],
         ];
     }
 }

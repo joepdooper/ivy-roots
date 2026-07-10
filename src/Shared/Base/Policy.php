@@ -2,8 +2,6 @@
 
 namespace Ivy\Shared\Base;
 
-use Delight\Auth\Auth;
-use Delight\Auth\Role;
 use Ivy\User\Application\Service\AuthService;
 
 abstract class Policy

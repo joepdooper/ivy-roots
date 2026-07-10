@@ -18,7 +18,7 @@ use Ivy\Shared\Traits\Stash;
  */
 class Setting extends Entity
 {
-    use Stash, HasPolicies;
+    use HasPolicies, Stash;
 
     protected $fillable = [
         'name',
@@ -36,14 +36,14 @@ class Setting extends Entity
 
             $definition = SettingRegistry::get($key);
 
-            if (!$definition) {
+            if (! $definition) {
                 return;
             }
 
             $handlers = (array) ($definition['handler'] ?? []);
 
             foreach ($handlers as $handler) {
-                $instance = new $handler();
+                $instance = new $handler;
                 /** @var SettingHandler $instance */
                 $instance->handle(
                     setting: $setting,

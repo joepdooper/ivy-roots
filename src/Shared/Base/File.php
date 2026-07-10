@@ -28,17 +28,17 @@ abstract class File
         }
     }
 
-    public function getUploadFile(): UploadedFile|null
+    public function getUploadFile(): ?UploadedFile
     {
         return $this->uploadFile;
     }
 
-    public function getExtension(): string|null
+    public function getExtension(): ?string
     {
         return $this->extension;
     }
 
-    public function getMimeType(): string|null
+    public function getMimeType(): ?string
     {
         return $this->mimeType;
     }
@@ -105,13 +105,12 @@ abstract class File
 
         return array_any(
             $this->getAllowedMimeTypes(),
-            fn($allowed) =>
-                $allowed === $this->mimeType ||
+            fn ($allowed) => $allowed === $this->mimeType ||
                 (
                     str_ends_with($allowed, '/*') &&
                     str_starts_with(
                         $this->mimeType,
-                        substr($allowed, 0, strpos($allowed, '/') ?: 0) . '/'
+                        substr($allowed, 0, strpos($allowed, '/') ?: 0).'/'
                     )
                 )
         );

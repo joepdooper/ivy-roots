@@ -10,7 +10,7 @@ class PluginRegistry
     private static array $active = [];
 
     /**
-     * @param array<string, mixed> $active
+     * @param  array<string, mixed>  $active
      */
     public static function setActive(array $active): void
     {

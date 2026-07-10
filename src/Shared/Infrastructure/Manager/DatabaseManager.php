@@ -18,7 +18,7 @@ class DatabaseManager
     }
 
     /**
-     * @param array<string, mixed> $config
+     * @param  array<string, mixed>  $config
      */
     public function addConnection(array $config, string $name = 'default'): void
     {

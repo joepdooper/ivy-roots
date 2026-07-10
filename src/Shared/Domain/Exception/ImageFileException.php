@@ -2,7 +2,4 @@
 
 namespace Ivy\Shared\Domain\Exception;
 
-class ImageFileException extends FileException
-{
-
-}
+class ImageFileException extends FileException {}

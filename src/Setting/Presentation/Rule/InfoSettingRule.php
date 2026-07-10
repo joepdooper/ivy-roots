@@ -10,12 +10,12 @@ class InfoSettingRule implements Rule
     protected string $field;
 
     /**
-     * @param array<int, mixed> $parameters
+     * @param  array<int, mixed>  $parameters
      */
     public function __construct(protected array $parameters = []) {}
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function passes(string $field, $value, array $data): bool
     {

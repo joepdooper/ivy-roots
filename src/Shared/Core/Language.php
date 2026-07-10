@@ -24,9 +24,7 @@ class Language
     }
 
     /**
-     * @param string $key
-     * @param array<string, string>|null $variables
-     * @return string
+     * @param  array<string, string>|null  $variables
      */
     public static function translate(string $key, ?array $variables = []): string
     {
@@ -43,7 +41,7 @@ class Language
         } else {
             $secondKey = array_shift($keys);
 
-            if($secondKey){
+            if ($secondKey) {
                 if (! isset(self::$loadedFiles[$firstKey.'_'.$secondKey])) {
                     self::loadPluginFile($firstKey, $secondKey);
                 }
@@ -61,7 +59,7 @@ class Language
                         $key = $matches[1];
                         $lookup = mb_strtolower($key);
 
-                        if (!array_key_exists($lookup, $variables)) {
+                        if (! array_key_exists($lookup, $variables)) {
                             return $matches[0];
                         }
 
@@ -71,8 +69,8 @@ class Language
                             return mb_strtoupper($value);
                         }
 
-                        if ($key === mb_convert_case($key, MB_CASE_TITLE, "UTF-8")) {
-                            return mb_convert_case($value, MB_CASE_TITLE, "UTF-8");
+                        if ($key === mb_convert_case($key, MB_CASE_TITLE, 'UTF-8')) {
+                            return mb_convert_case($value, MB_CASE_TITLE, 'UTF-8');
                         }
 
                         return $value;
@@ -80,13 +78,13 @@ class Language
                     $translation
                 );
 
-                if (!is_string($translation)) {
+                if (! is_string($translation)) {
                     $translation = '';
                 }
             }
         }
 
-        return is_string($translation) ?  $translation : $key;
+        return is_string($translation) ? $translation : $key;
     }
 
     private static function loadFile(string $firstKey): void
@@ -116,8 +114,8 @@ class Language
     }
 
     /**
-     * @param array<string, mixed> $translations
-     * @param array<int, string> $keys
+     * @param  array<string, mixed>  $translations
+     * @param  array<int, string>  $keys
      * @return string|array<string, mixed>
      */
     private static function getNestedTranslation(array $translations, array $keys): array|string

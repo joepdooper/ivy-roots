@@ -15,10 +15,10 @@ class CsrfVerifier implements MiddlewareInterface
             $csrfToken = SessionManager::get('csrf_token');
             $submitted = $request->request->get('csrf_token', '');
 
-            if (!is_string($csrfToken)) {
+            if (! is_string($csrfToken)) {
                 $csrfToken = '';
             }
-            if (!is_string($submitted)) {
+            if (! is_string($submitted)) {
                 $submitted = '';
             }
 

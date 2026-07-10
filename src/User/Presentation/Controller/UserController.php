@@ -28,18 +28,18 @@ use Ivy\User\Presentation\Form\LoginForm;
 use Ivy\User\Presentation\Form\RegisterForm;
 use Ivy\User\Presentation\Form\ResetForm;
 use Ivy\User\Presentation\Form\UserForm;
-use JetBrains\PhpStorm\NoReturn;
 
 class UserController extends Controller
 {
     private User $user;
+
     private UserForm $userForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->user = new User();
-        $this->userForm = new UserForm();
+        $this->user = new User;
+        $this->userForm = new UserForm;
     }
 
     public function before(): void
@@ -47,7 +47,7 @@ class UserController extends Controller
         if ($this->authService->isLoggedIn()) {
             $this->redirect('admin/profile');
         } else {
-            if (Path::get('CURRENT_PAGE') != Path::get('BASE_PATH') . 'user/login') {
+            if (Path::get('CURRENT_PAGE') != Path::get('BASE_PATH').'user/login') {
                 $this->redirect('user/login');
             }
         }
@@ -90,7 +90,7 @@ class UserController extends Controller
 
         $this->flashBag->add(
             'success',
-            'Info ' . $user->username . ' updated successfully.'
+            'Info '.$user->username.' updated successfully.'
         );
     }
 
@@ -108,14 +108,14 @@ class UserController extends Controller
         try {
             $this->authService->auth()->admin()->deleteUserById($user->id);
         } catch (UnknownIdException|AuthError $e) {
-            $this->flashBag->add('error', 'Something went wrong: ' . $e);
+            $this->flashBag->add('error', 'Something went wrong: '.$e);
         }
 
         Profile::where('user_id', $user->id)->delete();
 
         $this->flashBag->add(
             'success',
-            'User ' . $user->username . ' deleted successfully.'
+            'User '.$user->username.' deleted successfully.'
         );
     }
 
@@ -158,18 +158,18 @@ class UserController extends Controller
     {
         $result = (new RegisterForm)->validate($this->request->request->all());
 
-        if (!$result->valid) {
+        if (! $result->valid) {
             $this->redirectToFormWithErrors($result);
         }
 
         try {
             $userId = $this->authService->auth()->register($result->data['email'], $result->data['password'], $result->data['username'], function ($selector, $token) use ($result) {
-                $url = Path::get('PUBLIC_URL') . 'user/login/' . urlencode($selector) . '/' . urlencode($token);
+                $url = Path::get('PUBLIC_URL').'user/login/'.urlencode($selector).'/'.urlencode($token);
                 // send email
                 $mail = new MailService;
                 $mail->addAddress($result->data['email'], $result->data['username']);
                 $mail->setSubject('Activate account');
-                $mail->setBody('Activate your account with this link: ' . $url);
+                $mail->setBody('Activate your account with this link: '.$url);
                 $mail->send();
             });
 
@@ -196,7 +196,7 @@ class UserController extends Controller
             $this->redirect('user/register');
         }
 
-        $this->flashBag->add('success', 'An email has been sent to ' . $this->request->request->get('email') . ' with a link to activate your account');
+        $this->flashBag->add('success', 'An email has been sent to '.$this->request->request->get('email').' with a link to activate your account');
         $this->redirect('user/login');
     }
 
@@ -218,16 +218,16 @@ class UserController extends Controller
      */
     public function login(): void
     {
-        $form = new LoginForm();
+        $form = new LoginForm;
         $result = $form->validate($this->request->request->all());
 
-        if (!$result->valid) {
+        if (! $result->valid) {
             $this->redirectToFormWithErrors($result);
         }
 
         try {
             $this->authService->auth()->login((string) $this->request->request->get('email'), (string) $this->request->request->get('password'));
-            $this->flashBag->add('success', 'Welcome ' . $this->authService->auth()->getUsername());
+            $this->flashBag->add('success', 'Welcome '.$this->authService->auth()->getUsername());
             $this->redirect('admin/profile');
         } catch (InvalidEmailException|InvalidPasswordException) {
             $this->flashBag->add('error', 'Wrong login credentials');
@@ -271,7 +271,7 @@ class UserController extends Controller
 
     public function beforeLogout(): void
     {
-        if (!$this->authService->isLoggedIn()) {
+        if (! $this->authService->isLoggedIn()) {
             $this->redirect('user/login');
         }
     }
@@ -303,22 +303,22 @@ class UserController extends Controller
      */
     public function reset(): void
     {
-        $form = new ResetForm();
+        $form = new ResetForm;
         $result = $form->validate($this->request->request->all());
 
-        if (!$result->valid) {
+        if (! $result->valid) {
             $this->redirectToFormWithErrors($result);
         }
 
         if ($result->data['email']) {
             try {
-                $this->authService->auth()->forgotPassword($result->data['email'], function ($selector, $token) use($result) {
-                    $url = Path::get('PUBLIC_URL') . 'user/reset/' . urlencode($selector) . '/' . urlencode($token);
+                $this->authService->auth()->forgotPassword($result->data['email'], function ($selector, $token) use ($result) {
+                    $url = Path::get('PUBLIC_URL').'user/reset/'.urlencode($selector).'/'.urlencode($token);
                     // send email
                     $mail = new MailService;
                     $mail->addAddress($result->data['email']);
                     $mail->setSubject('Reset password');
-                    $mail->setBody('Reset password with this link: ' . $url);
+                    $mail->setBody('Reset password with this link: '.$url);
                     $mail->send();
                 });
             } catch (InvalidEmailException) {
@@ -334,7 +334,7 @@ class UserController extends Controller
                 $this->flashBag->add('error', 'Too many requests');
                 $this->redirect('user/reset');
             }
-            $this->flashBag->add('success', 'An email has been sent to ' . $this->request->request->get('email') . ' with a link to reset your password');
+            $this->flashBag->add('success', 'An email has been sent to '.$this->request->request->get('email').' with a link to reset your password');
             $this->redirect('user/reset');
         }
         if ($result->data['password']) {

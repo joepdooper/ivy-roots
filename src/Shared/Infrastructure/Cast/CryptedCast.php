@@ -2,9 +2,9 @@
 
 namespace Ivy\Shared\Infrastructure\Cast;
 
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
-use Illuminate\Container\Container;
 use Ivy\Shared\Infrastructure\Service\CryptedService;
 use Random\RandomException;
 use RuntimeException;
@@ -31,7 +31,7 @@ class CryptedCast implements CastsAttributes
         try {
             return $this->crypto()->decrypt($value);
         } catch (Throwable $e) {
-            throw new RuntimeException("Failed to decrypt [$key]: " . $e->getMessage(), 0, $e);
+            throw new RuntimeException("Failed to decrypt [$key]: ".$e->getMessage(), 0, $e);
         }
     }
 

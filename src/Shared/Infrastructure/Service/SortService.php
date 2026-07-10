@@ -12,8 +12,8 @@ readonly class SortService
     ) {}
 
     /**
-     * @param EntityBuilder<Entity> $query
-     * @param array<int, string> $sortable
+     * @param  EntityBuilder<Entity>  $query
+     * @param  array<int, string>  $sortable
      * @return EntityBuilder<Entity>
      */
     public function apply(
@@ -24,11 +24,11 @@ readonly class SortService
         string $direction = 'asc'
     ): EntityBuilder {
 
-        if (!in_array($column, $sortable, true)) {
+        if (! in_array($column, $sortable, true)) {
             $column = $defaultColumn;
         }
 
-        if (!in_array($direction, ['asc', 'desc'], true)) {
+        if (! in_array($direction, ['asc', 'desc'], true)) {
             $direction = 'asc';
         }
 
@@ -39,7 +39,7 @@ readonly class SortService
         $model = $query->getModel();
         $baseTable = $model->getTable();
 
-        if (!str_contains($column, '.')) {
+        if (! str_contains($column, '.')) {
             /** @var EntityBuilder<Entity> */
             return $query
                 ->orderBy("$baseTable.$column", $direction)

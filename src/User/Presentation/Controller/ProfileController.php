@@ -26,12 +26,13 @@ use Random\RandomException;
 class ProfileController extends Controller
 {
     private Profile $profile;
+
     private ProfileForm $profileForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->profile = new Profile();
+        $this->profile = new Profile;
         $this->profileForm = new ProfileForm;
     }
 
@@ -62,7 +63,7 @@ class ProfileController extends Controller
 
                 $profile->user->fill([
                     'username' => $result->data['username'],
-                    'email' => $result->data['email']
+                    'email' => $result->data['email'],
                 ]);
 
                 if ($profile->user->isDirty('username')) {
@@ -80,14 +81,14 @@ class ProfileController extends Controller
                             function ($selector, $token) use ($result) {
 
                                 $url = Path::get('PUBLIC_URL')
-                                    . 'admin/profile/'
-                                    . urlencode($selector) . '/'
-                                    . urlencode($token);
+                                    .'admin/profile/'
+                                    .urlencode($selector).'/'
+                                    .urlencode($token);
 
                                 $subject = Language::translate('mail.reset.subject');
                                 $body = Language::translate('mail.reset.body', ['url' => $url]);
 
-                                $mail = new MailService();
+                                $mail = new MailService;
                                 $mail->addAddress($result->data['email'], $result->data['username']);
                                 $mail->setSubject($subject);
                                 $mail->setBody($body);
@@ -130,7 +131,7 @@ class ProfileController extends Controller
                             'success',
                             Language::translate('profile.image.saved')
                         );
-                    } catch(ImageFileException $e) {
+                    } catch (ImageFileException $e) {
                         $this->flashBag->add('error', $e->getMessage());
                     }
                 }

@@ -2,10 +2,10 @@
 
 namespace Ivy\Shared\Traits;
 
+use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Builder;
 use Ivy\Shared\Infrastructure\Service\SortService;
 use Symfony\Component\HttpFoundation\Request;
-use Illuminate\Container\Container;
 
 /** @phpstan-ignore-next-line trait.unused */
 trait HasSorting
@@ -24,7 +24,7 @@ trait HasSorting
             $request->query->get('direction', $defaultDirection)
         );
 
-        if (!in_array($direction, ['asc', 'desc'], true)) {
+        if (! in_array($direction, ['asc', 'desc'], true)) {
             $direction = $defaultDirection;
         }
 

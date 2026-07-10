@@ -4,13 +4,13 @@ namespace Ivy\Shared\Infrastructure\Database;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Domain\Collection\EntityCollection;
 use Ivy\Shared\Presentation\Listing\PaginationState;
 use Ivy\Shared\Presentation\Listing\SearchState;
 
 /**
  * @template TModel of Model
+ *
  * @extends Builder<TModel>
  */
 class EntityBuilder extends Builder
@@ -44,7 +44,7 @@ class EntityBuilder extends Builder
     }
 
     /**
-     * @param array<int, string> $columns
+     * @param  array<int, string>  $columns
      * @return EntityCollection<TModel>
      */
     public function get($columns = ['*']): EntityCollection

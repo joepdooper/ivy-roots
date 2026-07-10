@@ -12,7 +12,7 @@ class TemplateForm extends Form
     protected function rules(): array
     {
         return [
-            'id'=> ['numeric'],
+            'id' => ['numeric'],
             'value' => ['required', 'not_nullable', 'string'],
         ];
     }

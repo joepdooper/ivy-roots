@@ -20,7 +20,7 @@ use Ivy\Shared\Traits\HasPolicies;
 class Plugin extends Entity
 {
     use HasPolicies;
-    
+
     protected $fillable = [
         'parent_id',
         'name',

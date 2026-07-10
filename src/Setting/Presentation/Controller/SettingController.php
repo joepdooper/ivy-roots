@@ -3,23 +3,23 @@
 namespace Ivy\Setting\Presentation\Controller;
 
 use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Setting\Presentation\Form\SettingForm;
 use Ivy\Setting\Domain\Entity\Setting;
+use Ivy\Setting\Presentation\Form\SettingForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
-use JetBrains\PhpStorm\NoReturn;
 
 class SettingController extends Controller
 {
     private Setting $setting;
+
     private SettingForm $settingForm;
 
     public function __construct()
     {
         parent::__construct();
-        $this->setting = new Setting();
-        $this->settingForm = new SettingForm();
+        $this->setting = new Setting;
+        $this->settingForm = new SettingForm;
     }
 
     /**
@@ -43,7 +43,7 @@ class SettingController extends Controller
      */
     public function add(mixed $data): void
     {
-        $setting = new Setting();
+        $setting = new Setting;
 
         $setting->authorize('add');
 
@@ -51,7 +51,7 @@ class SettingController extends Controller
 
         $this->flashBag->add(
             'success',
-            'Setting ' . $setting->name . ' added successfully.'
+            'Setting '.$setting->name.' added successfully.'
         );
     }
 
@@ -76,7 +76,7 @@ class SettingController extends Controller
 
         $this->flashBag->add(
             'success',
-            'Setting ' . $setting->name . ' updated successfully.'
+            'Setting '.$setting->name.' updated successfully.'
         );
     }
 
@@ -95,7 +95,7 @@ class SettingController extends Controller
 
         $this->flashBag->add(
             'success',
-            'Setting ' . $setting->name . ' deleted successfully.'
+            'Setting '.$setting->name.' deleted successfully.'
         );
     }
 
@@ -110,7 +110,7 @@ class SettingController extends Controller
 
         foreach ($this->request->request->all('setting') as $index => $data) {
 
-            if (empty($data['name']) && !isset($data['id'])) {
+            if (empty($data['name']) && ! isset($data['id'])) {
                 continue;
             }
 

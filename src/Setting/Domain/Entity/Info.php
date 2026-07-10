@@ -15,7 +15,7 @@ use Ivy\Shared\Traits\Stash;
  */
 class Info extends Entity
 {
-    use Stash, HasPolicies;
+    use HasPolicies, Stash;
 
     protected $fillable = [
         'name',

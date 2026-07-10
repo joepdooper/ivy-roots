@@ -14,8 +14,8 @@ class SearchService
     use ResolvesRequestInput;
 
     /**
-     * @param EntityBuilder<Entity> $query
-     * @param array<int, string> $columns
+     * @param  EntityBuilder<Entity>  $query
+     * @param  array<int, string>  $columns
      * @return EntityBuilder<Entity>
      */
     public function apply(
@@ -37,7 +37,7 @@ class SearchService
 
             foreach ($columns as $column) {
 
-                if (!str_contains($column, '.')) {
+                if (! str_contains($column, '.')) {
                     $q->orWhere(
                         "{$table}.{$column}",
                         'LIKE',
@@ -60,9 +60,7 @@ class SearchService
     }
 
     /**
-     * @param EntityBuilder<Entity> $query
-     * @param string $path
-     * @param string $term
+     * @param  EntityBuilder<Entity>  $query
      */
     protected function applyRelationSearch(
         EntityBuilder $query,

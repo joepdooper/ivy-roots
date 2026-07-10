@@ -2,16 +2,17 @@
 
 namespace Ivy\Setting\Presentation\Controller;
 
-use Ivy\User\Domain\Exception\AuthorizationException;
 use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Setting\Domain\Entity\Info;
 use Ivy\Setting\Presentation\Form\InfoForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Template\Presentation\View\View;
+use Ivy\User\Domain\Exception\AuthorizationException;
 
 class InfoController extends Controller
 {
     private Info $info;
+
     private InfoForm $infoForm;
 
     public function __construct()
@@ -48,7 +49,7 @@ class InfoController extends Controller
 
         $info->fill($data)->save();
 
-        $this->flashBag->add('success', 'Info ' . $info->name . ' added successfully.');
+        $this->flashBag->add('success', 'Info '.$info->name.' added successfully.');
     }
 
     /**
@@ -67,12 +68,12 @@ class InfoController extends Controller
         }
 
         $info->authorize('update');
-        
+
         $info->save();
 
         $this->flashBag->add(
             'success',
-            'Info ' . $info->name . ' updated successfully.'
+            'Info '.$info->name.' updated successfully.'
         );
     }
 
@@ -91,7 +92,7 @@ class InfoController extends Controller
 
         $this->flashBag->add(
             'success',
-            'Info ' . $info->name . ' deleted successfully.'
+            'Info '.$info->name.' deleted successfully.'
         );
     }
 

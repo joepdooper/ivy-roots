@@ -12,10 +12,10 @@ class PluginForm extends Form
     protected function rules(): array
     {
         return [
-            'id'=> ['numeric'],
+            'id' => ['numeric'],
             'url' => ['string'],
             'active' => ['in:0,1'],
-            'delete' => ['string']
+            'delete' => ['string'],
         ];
     }
 }

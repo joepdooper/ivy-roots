@@ -25,7 +25,7 @@ abstract class Form
     abstract protected function rules(): array;
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public function validate(array $data): ValidationResult
     {

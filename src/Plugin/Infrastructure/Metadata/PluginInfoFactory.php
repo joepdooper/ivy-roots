@@ -5,8 +5,7 @@ namespace Ivy\Plugin\Infrastructure\Metadata;
 class PluginInfoFactory
 {
     /**
-     * @param mixed[] $data
-      * @return PluginInfo
+     * @param  mixed[]  $data
      */
     public function make(array $data): PluginInfo
     {

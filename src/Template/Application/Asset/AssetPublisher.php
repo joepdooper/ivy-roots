@@ -12,8 +12,8 @@ class AssetPublisher
     {
         $target = Path::get('PUBLIC_PATH');
 
-        $this->removeDirectory($target . 'css');
-        $this->removeDirectory($target . 'js');
+        $this->removeDirectory($target.'css');
+        $this->removeDirectory($target.'js');
 
         $templates = Template::whereIn('type', ['base', 'sub'])
             ->orderByRaw("FIELD(type, 'base', 'sub')")
@@ -21,10 +21,10 @@ class AssetPublisher
 
         foreach ($templates as $template) {
             $source = Path::get('TEMPLATES_PATH')
-                . $template->value
-                . DIRECTORY_SEPARATOR
-                . 'dist'
-                . DIRECTORY_SEPARATOR;
+                .$template->value
+                .DIRECTORY_SEPARATOR
+                .'dist'
+                .DIRECTORY_SEPARATOR;
 
             if (is_dir($source)) {
                 $this->copy($source, $target);
@@ -35,23 +35,23 @@ class AssetPublisher
     public function publishPlugin(string $plugin): void
     {
         $source = Path::get('PLUGINS_PATH')
-            . $plugin
-            . DIRECTORY_SEPARATOR
-            . 'dist'
-            . DIRECTORY_SEPARATOR;
+            .$plugin
+            .DIRECTORY_SEPARATOR
+            .'dist'
+            .DIRECTORY_SEPARATOR;
 
         if (! is_dir($source)) {
             return;
         }
 
         $target = Path::get('PUBLIC_PATH')
-            . 'plugins'
-            . DIRECTORY_SEPARATOR
-            . $plugin
-            . DIRECTORY_SEPARATOR;
+            .'plugins'
+            .DIRECTORY_SEPARATOR
+            .$plugin
+            .DIRECTORY_SEPARATOR;
 
-        $this->copy($source . 'css', $target . 'css');
-        $this->copy($source . 'js',  $target . 'js');
+        $this->copy($source.'css', $target.'css');
+        $this->copy($source.'js', $target.'js');
     }
 
     protected function copy(string $source, string $target): void
@@ -67,12 +67,13 @@ class AssetPublisher
 
         foreach ($iterator as $item) {
             $relative = substr($item->getPathname(), strlen($source));
-            $dst = $target . DIRECTORY_SEPARATOR . $relative;
+            $dst = $target.DIRECTORY_SEPARATOR.$relative;
 
             if ($item->isDir()) {
                 if (! is_dir($dst)) {
                     mkdir($dst, 0755, true);
                 }
+
                 continue;
             }
 

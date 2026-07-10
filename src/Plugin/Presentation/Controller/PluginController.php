@@ -5,22 +5,23 @@ namespace Ivy\Plugin\Presentation\Controller;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Infrastructure\Manager\PluginManager;
+use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
+use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
+use Ivy\Plugin\Presentation\Form\PluginForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
-use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
-use Ivy\Plugin\Presentation\Form\PluginForm;
-use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
-use Ivy\Plugin\Infrastructure\Manager\PluginManager;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
-use JetBrains\PhpStorm\NoReturn;
 use ReflectionException;
 
 class PluginController extends Controller
 {
     private Plugin $plugin;
+
     private PluginForm $pluginForm;
+
     private PluginManager $pluginManager;
 
     /**
@@ -31,8 +32,8 @@ class PluginController extends Controller
     public function __construct()
     {
         parent::__construct();
-        $this->plugin = new Plugin();
-        $this->pluginForm = new PluginForm();
+        $this->plugin = new Plugin;
+        $this->pluginForm = new PluginForm;
     }
 
     /**
@@ -43,7 +44,7 @@ class PluginController extends Controller
     public function before(): void
     {
         if ($this->authService->isLoggedIn()) {
-            if($this->plugin->policy('index')) {
+            if ($this->plugin->policy('index')) {
                 $this->redirect();
             }
         } else {
@@ -60,8 +61,8 @@ class PluginController extends Controller
             : null;
 
         $installedPlugins = collect(Plugin::all())->map(function ($plugin) use (&$installedUrls) {
-            $loader = new PluginInfoLoader();
-            $factory = new PluginInfoFactory();
+            $loader = new PluginInfoLoader;
+            $factory = new PluginInfoFactory;
 
             $data = $loader->load($plugin->url);
             $data['url'] = $plugin->url;
@@ -69,12 +70,13 @@ class PluginController extends Controller
             $plugin->info = $factory->make($data);
 
             $installedUrls[$plugin->url] = true;
+
             return $plugin;
         });
 
         $uninstalledPlugins = [];
 
-        if (!$id) {
+        if (! $id) {
             $pluginsPath = Path::get('PLUGINS_PATH');
 
             if (is_dir($pluginsPath)) {
@@ -87,15 +89,15 @@ class PluginController extends Controller
                         continue;
                     }
 
-                    $infoPath = $pluginsPath . $plugin . '/info.json';
+                    $infoPath = $pluginsPath.$plugin.'/info.json';
 
-                    if (!is_file($infoPath)) {
+                    if (! is_file($infoPath)) {
                         continue;
                     }
 
                     $contents = file_get_contents($infoPath);
 
-                    if($contents) {
+                    if ($contents) {
                         $info = json_decode($contents);
                     } else {
                         $info = null;
@@ -118,7 +120,7 @@ class PluginController extends Controller
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      *
      * @throws Exception
      */
@@ -127,7 +129,7 @@ class PluginController extends Controller
         $this->plugin->authorize('install');
 
         try {
-            $plugin = new Plugin();
+            $plugin = new Plugin;
             $plugin->fill($data);
 
             $this->pluginManager = new PluginManager($plugin);
@@ -138,13 +140,13 @@ class PluginController extends Controller
                 'message' => Language::translate(
                     'plugin.installed_successfully',
                     ['plugin' => $plugin->name]
-                )
+                ),
             ];
 
         } catch (\Throwable $e) {
             $this->responses[] = [
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ];
         }
     }
@@ -168,7 +170,7 @@ class PluginController extends Controller
 
         $this->flashBag->add(
             'success',
-            'Plugin ' . $plugin->name . ' updated successfully.'
+            'Plugin '.$plugin->name.' updated successfully.'
         );
     }
 
@@ -192,13 +194,13 @@ class PluginController extends Controller
                 'message' => Language::translate(
                     'plugin.uninstalled_successfully',
                     ['plugin' => $plugin->name]
-                )
+                ),
             ];
 
         } catch (\Throwable $e) {
             $this->responses[] = [
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ];
         }
     }
@@ -207,7 +209,7 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('sync');
 
-        if($this->request->request->has('plugin')){
+        if ($this->request->request->has('plugin')) {
             foreach ($this->request->request->all('plugin') as $index => $data) {
 
                 $result = $this->pluginForm->validate($data);

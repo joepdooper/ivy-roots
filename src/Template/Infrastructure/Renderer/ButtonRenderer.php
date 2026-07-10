@@ -2,8 +2,8 @@
 
 namespace Ivy\Template\Infrastructure\Renderer;
 
-use Latte\Engine;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
+use Latte\Engine;
 
 final class ButtonRenderer
 {
@@ -16,20 +16,20 @@ final class ButtonRenderer
     ) {}
 
     /**
-     * @param array<string, mixed> $args
+     * @param  array<string, mixed>  $args
      */
     public function render(array $args): string
     {
         $type = $args['type'] ?? null;
 
-        if (!$type) {
+        if (! $type) {
             throw new \InvalidArgumentException('Button type missing');
         }
 
         $file = $this->templateCache[$type]
             ??= $this->templates->file("buttons/button.$type.latte");
 
-        if (!$file) {
+        if (! $file) {
             throw new \RuntimeException("Button '{$type}' not found");
         }
 
