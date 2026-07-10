@@ -16,8 +16,11 @@ class SortService
     ) {}
 
     /**
-     * @param  EntityBuilder<Entity>  $query
-     * @param  array<int, string>  $sortable
+     * @param EntityBuilder<Entity> $query
+     * @param Request $request
+     * @param string[] $columns
+     * @param string $defaultColumn
+     * @param string $defaultDirection
      * @return EntityBuilder<Entity>
      */
     public function apply(
