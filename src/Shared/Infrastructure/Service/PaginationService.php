@@ -13,8 +13,6 @@ class PaginationService
 {
     use ResolvesRequestInput;
 
-    private const SESSION_KEY = 'pagination.per_page';
-
     /**
      * @param EntityBuilder<Entity> $query
      * @return EntityBuilder<Entity>

@@ -38,9 +38,9 @@ class SearchService
 
                 if (! str_contains($column, '.')) {
                     $q->orWhere(
-                        "{$table}.{$column}",
+                        "$table.$column",
                         'LIKE',
-                        "%{$term}%"
+                        "%$term%"
                     );
 
                     continue;
@@ -70,8 +70,8 @@ class SearchService
         $field = array_pop($segments);
         $relation = implode('.', $segments);
 
-        $query->orWhereHas($relation, function (EntityBuilder $q) use ($field, $term) {
-            $q->where($field, 'LIKE', "%{$term}%");
+        $query->orWhereHas($relation, function ($q) use ($field, $term) {
+            $q->where($field, 'LIKE', "%$term%");
         });
     }
 }
