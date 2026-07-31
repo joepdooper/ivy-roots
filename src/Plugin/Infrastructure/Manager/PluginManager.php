@@ -11,6 +11,7 @@ use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
 use Ivy\Plugin\Infrastructure\Service\PluginService;
 use Ivy\Plugin\Presentation\Form\PluginInfoForm;
 use Ivy\Setting\Domain\Entity\Setting;
+use Ivy\Sprout\ComposerRunner;
 use Ivy\Template\Application\Asset\AssetPublisher;
 
 class PluginManager
@@ -42,6 +43,12 @@ class PluginManager
     public function install(): void
     {
         $this->plugin->authorize('install');
+
+        try {
+            (new ComposerRunner)->requirePackage('joepdooper/ivy-demo-plugin');
+        } catch  (Exception $e) {
+            throw new PluginException($e->getMessage(), $this->plugin->name);
+        }
 
         $info = (new PluginInfoLoader)->load($this->plugin->url);
 
