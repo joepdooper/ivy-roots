@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Plugin\Infrastructure\Manager\PluginManager;
+use Ivy\Plugin\Infrastructure\Metadata\PluginInfo;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
 use Ivy\Plugin\Presentation\Form\PluginForm;
@@ -61,15 +62,16 @@ class PluginController extends Controller
             : null;
 
         $installedPlugins = collect(Plugin::all())->map(function ($plugin) use (&$installedUrls) {
-            $loader = new PluginInfoLoader;
-            $factory = new PluginInfoFactory;
+            if($plugin->status !== 'pending') {
+                $loader = new PluginInfoLoader;
+                $factory = new PluginInfoFactory;
 
-            $data = $loader->load($plugin->url);
-            $data['url'] = $plugin->url;
+                $data = $loader->load($plugin->url);
+                $data['url'] = $plugin->url;
 
-            $plugin->info = $factory->make($data);
-
-            $installedUrls[$plugin->url] = true;
+                $plugin->info = $factory->make($data);
+                $installedUrls[$plugin->url] = true;
+            }
 
             return $plugin;
         });
