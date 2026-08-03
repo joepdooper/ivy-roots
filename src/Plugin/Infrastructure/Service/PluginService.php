@@ -83,4 +83,87 @@ class PluginService
 
         return array_values(array_diff($dependencies, $existing));
     }
+
+    /**
+     * @throws Exception
+     */
+    public static function queuePackageMetadata(string $package): array
+    {
+        $parts = explode('/', $package, 2);
+        if (count($parts) !== 2) {
+            throw new Exception("Package must be in form vendor/name");
+        }
+
+        [$vendor, $name] = $parts;
+
+        $url = "https://repo.packagist.org/p2/".$vendor."/".$name.".json";
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'timeout' => 10,
+                'header' => [
+                    'Accept: application/json',
+                    'User-Agent: IvySprout/1.0'
+                ],
+            ]
+        ]);
+
+        $raw = @file_get_contents($url, false, $context);
+        if ($raw === false) {
+            throw new Exception("Failed to fetch metadata from Packagist for $package");
+        }
+
+        $json = json_decode($raw, true);
+        if (!is_array($json)) {
+            throw new Exception("Invalid JSON metadata returned for $package");
+        }
+
+        if (!(isset($json['packages'][$package][0]['type']) && $json['packages'][$package][0]['type'] === 'ivy-plugin')) {
+            throw new Exception("Package $package is not a proper ivy-plugin");
+        }
+
+        $pkg0 = $json['packages'][$package][0];
+        $v = self::splitComposerVersion($pkg0['version'] ?? null);
+
+        return [
+            'name' => $pkg0['extra']['ivy']['name'] ?? null,
+            'interface' => $pkg0['extra']['ivy']['interface'] ?? null,
+            'version' => $v['version'],
+            'version_channel' => $v['channel'],
+            'description' => $pkg0['description'] ?? null,
+            'type' => $pkg0['extra']['ivy']['type'] ?? null,
+            'status' => 'pending',
+            'license' => isset($pkg0['license']) && is_array($pkg0['license']) ? ($pkg0['license'][0] ?? null) : null,
+            'homepage' => $pkg0['homepage'] ?? null,
+            'keywords' => $pkg0['keywords'] ?? [],
+            'published_time' => $pkg0['published-time'] ?? null,
+            'time' => $pkg0['time'] ?? null,
+        ];
+    }
+
+    /**
+     * @return array{string, string}
+     */
+    public static function splitComposerVersion(?string $rawVersion): array
+    {
+        $rawVersion = $rawVersion ?? '';
+        $rawVersion = trim($rawVersion);
+
+        if ($rawVersion === '') {
+            return ['version' => null, 'channel' => null];
+        }
+
+        $rawVersion = ltrim($rawVersion, 'v');
+
+        $m = [];
+        if (!preg_match('/^(\d+\.\d+\.\d+)(?:-(.+))?$/', $rawVersion, $m)) {
+            return ['version' => null, 'channel' => null];
+        }
+
+        $version = $m[1];
+        $channel = $m[2] ?? null;
+
+        return ['version' => $version, 'channel' => $channel];
+    }
 }

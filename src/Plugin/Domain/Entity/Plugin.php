@@ -26,8 +26,10 @@ class Plugin extends Entity
         'name',
         'interface',
         'version',
+        'version_channel',
         'description',
         'type',
+        'status',
         'active',
         'url',
     ];

@@ -45,85 +45,86 @@ class PluginManager
         $this->plugin->authorize('install');
 
         try {
-            (new ComposerRunner)->requirePackage('joepdooper/ivy-demo-plugin');
+            $data = PluginService::queuePackageMetadata('joepdooper/ivy-demo-plugin');
+            Plugin::create($data);
         } catch  (Exception $e) {
             throw new PluginException($e->getMessage(), $this->plugin->name);
         }
 
-        $info = (new PluginInfoLoader)->load($this->plugin->url);
-
-        if (! $info) {
-            throw new PluginException(message: 'contains no info.json', plugin: $this->plugin->url);
-        }
-
-        $result = (new PluginInfoForm)->validate($info);
-
-        if (! $result->valid) {
-            $errors = [];
-
-            foreach ($result->errors as $error) {
-                if (is_array($error)) {
-                    $errors[] = $error[0];
-                }
-            }
-
-            throw new PluginException(message: 'contains an invalid info.json file: '.implode(' ', $errors), plugin: $this->plugin->url);
-        }
-
-        $this->plugin->fill($result->data);
-
-        if (isset($info['dependencies'])) {
-            $missing = PluginService::getMissingDependencies($info['dependencies']);
-            if (! empty($missing)) {
-                throw new PluginException(message: 'is missing dependencies '.implode(', ', $missing), plugin: $this->plugin->name);
-            }
-        }
-
-        $this->resolvePluginInterface()->install();
-
-        try {
-            Capsule::connection()->transaction(function () use ($info) {
-                $this->plugin->save();
-
-                if (isset($info['settings'])) {
-                    foreach ($info['settings'] as $setting) {
-                        new Setting()->fill([
-                            ...$setting,
-                            'plugin_id' => $this->plugin->id,
-                            'is_default' => 1,
-                        ])->save();
-                    }
-                }
-
-                new AssetPublisher()->publishPlugin($this->plugin->url);
-
-                if (! empty($info['collection'])) {
-
-                    $paths = glob(PluginService::getCollectionDirectory($this->plugin->url).'[a-zA-Z0-9_-]*');
-
-                    if ($paths === false) {
-                        throw new PluginException(message: 'cannot read plugin collection directory', plugin: $this->plugin->name);
-                    }
-
-                    $subfolders = array_filter($paths, 'is_dir');
-
-                    foreach ($subfolders as $subfolder) {
-                        try {
-                            $plugin = new Plugin;
-                            $pluginManager = new PluginManager($plugin->fill([
-                                'url' => PluginService::getRelativePath($subfolder),
-                            ]));
-                            $pluginManager->install();
-                        } catch (PluginException $e) {
-                            throw new PluginException(message: 'cannot install plugin from its collection because '.$e->getMessage(), plugin: $this->plugin->name, previous: $e);
-                        }
-                    }
-                }
-            });
-        } catch (PluginException $e) {
-            $this->resolvePluginInterface()->uninstall();
-            throw new PluginException(message: 'installation failed. '.$e->getMessage(), plugin: $this->plugin->name, previous: $e);
-        }
+//        $info = (new PluginInfoLoader)->load($this->plugin->url);
+//
+//        if (! $info) {
+//            throw new PluginException(message: 'contains no info.json', plugin: $this->plugin->url);
+//        }
+//
+//        $result = (new PluginInfoForm)->validate($info);
+//
+//        if (! $result->valid) {
+//            $errors = [];
+//
+//            foreach ($result->errors as $error) {
+//                if (is_array($error)) {
+//                    $errors[] = $error[0];
+//                }
+//            }
+//
+//            throw new PluginException(message: 'contains an invalid info.json file: '.implode(' ', $errors), plugin: $this->plugin->url);
+//        }
+//
+//        $this->plugin->fill($result->data);
+//
+//        if (isset($info['dependencies'])) {
+//            $missing = PluginService::getMissingDependencies($info['dependencies']);
+//            if (! empty($missing)) {
+//                throw new PluginException(message: 'is missing dependencies '.implode(', ', $missing), plugin: $this->plugin->name);
+//            }
+//        }
+//
+//        $this->resolvePluginInterface()->install();
+//
+//        try {
+//            Capsule::connection()->transaction(function () use ($info) {
+//                $this->plugin->save();
+//
+//                if (isset($info['settings'])) {
+//                    foreach ($info['settings'] as $setting) {
+//                        new Setting()->fill([
+//                            ...$setting,
+//                            'plugin_id' => $this->plugin->id,
+//                            'is_default' => 1,
+//                        ])->save();
+//                    }
+//                }
+//
+//                new AssetPublisher()->publishPlugin($this->plugin->url);
+//
+//                if (! empty($info['collection'])) {
+//
+//                    $paths = glob(PluginService::getCollectionDirectory($this->plugin->url).'[a-zA-Z0-9_-]*');
+//
+//                    if ($paths === false) {
+//                        throw new PluginException(message: 'cannot read plugin collection directory', plugin: $this->plugin->name);
+//                    }
+//
+//                    $subfolders = array_filter($paths, 'is_dir');
+//
+//                    foreach ($subfolders as $subfolder) {
+//                        try {
+//                            $plugin = new Plugin;
+//                            $pluginManager = new PluginManager($plugin->fill([
+//                                'url' => PluginService::getRelativePath($subfolder),
+//                            ]));
+//                            $pluginManager->install();
+//                        } catch (PluginException $e) {
+//                            throw new PluginException(message: 'cannot install plugin from its collection because '.$e->getMessage(), plugin: $this->plugin->name, previous: $e);
+//                        }
+//                    }
+//                }
+//            });
+//        } catch (PluginException $e) {
+//            $this->resolvePluginInterface()->uninstall();
+//            throw new PluginException(message: 'installation failed. '.$e->getMessage(), plugin: $this->plugin->name, previous: $e);
+//        }
     }
 
     public function uninstall(): void
