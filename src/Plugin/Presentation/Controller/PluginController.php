@@ -2,9 +2,11 @@
 
 namespace Ivy\Plugin\Presentation\Controller;
 
+use Contacts\Contact;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Domain\Enum\PluginStatus;
 use Ivy\Plugin\Infrastructure\Manager\PluginManager;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfo;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
@@ -13,6 +15,7 @@ use Ivy\Plugin\Presentation\Form\PluginForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
+use Ivy\Sprout\ComposerRunner;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use ReflectionException;
@@ -57,12 +60,8 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('index');
 
-        $parentId = $id
-            ? Plugin::where('url', $id)->value('id')
-            : null;
-
         $installedPlugins = collect(Plugin::all())->map(function ($plugin) use (&$installedUrls) {
-            if($plugin->status !== 'pending') {
+            if($plugin->status !== PluginStatus::PENDING) {
                 $loader = new PluginInfoLoader;
                 $factory = new PluginInfoFactory;
 
@@ -115,9 +114,12 @@ class PluginController extends Controller
             }
         }
 
+        $catalogPlugins = ComposerRunner::findPlugins();
+
         View::render('admin/plugin.latte', [
             'installed_plugins' => $installedPlugins,
             'uninstalled_plugins' => $uninstalledPlugins,
+            'catalog_plugins' => $catalogPlugins,
         ]);
     }
 

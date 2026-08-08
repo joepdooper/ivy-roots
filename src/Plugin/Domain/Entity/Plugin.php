@@ -2,6 +2,7 @@
 
 namespace Ivy\Plugin\Domain\Entity;
 
+use Ivy\Plugin\Domain\Enum\PluginStatus;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfo;
 use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Traits\HasPolicies;
@@ -32,6 +33,10 @@ class Plugin extends Entity
         'status',
         'active',
         'url',
+    ];
+
+    protected $casts = [
+        'status' => PluginStatus::class,
     ];
 
     public PluginInfo $info;
