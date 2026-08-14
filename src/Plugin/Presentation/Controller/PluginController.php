@@ -19,6 +19,7 @@ use Ivy\Sprout\ComposerRunner;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use ReflectionException;
+use Symfony\Component\Process\Process;
 
 class PluginController extends Controller
 {
@@ -61,7 +62,7 @@ class PluginController extends Controller
         $this->plugin->authorize('index');
 
         $installedPlugins = collect(Plugin::all())->map(function ($plugin) use (&$installedUrls) {
-            if($plugin->status !== PluginStatus::PENDING) {
+            if ($plugin->status !== PluginStatus::PENDING) {
                 $loader = new PluginInfoLoader;
                 $factory = new PluginInfoFactory;
 
@@ -77,7 +78,7 @@ class PluginController extends Controller
 
         $uninstalledPlugins = [];
 
-        if (! $id) {
+        if (!$id) {
             $pluginsPath = Path::get('PLUGINS_PATH');
 
             if (is_dir($pluginsPath)) {
@@ -90,9 +91,9 @@ class PluginController extends Controller
                         continue;
                     }
 
-                    $infoPath = $pluginsPath.$plugin.'/info.json';
+                    $infoPath = $pluginsPath . $plugin . '/info.json';
 
-                    if (! is_file($infoPath)) {
+                    if (!is_file($infoPath)) {
                         continue;
                     }
 
@@ -124,7 +125,7 @@ class PluginController extends Controller
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      *
      * @throws Exception
      */
@@ -164,7 +165,7 @@ class PluginController extends Controller
 
         $plugin->fill($data);
 
-        if (! $plugin->isDirty()) {
+        if (!$plugin->isDirty()) {
             return;
         }
 
@@ -174,7 +175,7 @@ class PluginController extends Controller
 
         $this->flashBag->add(
             'success',
-            'Plugin '.$plugin->name.' updated successfully.'
+            'Plugin ' . $plugin->name . ' updated successfully.'
         );
     }
 
@@ -235,6 +236,37 @@ class PluginController extends Controller
 
         foreach ($this->responses as $response) {
             $this->flashBag->add($response['status'], $response['message']);
+        }
+
+        $this->redirect('admin/plugin');
+    }
+
+    public function download(): void
+    {
+        $this->plugin->authorize('install');
+
+        $package = $this->request->request->get('package');
+
+        try {
+            $process = new Process(
+                [
+                    Path::get('PROJECT_PATH') . '/vendor/bin/require',
+                    $package,
+                ],
+                Path::get('PROJECT_PATH'),
+            );
+
+            $process->start();
+
+            $this->flashBag->add(
+                'success',
+                'Plugin download started.'
+            );
+        } catch (\Throwable $e) {
+            $this->flashBag->add(
+                'error',
+                'Failed to start plugin download: ' . $e->getMessage()
+            );
         }
 
         $this->redirect('admin/plugin');
