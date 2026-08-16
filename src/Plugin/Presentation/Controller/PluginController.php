@@ -11,6 +11,7 @@ use Ivy\Plugin\Infrastructure\Manager\PluginManager;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfo;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
+use Ivy\Plugin\Infrastructure\Service\PluginService;
 use Ivy\Plugin\Presentation\Form\PluginForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
@@ -210,6 +211,9 @@ class PluginController extends Controller
         }
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function sync(): void
     {
         $this->plugin->authorize('sync');
@@ -241,6 +245,9 @@ class PluginController extends Controller
         $this->redirect('admin/plugin');
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function download(): void
     {
         $this->plugin->authorize('install');
@@ -248,15 +255,32 @@ class PluginController extends Controller
         $package = $this->request->request->get('package');
 
         try {
-            $process = new Process(
-                [
-                    Path::get('PROJECT_PATH') . '/vendor/bin/require',
-                    $package,
-                ],
-                Path::get('PROJECT_PATH'),
-            );
+//            $process = new Process(
+//                [
+//                    './vendor/bin/require',
+//                    $package,
+//                ],
+//                Path::get('PROJECT_PATH')
+//            );
+//
+//            $process->run();
+//
+//            file_put_contents('ivy-roots-run.log', date('c')." Process=" . $process->getOutput(). "\n", FILE_APPEND);
 
-            $process->start();
+//            if (! $process->isSuccessful()) {
+//                $this->flashBag->add(
+//                    'error',
+//                    'Failed to start plugin download: ' . ($process->getErrorOutput() ?: $process->getOutput())
+//                );
+//            }
+
+            $data = PluginService::queuePackageMetadata($package);
+
+            d($data);die;
+
+            $plugin = Plugin::create([
+                $data
+            ])->save();
 
             $this->flashBag->add(
                 'success',
