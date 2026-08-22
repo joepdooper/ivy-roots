@@ -4,6 +4,7 @@ namespace Ivy\Plugin\Infrastructure\Service;
 
 use Exception;
 use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Infrastructure\Metadata\PluginInfo;
 use Ivy\Shared\Core\Path;
 use Symfony\Component\HttpFoundation\File\File;
 
@@ -127,18 +128,17 @@ class PluginService
         $v = self::splitComposerVersion($pkg0['version'] ?? null);
 
         return [
-            'name' => $pkg0['extra']['ivy']['name'] ?? null,
+            'name' => $pkg0['extra']['ivy']['name'] ?? $name,
+            'package' => $package,
             'interface' => $pkg0['extra']['ivy']['interface'] ?? null,
             'version' => $v['version'],
             'version_channel' => $v['channel'],
             'description' => $pkg0['description'] ?? null,
             'type' => $pkg0['extra']['ivy']['type'] ?? null,
-            'status' => 'pending',
             'license' => isset($pkg0['license']) && is_array($pkg0['license']) ? ($pkg0['license'][0] ?? null) : null,
             'homepage' => $pkg0['homepage'] ?? null,
             'keywords' => $pkg0['keywords'] ?? [],
-            'published_time' => $pkg0['published-time'] ?? null,
-            'time' => $pkg0['time'] ?? null,
+            'url' => $name,
         ];
     }
 

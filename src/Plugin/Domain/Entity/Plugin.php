@@ -25,6 +25,7 @@ class Plugin extends Entity
     protected $fillable = [
         'parent_id',
         'name',
+        'package',
         'interface',
         'version',
         'version_channel',

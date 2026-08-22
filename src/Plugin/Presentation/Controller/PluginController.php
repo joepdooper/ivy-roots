@@ -2,24 +2,23 @@
 
 namespace Ivy\Plugin\Presentation\Controller;
 
-use Contacts\Contact;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Ivy\Plugin\Application\Command\RequirePlugin;
 use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Plugin\Domain\Enum\PluginStatus;
 use Ivy\Plugin\Infrastructure\Manager\PluginManager;
-use Ivy\Plugin\Infrastructure\Metadata\PluginInfo;
-use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
-use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
-use Ivy\Plugin\Infrastructure\Service\PluginService;
 use Ivy\Plugin\Presentation\Form\PluginForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
+use Ivy\Sprout\BackgroundProcess;
 use Ivy\Sprout\ComposerRunner;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use ReflectionException;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBus;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Process\Process;
 
 class PluginController extends Controller
@@ -29,6 +28,7 @@ class PluginController extends Controller
     private PluginForm $pluginForm;
 
     private PluginManager $pluginManager;
+
 
     /**
      * @var list<array{status: string, message: string|array<string, mixed>}>
@@ -63,16 +63,16 @@ class PluginController extends Controller
         $this->plugin->authorize('index');
 
         $installedPlugins = collect(Plugin::all())->map(function ($plugin) use (&$installedUrls) {
-            if ($plugin->status !== PluginStatus::PENDING) {
-                $loader = new PluginInfoLoader;
-                $factory = new PluginInfoFactory;
-
-                $data = $loader->load($plugin->url);
-                $data['url'] = $plugin->url;
-
-                $plugin->info = $factory->make($data);
-                $installedUrls[$plugin->url] = true;
-            }
+//            if ($plugin->status !== PluginStatus::PENDING) {
+//                $loader = new PluginInfoLoader;
+//                $factory = new PluginInfoFactory;
+//
+//                $data = $loader->load($plugin->url);
+//                $data['url'] = $plugin->url;
+//
+//                $plugin->info = $factory->make($data);
+//                $installedUrls[$plugin->url] = true;
+//            }
 
             return $plugin;
         });
@@ -255,42 +255,17 @@ class PluginController extends Controller
         $package = $this->request->request->get('package');
 
         try {
-//            $process = new Process(
-//                [
-//                    './vendor/bin/require',
-//                    $package,
-//                ],
-//                Path::get('PROJECT_PATH')
-//            );
-//
-//            $process->run();
-//
-//            file_put_contents('ivy-roots-run.log', date('c')." Process=" . $process->getOutput(). "\n", FILE_APPEND);
+            BackgroundProcess::require($package);
 
-//            if (! $process->isSuccessful()) {
-//                $this->flashBag->add(
-//                    'error',
-//                    'Failed to start plugin download: ' . ($process->getErrorOutput() ?: $process->getOutput())
-//                );
-//            }
+            $this->flashBag->add('success', 'Plugin download pending.');
 
-            $data = PluginService::queuePackageMetadata($package);
+//                Plugin::create([
+//                    ...PluginService::queuePackageMetadata($package),
+//                    'status' => PluginStatus::PENDING,
+//                ]);
 
-            d($data);die;
-
-            $plugin = Plugin::create([
-                $data
-            ])->save();
-
-            $this->flashBag->add(
-                'success',
-                'Plugin download started.'
-            );
-        } catch (\Throwable $e) {
-            $this->flashBag->add(
-                'error',
-                'Failed to start plugin download: ' . $e->getMessage()
-            );
+        } catch (Exception $e) {
+            $this->flashBag->add('error', $e->getMessage());
         }
 
         $this->redirect('admin/plugin');
