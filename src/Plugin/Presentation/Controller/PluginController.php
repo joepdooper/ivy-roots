@@ -4,22 +4,19 @@ namespace Ivy\Plugin\Presentation\Controller;
 
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Ivy\Plugin\Application\Command\RequirePlugin;
 use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Domain\Enum\PluginStatus;
 use Ivy\Plugin\Infrastructure\Manager\PluginManager;
+use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
+use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
+use Ivy\Plugin\Infrastructure\Service\PluginService;
 use Ivy\Plugin\Presentation\Form\PluginForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
-use Ivy\Shared\Core\Path;
 use Ivy\Sprout\BackgroundProcess;
-use Ivy\Sprout\ComposerRunner;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use ReflectionException;
-use Symfony\Component\Messenger\Exception\ExceptionInterface;
-use Symfony\Component\Messenger\MessageBus;
-use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Process\Process;
 
 class PluginController extends Controller
 {
@@ -29,17 +26,14 @@ class PluginController extends Controller
 
     private PluginManager $pluginManager;
 
-
-    /**
-     * @var list<array{status: string, message: string|array<string, mixed>}>
-     */
-    private array $responses = [];
+    private BackgroundProcess $backgroundProcess;
 
     public function __construct()
     {
         parent::__construct();
         $this->plugin = new Plugin;
         $this->pluginForm = new PluginForm;
+        $this->backgroundProcess = new BackgroundProcess;
     }
 
     /**
@@ -58,105 +52,118 @@ class PluginController extends Controller
         }
     }
 
-    public function index(?string $id = null): void
+    /**
+     * @throws AuthorizationException
+     */
+    public function index(): void
     {
         $this->plugin->authorize('index');
 
-        $installedPlugins = collect(Plugin::all())->map(function ($plugin) use (&$installedUrls) {
-//            if ($plugin->status !== PluginStatus::PENDING) {
-//                $loader = new PluginInfoLoader;
-//                $factory = new PluginInfoFactory;
-//
-//                $data = $loader->load($plugin->url);
-//                $data['url'] = $plugin->url;
-//
-//                $plugin->info = $factory->make($data);
-//                $installedUrls[$plugin->url] = true;
-//            }
-
-            return $plugin;
-        });
-
-        $uninstalledPlugins = [];
-
-        if (!$id) {
-            $pluginsPath = Path::get('PLUGINS_PATH');
-
-            if (is_dir($pluginsPath)) {
-
-                $ignore = ['.' => true, '..' => true, '.DS_Store' => true];
-
-                foreach (scandir($pluginsPath) as $plugin) {
-
-                    if (isset($ignore[$plugin]) || isset($installedUrls[$plugin])) {
-                        continue;
+        $plugins = Plugin::all()
+            ->map(function ($plugin) {
+                if ($plugin->status === PluginStatus::DOWNLOADING) {
+                    if (PluginService::exists($plugin->url.DIRECTORY_SEPARATOR.'composer.json')) {
+                        $plugin->status = PluginStatus::DOWNLOADED;
                     }
-
-                    $infoPath = $pluginsPath . $plugin . '/info.json';
-
-                    if (!is_file($infoPath)) {
-                        continue;
-                    }
-
-                    $contents = file_get_contents($infoPath);
-
-                    if ($contents) {
-                        $info = json_decode($contents);
-                    } else {
-                        $info = null;
-                    }
-
-                    if ($info === null) {
-                        continue;
-                    }
-
-                    $info->url = $plugin;
-                    $uninstalledPlugins[] = $info;
                 }
-            }
-        }
+                if ($plugin->status === PluginStatus::DOWNLOADED) {
+                    if (PluginService::exists($plugin->url.DIRECTORY_SEPARATOR.'composer.json')) {
+                        $plugin->status = PluginStatus::DOWNLOADED;
+                    }
+                }
 
-        $catalogPlugins = ComposerRunner::findPlugins();
+                return $plugin;
+            })
+            ->keyBy('package');
+
+        $catalogPlugins = PluginService::getPluginCatalog();
+
+        $catalogPlugins = collect($catalogPlugins)
+            ->reject(function (array $catalogPlugin) use ($plugins) {
+                return $plugins->has($catalogPlugin['package']);
+            })
+            ->values()
+            ->all();
 
         View::render('admin/plugin.latte', [
-            'installed_plugins' => $installedPlugins,
-            'uninstalled_plugins' => $uninstalledPlugins,
+            'installed_plugins' => $plugins,
             'catalog_plugins' => $catalogPlugins,
         ]);
     }
 
+//    public function sync(): void
+//    {
+//        $this->plugin->authorize('sync');
+//
+//        if ($this->request->request->has('plugin')) {
+//            foreach ($this->request->request->all('plugin') as $index => $data) {
+//
+//                $result = $this->pluginForm->validate($data);
+//
+//                if ($result->valid) {
+//                    if (empty($result->data['id'])) {
+//                        $this->add($result->data);
+//                    } elseif (isset($result->data['delete'])) {
+//                        $this->delete($result->data['id']);
+//                    } else {
+//                        $this->update($result->data['id'], $result->data);
+//                    }
+//                } else {
+//                    $errors[$index] = $result->errors;
+//                    $old[$index] = $result->old;
+//                }
+//            }
+//        }
+//
+//        foreach ($this->responses as $response) {
+//            $this->flashBag->add($response['status'], $response['message']);
+//        }
+//
+//        $this->redirect('admin/plugin');
+//    }
+
     /**
-     * @param array<string, mixed> $data
-     *
-     * @throws Exception
+     * @throws AuthorizationException
      */
-    public function add(array $data): void
+    public function add(): void
     {
         $this->plugin->authorize('install');
 
+        $package = $this->request->request->get('package');
+
         try {
-            $plugin = new Plugin;
-            $plugin->fill($data);
+            $plugin = Plugin::firstOrCreate(
+                ['package' => $package],
+                [
+                    ...PluginService::queuePackageMetadata($package),
+                    'status' => PluginStatus::DOWNLOADING,
+                ]
+            );
 
-            $this->pluginManager = new PluginManager($plugin);
-            $this->pluginManager->install();
+//            $this->pluginManager = new PluginManager($plugin);
+//            $this->pluginManager->install();
 
-            $this->responses[] = [
-                'status' => 'success',
-                'message' => Language::translate(
-                    'plugin.installed_successfully',
-                    ['plugin' => $plugin->name]
-                ),
-            ];
+            if ($plugin->status === PluginStatus::DOWNLOADING) {
+                $this->backgroundProcess->require($package);
+            }
 
+            $this->flashBag->add(
+                'success',
+                Language::translate('plugin.added_successfully', ['plugin' => $plugin->name])
+            );
         } catch (\Throwable $e) {
-            $this->responses[] = [
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ];
+            $this->flashBag->add(
+                'error',
+                'Failed to start plugin download: ' . $e->getMessage()
+            );
         }
+
+        $this->redirect('admin/plugin');
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function update(Plugin|int $plugin, mixed $data): void
     {
 
@@ -192,80 +199,25 @@ class PluginController extends Controller
         $plugin->authorize('uninstall');
 
         try {
-            $this->pluginManager = new PluginManager($plugin);
-            $this->pluginManager->uninstall();
+            $this->backgroundProcess->remove($plugin->package);
 
-            $this->responses[] = [
-                'status' => 'success',
-                'message' => Language::translate(
-                    'plugin.uninstalled_successfully',
-                    ['plugin' => $plugin->name]
-                ),
-            ];
+            $plugin->delete();
+
+//            $this->pluginManager = new PluginManager($plugin);
+//            $this->pluginManager->uninstall();
+
+            $this->flashBag->add(
+                'success',
+                Language::translate('plugin.uninstalled_successfully', [
+                    'plugin' => $plugin->name
+                ])
+            );
 
         } catch (\Throwable $e) {
-            $this->responses[] = [
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ];
-        }
-    }
-
-    /**
-     * @throws AuthorizationException
-     */
-    public function sync(): void
-    {
-        $this->plugin->authorize('sync');
-
-        if ($this->request->request->has('plugin')) {
-            foreach ($this->request->request->all('plugin') as $index => $data) {
-
-                $result = $this->pluginForm->validate($data);
-
-                if ($result->valid) {
-                    if (empty($result->data['id'])) {
-                        $this->add($result->data);
-                    } elseif (isset($result->data['delete'])) {
-                        $this->delete($result->data['id']);
-                    } else {
-                        $this->update($result->data['id'], $result->data);
-                    }
-                } else {
-                    $errors[$index] = $result->errors;
-                    $old[$index] = $result->old;
-                }
-            }
-        }
-
-        foreach ($this->responses as $response) {
-            $this->flashBag->add($response['status'], $response['message']);
-        }
-
-        $this->redirect('admin/plugin');
-    }
-
-    /**
-     * @throws AuthorizationException
-     */
-    public function download(): void
-    {
-        $this->plugin->authorize('install');
-
-        $package = $this->request->request->get('package');
-
-        try {
-            BackgroundProcess::require($package);
-
-            $this->flashBag->add('success', 'Plugin download pending.');
-
-//                Plugin::create([
-//                    ...PluginService::queuePackageMetadata($package),
-//                    'status' => PluginStatus::PENDING,
-//                ]);
-
-        } catch (Exception $e) {
-            $this->flashBag->add('error', $e->getMessage());
+            $this->flashBag->add(
+                'error',
+                $e->getMessage(),
+            );
         }
 
         $this->redirect('admin/plugin');
