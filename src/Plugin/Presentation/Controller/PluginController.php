@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Plugin\Domain\Enum\PluginStatus;
+use Ivy\Plugin\Domain\Exception\PluginException;
 use Ivy\Plugin\Infrastructure\Manager\PluginManager;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
@@ -22,17 +23,12 @@ class PluginController extends Controller
 {
     private Plugin $plugin;
 
-    private PluginForm $pluginForm;
-
-    private PluginManager $pluginManager;
-
     private BackgroundProcess $backgroundProcess;
 
     public function __construct()
     {
         parent::__construct();
         $this->plugin = new Plugin;
-        $this->pluginForm = new PluginForm;
         $this->backgroundProcess = new BackgroundProcess;
     }
 
@@ -54,6 +50,7 @@ class PluginController extends Controller
 
     /**
      * @throws AuthorizationException
+     * @throws Exception
      */
     public function index(): void
     {
@@ -68,7 +65,14 @@ class PluginController extends Controller
                 }
                 if ($plugin->status === PluginStatus::DOWNLOADED) {
                     if (PluginService::exists($plugin->url.DIRECTORY_SEPARATOR.'composer.json')) {
-                        $plugin->status = PluginStatus::DOWNLOADED;
+                        try {
+                            PluginManager::install($plugin);
+                        } catch (PluginException $e) {
+                            $this->flashBag->add(
+                                'error',
+                                $e->getMessage()
+                            );
+                        }
                     }
                 }
 
@@ -140,9 +144,6 @@ class PluginController extends Controller
                 ]
             );
 
-//            $this->pluginManager = new PluginManager($plugin);
-//            $this->pluginManager->install();
-
             if ($plugin->status === PluginStatus::DOWNLOADING) {
                 $this->backgroundProcess->require($package);
             }
@@ -201,10 +202,7 @@ class PluginController extends Controller
         try {
             $this->backgroundProcess->remove($plugin->package);
 
-            $plugin->delete();
-
-//            $this->pluginManager = new PluginManager($plugin);
-//            $this->pluginManager->uninstall();
+            PluginManager::uninstall($plugin);
 
             $this->flashBag->add(
                 'success',

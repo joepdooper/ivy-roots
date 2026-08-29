@@ -11,10 +11,12 @@ use Ivy\Shared\Traits\HasPolicies;
  * @property int $id
  * @property int|null $parent_id
  * @property string $name
+ * @property string $package
  * @property string $interface
  * @property string $version
  * @property string $description
  * @property string $type
+ * @property PluginStatus $status
  * @property bool $active
  * @property string $url
  */

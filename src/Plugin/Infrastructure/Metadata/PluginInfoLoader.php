@@ -14,6 +14,6 @@ class PluginInfoLoader
      */
     public function load(string $url): ?array
     {
-        return PluginService::parseJson($url.DIRECTORY_SEPARATOR.'info.json');
+        return PluginService::parseJson($url.DIRECTORY_SEPARATOR.'composer.json');
     }
 }

@@ -3,6 +3,7 @@
 namespace Ivy\Plugin\Domain\Policy;
 
 use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Domain\Enum\PluginStatus;
 use Ivy\Shared\Base\Policy;
 
 class PluginPolicy extends Policy
@@ -19,6 +20,10 @@ class PluginPolicy extends Policy
 
     public function install(Plugin $plugin): bool
     {
+        if($plugin->status != PluginStatus::DOWNLOADED) {
+            return false;
+        }
+
         return $this->canEditAsSuperAdmin();
     }
 

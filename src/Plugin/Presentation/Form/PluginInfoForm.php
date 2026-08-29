@@ -14,12 +14,14 @@ class PluginInfoForm extends Form
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', new UniqueRule([Plugin::class])],
+            'name' => ['required', 'string'],
+            'package' => ['required', 'string', new UniqueRule([Plugin::class])],
             'interface' => ['required', 'string'],
             'version' => ['string'],
+            'version_channel' => ['string'],
             'description' => ['string'],
             'type' => ['alpha'],
-            'url' => ['alpha_num'],
+            'url' => ['required', 'string', new UniqueRule([Plugin::class])],
             'collection.*' => ['string'],
             'settings.*.name' => ['string'],
             'settings.*.info' => ['string'],
@@ -28,3 +30,15 @@ class PluginInfoForm extends Form
         ];
     }
 }
+
+
+//"extra": {
+//    "ivy": {
+//        "name": "Demo Plugin",
+//      "directory": "demo",
+//      "version": "1.0.0",
+//      "description": "Demo plugin for ivy",
+//      "type": "demo",
+//      "interface": "Ivy\\DemoPlugin\\DemoPluginInterface"
+//    }
+//  },

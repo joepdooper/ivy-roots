@@ -11,13 +11,39 @@ use Symfony\Component\HttpFoundation\File\File;
 class PluginService
 {
     /**
+     * Check whether a file exists inside the plugins directory.
+     *
+     * @throws Exception
+     */
+    public static function exists(string $path): bool
+    {
+        $basePath = rtrim(Path::get('PLUGINS_PATH'), DIRECTORY_SEPARATOR);
+        $fullPath = $basePath.DIRECTORY_SEPARATOR.ltrim($path, DIRECTORY_SEPARATOR);
+
+        if (! is_file($fullPath)) {
+            return false;
+        }
+
+        $realPath = realpath($fullPath);
+
+        if ($realPath === false || ! str_starts_with(
+                $realPath,
+                $basePath.DIRECTORY_SEPARATOR
+            )) {
+            throw new Exception('Invalid file path: '.$path);
+        }
+
+        return true;
+    }
+
+    /**
      * @return array<string, mixed>|null
      *
      * @throws Exception
      */
     public static function parseJson(string $path): ?array
     {
-        $file = self::getRealPath(Path::get('PLUGINS_PATH').$path);
+        $file = self::getRealPath(Path::get('PLUGINS_PATH').trim($path));
 
         if (! $file) {
             throw new Exception('No JSON file found: '.$path);
