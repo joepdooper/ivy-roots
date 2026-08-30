@@ -164,7 +164,7 @@ class PluginService
     /**
      * @throws Exception
      */
-    public static function queuePackageMetadata(string $package): array
+    public static function getPackageData(string $package): array
     {
         $parts = explode('/', $package, 2);
         if (count($parts) !== 2) {
@@ -211,10 +211,10 @@ class PluginService
             'version_channel' => $v['channel'],
             'description' => $pkg0['description'] ?? null,
             'type' => $pkg0['extra']['ivy']['type'] ?? null,
-            'license' => isset($pkg0['license']) && is_array($pkg0['license']) ? ($pkg0['license'][0] ?? null) : null,
-            'homepage' => $pkg0['homepage'] ?? null,
-            'keywords' => $pkg0['keywords'] ?? [],
             'url' => $name,
+//            'license' => isset($pkg0['license']) && is_array($pkg0['license']) ? ($pkg0['license'][0] ?? null) : null,
+//            'homepage' => $pkg0['homepage'] ?? null,
+//            'keywords' => $pkg0['keywords'] ?? [],
         ];
     }
 

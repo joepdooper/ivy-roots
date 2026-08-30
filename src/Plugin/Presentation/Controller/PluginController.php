@@ -8,16 +8,15 @@ use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Plugin\Domain\Enum\PluginStatus;
 use Ivy\Plugin\Domain\Exception\PluginException;
 use Ivy\Plugin\Infrastructure\Manager\PluginManager;
-use Ivy\Plugin\Infrastructure\Metadata\PluginInfoFactory;
-use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
 use Ivy\Plugin\Infrastructure\Service\PluginService;
-use Ivy\Plugin\Presentation\Form\PluginForm;
+use Ivy\Plugin\Presentation\Form\PluginDataForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
 use Ivy\Sprout\BackgroundProcess;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use ReflectionException;
+use Throwable;
 
 class PluginController extends Controller
 {
@@ -95,37 +94,6 @@ class PluginController extends Controller
         ]);
     }
 
-//    public function sync(): void
-//    {
-//        $this->plugin->authorize('sync');
-//
-//        if ($this->request->request->has('plugin')) {
-//            foreach ($this->request->request->all('plugin') as $index => $data) {
-//
-//                $result = $this->pluginForm->validate($data);
-//
-//                if ($result->valid) {
-//                    if (empty($result->data['id'])) {
-//                        $this->add($result->data);
-//                    } elseif (isset($result->data['delete'])) {
-//                        $this->delete($result->data['id']);
-//                    } else {
-//                        $this->update($result->data['id'], $result->data);
-//                    }
-//                } else {
-//                    $errors[$index] = $result->errors;
-//                    $old[$index] = $result->old;
-//                }
-//            }
-//        }
-//
-//        foreach ($this->responses as $response) {
-//            $this->flashBag->add($response['status'], $response['message']);
-//        }
-//
-//        $this->redirect('admin/plugin');
-//    }
-
     /**
      * @throws AuthorizationException
      */
@@ -136,26 +104,40 @@ class PluginController extends Controller
         $package = $this->request->request->get('package');
 
         try {
-            $plugin = Plugin::firstOrCreate(
-                ['package' => $package],
-                [
-                    ...PluginService::queuePackageMetadata($package),
-                    'status' => PluginStatus::DOWNLOADING,
-                ]
-            );
-
-                $this->backgroundProcess->require($package);
-
-            $this->flashBag->add(
-                'success',
-                Language::translate('plugin.added_successfully', ['plugin' => $plugin->name])
-            );
-        } catch (\Throwable $e) {
+            $data = PluginService::getPackageData($package);
+        } catch (Exception $exception) {
             $this->flashBag->add(
                 'error',
-                'Failed to start plugin download: ' . $e->getMessage()
+                $exception->getMessage()
             );
+            return;
         }
+
+        $result = (new PluginDataForm)->validate($data);
+
+        if (! $result->valid) {
+            foreach ($result->errors as $error) {
+                if (is_array($error)) {
+                    $this->flashBag->add('error', $error[0]);
+                }
+            }
+            return;
+        }
+
+        $plugin = Plugin::firstOrCreate(
+            ['package' => $package],
+            [
+                ...$result->data,
+                'status' => PluginStatus::DOWNLOADING,
+            ]
+        );
+
+        $this->backgroundProcess->require($package);
+
+        $this->flashBag->add(
+            'success',
+            Language::translate('plugin.added_successfully', ['plugin' => $plugin->name])
+        );
 
         $this->redirect('admin/plugin');
     }
@@ -209,7 +191,7 @@ class PluginController extends Controller
                 ])
             );
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->flashBag->add(
                 'error',
                 $e->getMessage(),

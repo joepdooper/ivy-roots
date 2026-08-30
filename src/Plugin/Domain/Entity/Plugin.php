@@ -14,11 +14,12 @@ use Ivy\Shared\Traits\HasPolicies;
  * @property string $package
  * @property string $interface
  * @property string $version
+ * @property string $version_channel
  * @property string $description
  * @property string $type
+ * @property string $url
  * @property PluginStatus $status
  * @property bool $active
- * @property string $url
  */
 class Plugin extends Entity
 {
@@ -33,14 +34,12 @@ class Plugin extends Entity
         'version_channel',
         'description',
         'type',
+        'url',
         'status',
         'active',
-        'url',
     ];
 
     protected $casts = [
         'status' => PluginStatus::class,
     ];
-
-    public PluginInfo $info;
 }
