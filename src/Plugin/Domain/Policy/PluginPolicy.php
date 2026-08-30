@@ -20,10 +20,6 @@ class PluginPolicy extends Policy
 
     public function install(Plugin $plugin): bool
     {
-        if($plugin->status != PluginStatus::DOWNLOADED) {
-            return false;
-        }
-
         return $this->canEditAsSuperAdmin();
     }
 

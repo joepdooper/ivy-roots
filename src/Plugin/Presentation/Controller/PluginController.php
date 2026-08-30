@@ -144,9 +144,7 @@ class PluginController extends Controller
                 ]
             );
 
-            if ($plugin->status === PluginStatus::DOWNLOADING) {
                 $this->backgroundProcess->require($package);
-            }
 
             $this->flashBag->add(
                 'success',
