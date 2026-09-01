@@ -4,7 +4,6 @@ namespace Ivy\Plugin\Infrastructure\Service;
 
 use Exception;
 use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Plugin\Infrastructure\Metadata\PluginInfo;
 use Ivy\Shared\Core\Path;
 use Symfony\Component\HttpFoundation\File\File;
 

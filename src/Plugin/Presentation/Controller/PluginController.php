@@ -55,42 +55,21 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('index');
 
-        $plugins = Plugin::all()
-            ->map(function ($plugin) {
-                if ($plugin->status === PluginStatus::DOWNLOADING) {
-                    if (PluginService::exists($plugin->url.DIRECTORY_SEPARATOR.'composer.json')) {
-                        $plugin->status = PluginStatus::DOWNLOADED;
-                    }
-                }
-                if ($plugin->status === PluginStatus::DOWNLOADED) {
-                    if (PluginService::exists($plugin->url.DIRECTORY_SEPARATOR.'composer.json')) {
-                        try {
-                            PluginManager::install($plugin);
-                        } catch (PluginException $e) {
-                            $this->flashBag->add(
-                                'error',
-                                $e->getMessage()
-                            );
-                        }
-                    }
-                }
-
-                return $plugin;
-            })
-            ->keyBy('package');
-
-        $catalogPlugins = PluginService::getPluginCatalog();
-
-        $catalogPlugins = collect($catalogPlugins)
-            ->reject(function (array $catalogPlugin) use ($plugins) {
-                return $plugins->has($catalogPlugin['package']);
-            })
-            ->values()
-            ->all();
+        $plugins = Plugin::all();
 
         View::render('admin/plugin.latte', [
-            'installed_plugins' => $plugins,
-            'catalog_plugins' => $catalogPlugins,
+            'plugins' => $plugins,
+        ]);
+    }
+
+    public function catalog(): void
+    {
+        $this->plugin->authorize('index');
+
+        $catalog = PluginService::getPluginCatalog();
+
+        View::render('admin/plugin.catalog.latte', [
+            'catalog' => $catalog,
         ]);
     }
 
@@ -199,5 +178,32 @@ class PluginController extends Controller
         }
 
         $this->redirect('admin/plugin');
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    public function status(Plugin|int $plugin): void
+    {
+        if (is_int($plugin)) {
+            $plugin = Plugin::find($plugin);
+        }
+
+        if ($plugin->status === PluginStatus::DOWNLOADING) {
+            if (PluginService::exists($plugin->url.DIRECTORY_SEPARATOR.'composer.json')) {
+                $plugin->status = PluginStatus::DOWNLOADED;
+            }
+        }
+        if ($plugin->status === PluginStatus::DOWNLOADED) {
+            try {
+                PluginManager::install($plugin);
+            } catch (PluginException $e) {
+                $this->flashBag->add('error', $e->getMessage());
+            }
+        }
+
+        View::render('include/plugin-status.latte', [
+            'plugin' => $plugin,
+        ]);
     }
 }

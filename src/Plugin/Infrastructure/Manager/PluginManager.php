@@ -26,7 +26,7 @@ class PluginManager
     {
         $plugin->authorize('install');
 
-        $info = PluginService::queuePackageMetadata($plugin->package);
+        $info = PluginService::getPackageData($plugin->package);
 
         if (! $info) {
             throw new PluginException(message: 'no package metadata could be retreived', plugin: $plugin->url);
