@@ -12,7 +12,7 @@ use Ivy\Plugin\Infrastructure\Service\PluginService;
 use Ivy\Plugin\Presentation\Form\PluginDataForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
-use Ivy\Sprout\BackgroundProcess;
+use Ivy\Shared\Infrastructure\Composer\ComposerRunner;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use ReflectionException;
@@ -22,13 +22,13 @@ class PluginController extends Controller
 {
     private Plugin $plugin;
 
-    private BackgroundProcess $backgroundProcess;
+    private ComposerRunner $composerRunner;
 
     public function __construct()
     {
         parent::__construct();
         $this->plugin = new Plugin;
-        $this->backgroundProcess = new BackgroundProcess;
+        $this->composerRunner = new ComposerRunner();
     }
 
     /**
@@ -83,7 +83,7 @@ class PluginController extends Controller
         $package = $this->request->request->get('package');
 
         try {
-            $data = PluginService::getPackageData($package);
+            $data = PluginService::getPackageData((string) $package);
         } catch (Exception $exception) {
             $this->flashBag->add(
                 'error',
@@ -111,7 +111,7 @@ class PluginController extends Controller
             ]
         );
 
-        $this->backgroundProcess->require($package);
+        $this->composerRunner->require((string) $package);
 
         $this->flashBag->add(
             'success',
@@ -159,7 +159,7 @@ class PluginController extends Controller
         $plugin->authorize('uninstall');
 
         try {
-            $this->backgroundProcess->remove($plugin->package);
+            $this->composerRunner->remove($plugin->package);
 
             PluginManager::uninstall($plugin);
 
