@@ -52,7 +52,7 @@ class PluginManager
         if (isset($info['dependencies'])) {
             $missing = PluginService::getMissingDependencies($info['dependencies']);
             if (! empty($missing)) {
-                throw new PluginException(message: 'is missing dependencies '.implode(', ', $missing), plugin: $this->plugin->name);
+                throw new PluginException(message: 'is missing dependencies '.implode(', ', $missing), plugin: $plugin->name);
             }
         }
 

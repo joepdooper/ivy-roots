@@ -182,6 +182,7 @@ class PluginController extends Controller
 
     /**
      * @throws AuthorizationException
+     * @throws Exception
      */
     public function status(Plugin|int $plugin): void
     {
