@@ -17,6 +17,7 @@ use Ivy\Shared\Infrastructure\Manager\ErrorManager;
 use Ivy\Shared\Infrastructure\Manager\LanguageManager;
 use Ivy\Shared\Infrastructure\Manager\RouterManager;
 use Ivy\Shared\Infrastructure\Manager\SecurityManager;
+use Ivy\Shared\Infrastructure\Manager\SessionManager;
 use Ivy\Shared\Infrastructure\Service\SortService;
 use Ivy\Shared\Presentation\Middleware\CsrfVerifier;
 use Ivy\Shared\Presentation\Middleware\MiddlewarePipeline;
@@ -29,6 +30,7 @@ use Ivy\Template\Presentation\View\Engine\LatteEngine;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Application\Service\AuthService;
 use Ivy\User\Domain\Exception\AuthorizationException;
+use Random\RandomException;
 use Symfony\Component\HttpFoundation\Request;
 use Throwable;
 
@@ -128,6 +130,8 @@ class App
         SecurityManager::setSecurityHeaders();
 
         $this->initDatabase();
+
+        SessionManager::start();
 
         $auth = new AuthService;
         $this->container->instance(AuthService::class, $auth);

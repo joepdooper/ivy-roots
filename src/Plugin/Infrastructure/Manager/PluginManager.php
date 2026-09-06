@@ -56,16 +56,14 @@ class PluginManager
             }
         }
 
-        $class = $plugin->interface;
-
-        if (! class_exists($class)) {
-            throw new PluginException("class {$class} not found", $plugin->name);
+        if (! class_exists($plugin->interface)) {
+            throw new PluginException("class {$plugin->interface} not found", $plugin->name);
         }
 
-        $instance = new $class;
+        $instance = new $plugin->interface;
 
         if (! $instance instanceof PluginInterface) {
-            throw new PluginException("must implement {$class}", $plugin->name);
+            throw new PluginException("must implement {$plugin->interface}", $plugin->name);
         }
 
         try {

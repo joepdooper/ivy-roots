@@ -14,11 +14,21 @@ class SessionManager
     public static function getSession(): Session
     {
         if (self::$session === null) {
-            $storage = new NativeSessionStorage([], new NativeFileSessionHandler);
+            $handler = new NativeFileSessionHandler('/tmp');
+            $storage = new NativeSessionStorage([], $handler);
             self::$session = new Session($storage);
         }
 
         return self::$session;
+    }
+
+    public static function start(): void
+    {
+        $session = self::getSession();
+
+        if (! $session->isStarted()) {
+            $session->start();
+        }
     }
 
     public static function set(string $key, mixed $value): void
