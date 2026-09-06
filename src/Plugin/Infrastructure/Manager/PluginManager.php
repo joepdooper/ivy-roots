@@ -72,6 +72,9 @@ class PluginManager
                 'status' => PluginStatus::INSTALLED
             ])->save();
         } catch (Exception $exception) {
+            $plugin->update([
+                'status' => PluginStatus::FAILED
+            ]);
             throw new PluginException($exception->getMessage(), $plugin->name);
         }
 

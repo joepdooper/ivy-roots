@@ -199,12 +199,12 @@ class PluginController extends Controller
             try {
                 PluginManager::install($plugin);
             } catch (PluginException $e) {
-                $plugin->update([
-                    'status' => PluginStatus::FAILED
-                ]);
                 $this->flashBag->add('error', $e->getMessage());
-                $this->redirect('admin/plugin');
             }
+        }
+
+        if ($plugin->status === PluginStatus::FAILED) {
+            $this->redirect('admin/plugin');
         }
 
         View::render('include/plugin-status.latte', [
