@@ -13,6 +13,7 @@ use Ivy\Plugin\Presentation\Form\PluginDataForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
 use Ivy\Shared\Infrastructure\Composer\ComposerRunner;
+use Ivy\Shared\Infrastructure\Composer\PackagistClient;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use ReflectionException;
@@ -66,7 +67,7 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('index');
 
-        $catalog = PluginService::getPluginCatalog();
+        $catalog = PackagistClient::getCatalog('ivy-plugin');
 
         View::render('admin/plugin.catalog.latte', [
             'catalog' => $catalog,

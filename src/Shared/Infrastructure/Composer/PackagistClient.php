@@ -1,116 +1,12 @@
 <?php
 
-namespace Ivy\Plugin\Infrastructure\Service;
+namespace Ivy\Shared\Infrastructure\Composer;
 
 use Exception;
-use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Shared\Core\Path;
-use Symfony\Component\HttpFoundation\File\File;
 
-class PluginService
+final class PackagistClient
 {
-    /**
-     * Check whether a file exists inside the plugins' directory.
-     *
-     * @throws Exception
-     */
-    public static function exists(string $path): bool
-    {
-        $basePath = rtrim(Path::get('PLUGINS_PATH'), DIRECTORY_SEPARATOR);
-        $fullPath = $basePath.DIRECTORY_SEPARATOR.ltrim($path, DIRECTORY_SEPARATOR);
-
-        if (! is_file($fullPath)) {
-            return false;
-        }
-
-        $realPath = realpath($fullPath);
-
-        if ($realPath === false || ! str_starts_with(
-                $realPath,
-                $basePath.DIRECTORY_SEPARATOR
-            )) {
-            throw new Exception('Invalid file path: '.$path);
-        }
-
-        return true;
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     *
-     * @throws Exception
-     */
-    public static function parseJson(string $path): ?array
-    {
-        $file = self::getRealPath(Path::get('PLUGINS_PATH').trim($path));
-
-        if (! $file) {
-            throw new Exception('No JSON file found: '.$path);
-        }
-
-        $content = file_get_contents($file);
-
-        if (! $content) {
-            throw new Exception('JSON file could not be read: '.$path);
-        }
-
-        $decoded = json_decode($content, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return null;
-        }
-
-        if (! $decoded) {
-            throw new Exception('Invalid JSON: '.$path);
-        }
-
-        return $decoded;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public static function getRealPath(string $path): ?string
-    {
-        $file = new File($path);
-        $file = $file->getRealPath();
-
-        if ($file === false || ! str_starts_with($file, Path::get('PLUGINS_PATH'))) {
-            throw new Exception('Invalid file path: '.$path);
-        }
-
-        return $file;
-    }
-
-    public static function getRelativePath(string $path): ?string
-    {
-        return str_replace(Path::get('PLUGINS_PATH'), '', $path);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public static function getCollectionDirectory(string $pluginUrl): ?string
-    {
-        if (! is_dir(Path::get('PLUGINS_PATH').basename($pluginUrl).DIRECTORY_SEPARATOR.'collection')) {
-            throw new Exception('Invalid collection directory');
-        }
-
-        return Path::get('PLUGINS_PATH').basename($pluginUrl).DIRECTORY_SEPARATOR.'collection'.DIRECTORY_SEPARATOR;
-    }
-
-    /**
-     * @param  list<string>  $dependencies
-     * @return array<int<0, max>, string>
-     */
-    public static function getMissingDependencies(array $dependencies): array
-    {
-        $existing = Plugin::whereIn('name', $dependencies)->pluck('name')->all()->toArray();
-
-        return array_values(array_diff($dependencies, $existing));
-    }
-
-    public static function getPluginCatalog(string $type = 'ivy-plugin', int $page = 1, int $per_page = 25): array
+    public static function getCatalog(string $type, int $page = 1, int $per_page = 25): array
     {
         $listUrl = "https://packagist.org/packages/list.json?type=" . rawurlencode($type) . "&page=" . $page . "&per_page=" . $per_page;
         $namesJson = file_get_contents($listUrl);
@@ -180,7 +76,7 @@ class PluginService
                 'timeout' => 10,
                 'header' => [
                     'Accept: application/json',
-                    'User-Agent: IvySprout/1.0'
+                    'User-Agent: Ivy/1.0'
                 ],
             ]
         ]);
@@ -195,8 +91,8 @@ class PluginService
             throw new Exception("Invalid JSON metadata returned for $package");
         }
 
-        if (!(isset($json['packages'][$package][0]['type']) && $json['packages'][$package][0]['type'] === 'ivy-plugin')) {
-            throw new Exception("Package $package is not a proper ivy-plugin");
+        if (!(isset($json['packages'][$package][0]['type']) && in_array($json['packages'][$package][0]['type'], ['ivy-plugin', 'ivy-template']))) {
+            throw new Exception("Package $package is not for ivy");
         }
 
         $pkg0 = $json['packages'][$package][0];

@@ -5,6 +5,7 @@ namespace Ivy\Template\Presentation\Controller;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
+use Ivy\Shared\Infrastructure\Composer\PackagistClient;
 use Ivy\Template\Application\Asset\AssetPublisher;
 use Ivy\Template\Domain\Entity\Template;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
@@ -45,6 +46,20 @@ class TemplateController extends Controller
         View::render('admin/template.latte', [
             'templateBase' => basename((string) TemplateManager::getTemplateBase()),
             'templateSub' => basename((string) TemplateManager::getTemplateSub()),
+        ]);
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    public function catalog(): void
+    {
+        $this->template->authorize('index');
+
+        $catalog = PackagistClient::getCatalog('ivy-template');
+
+        View::render('admin/template.catalog.latte', [
+            'catalog' => $catalog,
         ]);
     }
 
