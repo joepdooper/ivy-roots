@@ -32,8 +32,8 @@ class TemplateManager
             return;
         }
 
-        $templateBase = Template::where('type', 'base')->value('value');
-        $templateSub = Template::where('type', 'sub')->value('value');
+        $templateBase = Template::where('type', 'base')->value('url');
+        $templateSub = Template::where('type', 'sub')->value('url');
 
         self::$templateBase = Path::get('TEMPLATES_PATH').$templateBase.DIRECTORY_SEPARATOR;
         self::$templateSub = Path::get('TEMPLATES_PATH').$templateSub.DIRECTORY_SEPARATOR;

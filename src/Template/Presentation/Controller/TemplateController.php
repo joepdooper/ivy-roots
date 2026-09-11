@@ -4,6 +4,7 @@ namespace Ivy\Template\Presentation\Controller;
 
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Controller;
+use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
 use Ivy\Shared\Infrastructure\Composer\ComposerRunner;
 use Ivy\Shared\Infrastructure\Composer\PackagistClient;
@@ -110,7 +111,7 @@ class TemplateController extends Controller
 
         $this->flashBag->add(
             'success',
-            Language::translate('template.added_successfully', ['template' => $template->name])
+            Language::translate('template.added_successfully', ['template' => '$template->name'])
         );
 
         $this->redirect('admin/template');
