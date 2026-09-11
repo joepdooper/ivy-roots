@@ -2,7 +2,6 @@
 
 namespace Ivy\Template\Domain\Policy;
 
-use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Shared\Base\Policy;
 use Ivy\Template\Domain\Entity\Template;
 

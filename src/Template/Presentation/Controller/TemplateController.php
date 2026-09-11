@@ -5,10 +5,12 @@ namespace Ivy\Template\Presentation\Controller;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Path;
+use Ivy\Shared\Infrastructure\Composer\ComposerRunner;
 use Ivy\Shared\Infrastructure\Composer\PackagistClient;
 use Ivy\Template\Application\Asset\AssetPublisher;
 use Ivy\Template\Domain\Entity\Template;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
+use Ivy\Template\Presentation\Form\TemplateDataForm;
 use Ivy\Template\Presentation\Form\TemplateForm;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
@@ -19,11 +21,14 @@ class TemplateController extends Controller
 
     protected TemplateForm $templateForm;
 
+    private ComposerRunner $composerRunner;
+
     public function __construct()
     {
         parent::__construct();
         $this->template = new Template;
         $this->templateForm = new TemplateForm;
+        $this->composerRunner = new ComposerRunner();
     }
 
     public function before(): void
@@ -82,8 +87,6 @@ class TemplateController extends Controller
             return;
         }
 
-        d($data);die;
-
         $result = (new TemplateDataForm)->validate($data);
 
         if (! $result->valid) {
@@ -95,13 +98,13 @@ class TemplateController extends Controller
             return;
         }
 
-        $template = Template::firstOrCreate(
-            ['package' => $package],
-            [
-                ...$result->data,
-                'status' => TemplateStatus::DOWNLOADING,
-            ]
-        );
+//        $template = Template::firstOrCreate(
+//            ['package' => $package],
+//            [
+//                ...$result->data,
+//                'status' => TemplateStatus::DOWNLOADING,
+//            ]
+//        );
 
         $this->composerRunner->require((string) $package);
 
