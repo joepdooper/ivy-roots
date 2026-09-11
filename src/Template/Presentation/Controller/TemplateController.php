@@ -63,6 +63,56 @@ class TemplateController extends Controller
         ]);
     }
 
+    /**
+     * @throws AuthorizationException
+     */
+    public function add(): void
+    {
+        $this->template->authorize('install');
+
+        $package = $this->request->request->get('package');
+
+        try {
+            $data = PackagistClient::getPackageData((string) $package);
+        } catch (\Exception $exception) {
+            $this->flashBag->add(
+                'error',
+                $exception->getMessage()
+            );
+            return;
+        }
+
+        d($data);die;
+
+        $result = (new TemplateDataForm)->validate($data);
+
+        if (! $result->valid) {
+            foreach ($result->errors as $error) {
+                if (is_array($error)) {
+                    $this->flashBag->add('error', $error[0]);
+                }
+            }
+            return;
+        }
+
+        $template = Template::firstOrCreate(
+            ['package' => $package],
+            [
+                ...$result->data,
+                'status' => TemplateStatus::DOWNLOADING,
+            ]
+        );
+
+        $this->composerRunner->require((string) $package);
+
+        $this->flashBag->add(
+            'success',
+            Language::translate('template.added_successfully', ['template' => $template->name])
+        );
+
+        $this->redirect('admin/template');
+    }
+
     public function update(Template|int $template, mixed $data): void
     {
         if (is_int($template)) {

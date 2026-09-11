@@ -12,8 +12,10 @@ use Ivy\Plugin\Infrastructure\Service\PluginService;
 use Ivy\Plugin\Presentation\Form\PluginDataForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
+use Ivy\Shared\Core\Path;
 use Ivy\Shared\Infrastructure\Composer\ComposerRunner;
 use Ivy\Shared\Infrastructure\Composer\PackagistClient;
+use Ivy\Shared\Infrastructure\Service\FileService;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use ReflectionException;
@@ -84,7 +86,7 @@ class PluginController extends Controller
         $package = $this->request->request->get('package');
 
         try {
-            $data = PluginService::getPackageData((string) $package);
+            $data = PackagistClient::getPackageData((string) $package);
         } catch (Exception $exception) {
             $this->flashBag->add(
                 'error',
@@ -192,7 +194,7 @@ class PluginController extends Controller
         }
 
         if ($plugin->status === PluginStatus::DOWNLOADING) {
-            if (PluginService::exists($plugin->url.DIRECTORY_SEPARATOR.'composer.json')) {
+            if (FileService::exists($plugin->url.DIRECTORY_SEPARATOR.'composer.json', Path::get('PLUGINS_PATH'))) {
                 $plugin->status = PluginStatus::DOWNLOADED;
             }
         }
