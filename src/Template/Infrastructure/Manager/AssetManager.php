@@ -91,7 +91,7 @@ class AssetManager
 
         if (Environment::isDev()) {
             $host = Path::get('PROTOCOL').'://'.$_ENV['VITE_FRONTEND_HOST'].':'.$_ENV['VITE_PORT'];
-            $path = TemplateManager::file($path);
+            $path = TemplateManager::asset($path);
         }
 
         $collection[] = $host.$path;

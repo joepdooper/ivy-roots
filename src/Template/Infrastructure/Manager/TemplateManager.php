@@ -74,6 +74,19 @@ class TemplateManager
         return self::$cache[$filename] = $filename;
     }
 
+    public static function asset(string $filename): string
+    {
+        $file = self::file($filename);
+
+        $templatesPath = Path::get('TEMPLATES_PATH');
+
+        if (str_starts_with($file, $templatesPath)) {
+            return '/' . Path::get('TEMPLATES_FOLDER') . ltrim(substr($file, strlen($templatesPath)), '/');
+        }
+
+        return ltrim($filename, '/');
+    }
+
     public static function require(string $filename): void
     {
         require self::file($filename);
