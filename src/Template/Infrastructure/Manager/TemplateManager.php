@@ -3,27 +3,33 @@
 namespace Ivy\Template\Infrastructure\Manager;
 
 use Ivy\Shared\Core\Path;
+use Ivy\Template\Application\Contracts\TemplateInterface;
 use Ivy\Template\Domain\Entity\Template;
+use Ivy\User\Application\Service\AuthService;
 
 class TemplateManager
 {
-    private static ?string $templateBase = null;
+    private static ?Template $baseTemplate = null;
 
-    private static ?string $templateSub = null;
+    private static ?Template $subTemplate = null;
 
     private static bool $initialized = false;
 
     /** @var array<string, string> */
     private static array $cache = [];
 
+    /** @var array<string, string> */
+    private static array $registered = [];
+
+
     public static function getTemplateBase(): ?string
     {
-        return self::$templateBase ? basename(self::$templateBase) : null;
+        return self::$baseTemplate->url ? basename(Path::get('TEMPLATES_PATH') . self::$baseTemplate->url) : null;
     }
 
     public static function getTemplateSub(): ?string
     {
-        return self::$templateSub ? basename(self::$templateSub) : null;
+        return self::$subTemplate->url ? basename(Path::get('TEMPLATES_PATH') . self::$subTemplate->url) : null;
     }
 
     public static function init(bool $forceRefresh = false): void
@@ -32,17 +38,49 @@ class TemplateManager
             return;
         }
 
-        $templateBase = Template::where('type', 'base')->value('url');
-        $templateSub = Template::where('type', 'sub')->value('url');
-
-        self::$templateBase = Path::get('TEMPLATES_PATH').$templateBase.DIRECTORY_SEPARATOR;
-        self::$templateSub = Path::get('TEMPLATES_PATH').$templateSub.DIRECTORY_SEPARATOR;
+        self::$baseTemplate = Template::where('type', 'base')->first();
+        self::$subTemplate = Template::where('type', 'sub')->first();
 
         if ($forceRefresh) {
             self::$cache = [];
+            self::$registered = [];
         }
 
         self::$initialized = true;
+    }
+
+    public static function register(AuthService $auth): void
+    {
+        foreach ([self::$baseTemplate, self::$subTemplate] as $template) {
+            if (! $template || ! $template->interface) {
+                continue;
+            }
+
+            $class = $template->interface;
+
+            if (isset(self::$registered[$class])) {
+                continue;
+            }
+
+            if (! class_exists($class)) {
+                throw new \RuntimeException(
+                    "Template class [$class] does not exist."
+                );
+            }
+
+            if (! is_a($class, TemplateInterface::class, true)) {
+                throw new \RuntimeException(
+                    "Template class [$class] must implement ".TemplateInterface::class.'.'
+                );
+            }
+
+            /** @var TemplateInterface $template */
+            $template = new $class();
+
+            $template->register($auth);
+
+            self::$registered[$class] = true;
+        }
     }
 
     public static function file(string $filename): string
@@ -51,14 +89,14 @@ class TemplateManager
             return self::$cache[$filename];
         }
 
-        $paths = [self::$templateSub, self::$templateBase];
+        $paths = [Path::get('TEMPLATES_PATH') . self::$subTemplate->url, Path::get('TEMPLATES_PATH') . self::$baseTemplate->url];
 
         foreach ($paths as $path) {
             if (! $path) {
                 continue;
             }
 
-            $fullPath = $path.$filename;
+            $fullPath = $path.DIRECTORY_SEPARATOR.$filename;
 
             if (file_exists($fullPath)) {
                 return self::$cache[$filename] = $fullPath;

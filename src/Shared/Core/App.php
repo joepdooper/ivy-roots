@@ -142,7 +142,6 @@ class App
         Info::stash()->keyByColumn('name');
         Setting::stash()->keyByColumn('name');
 
-        TemplateManager::init();
         LanguageManager::init();
 
         $engine = match ($_ENV['VIEW_ENGINE'] ?? 'latte') {
@@ -154,7 +153,8 @@ class App
 
         $this->initPlugins($auth);
 
-        TemplateManager::require('template.php');
+        TemplateManager::init();
+        TemplateManager::register($auth);
 
         SettingRegistry::define('Minify CSS', [
             'handler' => MinifyCssHandler::class,
