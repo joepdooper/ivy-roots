@@ -22,14 +22,14 @@ class TemplateManager
     private static array $registered = [];
 
 
-    public static function getTemplateBase(): ?string
+    public static function getBaseTemplate(): ?string
     {
-        return self::$baseTemplate->url ? basename(Path::get('TEMPLATES_PATH') . self::$baseTemplate->url) : null;
+        return self::$baseTemplate ?: null;
     }
 
-    public static function getTemplateSub(): ?string
+    public static function getSubTemplate(): ?string
     {
-        return self::$subTemplate->url ? basename(Path::get('TEMPLATES_PATH') . self::$subTemplate->url) : null;
+        return self::$subTemplate ?: null;
     }
 
     public static function init(bool $forceRefresh = false): void

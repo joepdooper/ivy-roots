@@ -2,6 +2,7 @@
 
 namespace Ivy\Template\Presentation\Controller;
 
+use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
@@ -49,9 +50,10 @@ class TemplateController extends Controller
     {
         $this->template->authorize('index');
 
+        $templates = Template::all();
+
         View::render('admin/template.latte', [
-            'templateBase' => basename((string) TemplateManager::getTemplateBase()),
-            'templateSub' => basename((string) TemplateManager::getTemplateSub()),
+            'templates' => $templates
         ]);
     }
 
