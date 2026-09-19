@@ -52,7 +52,6 @@ class PluginController extends Controller
 
     /**
      * @throws AuthorizationException
-     * @throws Exception
      */
     public function index(): void
     {
@@ -65,6 +64,9 @@ class PluginController extends Controller
         ]);
     }
 
+    /**
+     * @throws AuthorizationException
+     */
     public function catalog(): void
     {
         $this->plugin->authorize('index');
@@ -121,7 +123,7 @@ class PluginController extends Controller
             Language::translate('plugin.added_successfully', ['plugin' => $plugin->name])
         );
 
-        $this->redirect('admin/plugin');
+        $this->redirect('admin/plugin/catalog');
     }
 
     /**
@@ -196,6 +198,7 @@ class PluginController extends Controller
         if ($plugin->status === PluginStatus::DOWNLOADING) {
             if (FileService::exists($plugin->url.DIRECTORY_SEPARATOR.'composer.json', Path::get('PLUGINS_PATH'))) {
                 $plugin->status = PluginStatus::DOWNLOADED;
+                $plugin->save();
             }
         }
         if ($plugin->status === PluginStatus::DOWNLOADED) {

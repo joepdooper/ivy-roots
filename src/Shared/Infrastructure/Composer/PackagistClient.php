@@ -3,11 +3,14 @@
 namespace Ivy\Shared\Infrastructure\Composer;
 
 use Exception;
+use Ivy\Plugin\Domain\Entity\Plugin;
 
 final class PackagistClient
 {
     public static function getCatalog(string $type, int $page = 1, int $per_page = 25): array
     {
+        $pluginsByPackage = Plugin::all()->keyBy('package');
+
         $listUrl = "https://packagist.org/packages/list.json?type=" . rawurlencode($type) . "&page=" . $page . "&per_page=" . $per_page;
         $namesJson = file_get_contents($listUrl);
         if ($namesJson === false) {
@@ -49,6 +52,7 @@ final class PackagistClient
                 'versions' => $v,
                 'description' => $meta['packages'][$fullName][0]['description'] ?? null,
                 'extra' => $meta['packages'][$fullName][0]['extra'] ?? null,
+                'plugin' => $pluginsByPackage->get($fullName),
             ];
         }
 

@@ -115,6 +115,8 @@ class App
 
         (Dotenv::createImmutable(Path::get('PROJECT_PATH')))->load();
 
+        SessionManager::start();
+
         $this->container = new Container;
         $request = Request::createFromGlobals();
         $this->container->instance(Request::class, $request);
@@ -130,8 +132,6 @@ class App
         SecurityManager::setSecurityHeaders();
 
         $this->initDatabase();
-
-        SessionManager::start();
 
         $auth = new AuthService;
         $this->container->instance(AuthService::class, $auth);
