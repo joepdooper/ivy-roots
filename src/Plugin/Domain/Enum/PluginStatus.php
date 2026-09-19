@@ -14,3 +14,4 @@ enum PluginStatus: string
     case FAILED = 'failed';
     case CANCELED = 'canceled';
 }
+

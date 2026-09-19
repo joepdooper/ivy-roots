@@ -5,14 +5,13 @@ namespace Ivy\Plugin\Presentation\Controller;
 use Exception;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Plugin\Domain\Enum\PluginStatus;
 use Ivy\Plugin\Domain\Exception\PluginException;
 use Ivy\Plugin\Infrastructure\Manager\PluginManager;
-use Ivy\Plugin\Infrastructure\Service\PluginService;
 use Ivy\Plugin\Presentation\Form\PluginDataForm;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
+use Ivy\Shared\Domain\Enum\Status;
 use Ivy\Shared\Infrastructure\Composer\ComposerRunner;
 use Ivy\Shared\Infrastructure\Composer\PackagistClient;
 use Ivy\Shared\Infrastructure\Service\FileService;
@@ -112,7 +111,7 @@ class PluginController extends Controller
             ['package' => $package],
             [
                 ...$result->data,
-                'status' => PluginStatus::DOWNLOADING,
+                'status' => Status::DOWNLOADING,
             ]
         );
 
@@ -195,13 +194,13 @@ class PluginController extends Controller
             $plugin = Plugin::find($plugin);
         }
 
-        if ($plugin->status === PluginStatus::DOWNLOADING) {
+        if ($plugin->status === Status::DOWNLOADING) {
             if (FileService::exists($plugin->url.DIRECTORY_SEPARATOR.'composer.json', Path::get('PLUGINS_PATH'))) {
-                $plugin->status = PluginStatus::DOWNLOADED;
+                $plugin->status = Status::DOWNLOADED;
                 $plugin->save();
             }
         }
-        if ($plugin->status === PluginStatus::DOWNLOADED) {
+        if ($plugin->status === Status::DOWNLOADED) {
             try {
                 PluginManager::install($plugin);
             } catch (PluginException $e) {
@@ -209,11 +208,11 @@ class PluginController extends Controller
             }
         }
 
-        if ($plugin->status === PluginStatus::FAILED) {
-            $this->redirect('admin/plugin');
+        if ($plugin->status === Status::FAILED) {
+            $this->redirect('admin/plugin/catalog');
         }
 
-        View::render('include/plugin-status.latte', [
+        View::render('include/plugin.status.latte', [
             'plugin' => $plugin,
         ]);
     }

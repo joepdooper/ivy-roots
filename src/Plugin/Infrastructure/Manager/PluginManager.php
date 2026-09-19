@@ -6,13 +6,13 @@ use Exception;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Ivy\Plugin\Application\Contracts\PluginInterface;
 use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Plugin\Domain\Enum\PluginStatus;
 use Ivy\Plugin\Domain\Exception\PluginException;
 use Ivy\Plugin\Infrastructure\Metadata\PluginInfoLoader;
 use Ivy\Plugin\Infrastructure\Service\PluginService;
 use Ivy\Plugin\Presentation\Form\PluginForm;
 use Ivy\Plugin\Presentation\Form\PluginInfoForm;
 use Ivy\Setting\Domain\Entity\Setting;
+use Ivy\Shared\Domain\Enum\Status;
 use Ivy\Template\Application\Asset\AssetPublisher;
 use Ivy\User\Domain\Exception\AuthorizationException;
 
@@ -69,11 +69,11 @@ class PluginManager
         try {
             self::resolvePluginInterface($plugin)->install();
             $plugin->fill([
-                'status' => PluginStatus::INSTALLED
+                'status' => Status::INSTALLED
             ])->save();
         } catch (Exception $exception) {
             $plugin->update([
-                'status' => PluginStatus::FAILED
+                'status' => Status::FAILED
             ]);
             throw new PluginException($exception->getMessage(), $plugin->name);
         }
