@@ -52,7 +52,7 @@ final class PackagistClient
                 'versions' => $v,
                 'description' => $meta['packages'][$fullName][0]['description'] ?? null,
                 'extra' => $meta['packages'][$fullName][0]['extra'] ?? null,
-                'plugin' => $pluginsByPackage->get($fullName),
+                'model' => $pluginsByPackage->get($fullName),
             ];
         }
 
