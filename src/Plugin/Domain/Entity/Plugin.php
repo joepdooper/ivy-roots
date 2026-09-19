@@ -4,7 +4,10 @@ namespace Ivy\Plugin\Domain\Entity;
 
 use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Domain\Enum\Status;
+use Ivy\Shared\Traits\HasPagination;
 use Ivy\Shared\Traits\HasPolicies;
+use Ivy\Shared\Traits\HasSearching;
+use Ivy\Shared\Traits\HasSorting;
 
 /**
  * @property int $id
@@ -22,7 +25,7 @@ use Ivy\Shared\Traits\HasPolicies;
  */
 class Plugin extends Entity
 {
-    use HasPolicies;
+    use HasPagination, HasPolicies, HasSearching, HasSorting;
 
     protected $fillable = [
         'parent_id',
@@ -40,5 +43,17 @@ class Plugin extends Entity
 
     protected $casts = [
         'status' => Status::class,
+    ];
+
+    protected static array $sortable = [
+        'name',
+        'package',
+        'type',
+    ];
+
+    protected static array $searchable = [
+        'name',
+        'package',
+        'type',
     ];
 }

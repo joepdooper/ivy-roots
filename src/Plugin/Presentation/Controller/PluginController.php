@@ -56,7 +56,10 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('index');
 
-        $plugins = Plugin::all();
+        $plugins = Plugin::search($this->request)
+            ->sort($this->request, 'name')
+            ->pages($this->request)
+            ->get();
 
         View::render('admin/plugin.latte', [
             'plugins' => $plugins,
