@@ -7,18 +7,35 @@ use Ivy\Plugin\Domain\Entity\Plugin;
 
 final class PackagistClient
 {
-    public static function getCatalog(string $type, int $page = 1, int $per_page = 25): array
+    public static function getCatalog(string $type, int $page = 1, int $per_page = 25, string $search = ''): array
     {
         $pluginsByPackage = Plugin::all()->keyBy('package');
 
-        $listUrl = "https://packagist.org/packages/list.json?type=" . rawurlencode($type) . "&page=" . $page . "&per_page=" . $per_page;
+        $query = [
+            'page' => max(1, $page),
+            'per_page' => max(1, min($per_page, 100)),
+        ];
+
+        if (trim($search) !== '') {
+            $query['q'] = trim($search);
+        }
+
+        if ($type !== '') {
+            $query['type'] = $type;
+        }
+
+        $listUrl = 'https://packagist.org/search.json?' .
+            http_build_query($query);
+
+        // $listUrl = "https://packagist.org/packages/list.json?type=" . rawurlencode($type) . "&page=" . $page . "&per_page=" . $per_page;
         $namesJson = file_get_contents($listUrl);
+
         if ($namesJson === false) {
             throw new \RuntimeException("Failed to fetch Packagist list: " . $listUrl);
         }
 
         $namesData = json_decode($namesJson, true);
-        $packageNames = $namesData['packageNames'] ?? [];
+        $packageNames = $namesData['results'] ?? [];
 
         $p = [];
 
