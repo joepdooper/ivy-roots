@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Shared\Infrastructure\Service\SearchService;
 use Ivy\Shared\Presentation\Form\FilterPackagistRequestForm;
+use Ivy\Template\Domain\Entity\Template;
 use Symfony\Component\HttpFoundation\Request;
 
 final class PackagistClient
@@ -17,7 +18,9 @@ final class PackagistClient
     {
         $validated = $request ? (new FilterPackagistRequestForm)->validate($request->query->all()) : null;
 
-        $pluginsByPackage = Plugin::all()->keyBy('package');
+        $modelsByPackage = Plugin::all()
+            ->concat(Template::all())
+            ->keyBy('package');
 
         $query['type'] = $type;
 
@@ -77,7 +80,7 @@ final class PackagistClient
                 'versions' => $v,
                 'description' => $meta['packages'][$packageName][0]['description'] ?? null,
                 'extra' => $meta['packages'][$packageName][0]['extra'] ?? null,
-                'model' => $pluginsByPackage->get($packageName),
+                'model' => $modelsByPackage->get($packageName),
             ];
         }
 

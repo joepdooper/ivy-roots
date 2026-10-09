@@ -64,7 +64,7 @@ class TemplateController extends Controller
     {
         $this->template->authorize('index');
 
-        $catalog = PackagistClient::getCatalog('ivy-template');
+        $catalog = PackagistClient::getCatalog('ivy-template', $this->request);
 
         View::render('admin/template.catalog.latte', [
             'catalog' => $catalog,
