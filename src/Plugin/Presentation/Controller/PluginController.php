@@ -15,6 +15,7 @@ use Ivy\Shared\Domain\Enum\Status;
 use Ivy\Shared\Infrastructure\Composer\ComposerRunner;
 use Ivy\Shared\Infrastructure\Composer\PackagistClient;
 use Ivy\Shared\Infrastructure\Service\FileService;
+use Ivy\Shared\Presentation\Form\FilterPackagistRequestForm;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
 use ReflectionException;
@@ -73,7 +74,7 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('index');
 
-        $catalog = PackagistClient::getCatalog('ivy-plugin');
+        $catalog = PackagistClient::getCatalog('ivy-plugin', $this->request);
 
         View::render('admin/plugin.catalog.latte', [
             'catalog' => $catalog,

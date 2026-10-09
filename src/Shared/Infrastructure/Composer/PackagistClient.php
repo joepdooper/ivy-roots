@@ -3,31 +3,37 @@
 namespace Ivy\Shared\Infrastructure\Composer;
 
 use Exception;
+use Illuminate\Container\Container;
+use Illuminate\Database\Eloquent\Builder;
 use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Shared\Infrastructure\Service\SearchService;
+use Ivy\Shared\Presentation\Form\FilterPackagistRequestForm;
+use Symfony\Component\HttpFoundation\Request;
 
 final class PackagistClient
 {
-    public static function getCatalog(string $type, int $page = 1, int $per_page = 25, string $search = ''): array
+
+    public static function getCatalog(string $type, ?Request $request = null): array
     {
+        $validated = $request ? (new FilterPackagistRequestForm)->validate($request->query->all()) : null;
+
         $pluginsByPackage = Plugin::all()->keyBy('package');
 
-        $query = [
-            'page' => max(1, $page),
-            'per_page' => max(1, min($per_page, 100)),
-        ];
+        $query['type'] = $type;
 
-        if (trim($search) !== '') {
-            $query['q'] = trim($search);
+        if(isset($validated->data['page']) && isset($validated->data['per_page'])){
+            $query = [
+                'page' => max(1, $validated->data['page']),
+                'per_page' => max(1, $validated->data['per_page']),
+            ];
         }
 
-        if ($type !== '') {
-            $query['type'] = $type;
+        if (isset($validated->data['search']) && trim($validated->data['search']) !== '') {
+            $query['q'] = trim($validated->data['search']);
         }
 
-        $listUrl = 'https://packagist.org/search.json?' .
-            http_build_query($query);
+        $listUrl = 'https://packagist.org/search.json?' . http_build_query($query);
 
-        // $listUrl = "https://packagist.org/packages/list.json?type=" . rawurlencode($type) . "&page=" . $page . "&per_page=" . $per_page;
         $namesJson = file_get_contents($listUrl);
 
         if ($namesJson === false) {
@@ -35,12 +41,14 @@ final class PackagistClient
         }
 
         $namesData = json_decode($namesJson, true);
-        $packageNames = $namesData['results'] ?? [];
+        $packages = $namesData['results'] ?? [];
 
         $p = [];
 
-        foreach ($packageNames as $fullName) {
-            [$vendor, $package] = explode('/', $fullName, 2);
+        foreach ($packages as $package) {
+
+            $packageName = $package['name'];
+            [$vendor, $package] = explode('/', $packageName, 2);
 
             $url = "https://repo.packagist.org/p2/".$vendor."/".$package.".json";
             $json = file_get_contents($url);
@@ -49,11 +57,11 @@ final class PackagistClient
             }
 
             $meta = json_decode($json, true);
-            if (!$meta || !isset($meta['packages'][$fullName])) {
+            if (!$meta || !isset($meta['packages'][$packageName])) {
                 continue;
             }
 
-            $versions = $meta['packages'][$fullName];
+            $versions = $meta['packages'][$packageName];
             if (!is_array($versions)) {
                 continue;
             }
@@ -65,11 +73,11 @@ final class PackagistClient
             }
 
             $p[] = [
-                'package' => $fullName,
+                'package' => $packageName,
                 'versions' => $v,
-                'description' => $meta['packages'][$fullName][0]['description'] ?? null,
-                'extra' => $meta['packages'][$fullName][0]['extra'] ?? null,
-                'model' => $pluginsByPackage->get($fullName),
+                'description' => $meta['packages'][$packageName][0]['description'] ?? null,
+                'extra' => $meta['packages'][$packageName][0]['extra'] ?? null,
+                'model' => $pluginsByPackage->get($packageName),
             ];
         }
 
