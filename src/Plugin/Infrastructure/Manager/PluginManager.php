@@ -13,6 +13,7 @@ use Ivy\Plugin\Presentation\Form\PluginForm;
 use Ivy\Plugin\Presentation\Form\PluginInfoForm;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Domain\Enum\Status;
+use Ivy\Shared\Infrastructure\Composer\PackagistClient;
 use Ivy\Template\Application\Asset\AssetPublisher;
 use Ivy\User\Domain\Exception\AuthorizationException;
 
@@ -26,7 +27,7 @@ class PluginManager
     {
         $plugin->authorize('install');
 
-        $info = PluginService::getPackageData($plugin->package);
+        $info = PackagistClient::getPackageData($plugin->package);
 
         if (! $info) {
             throw new PluginException(message: 'no package metadata could be retreived', plugin: $plugin->url);

@@ -216,7 +216,7 @@ class PluginController extends Controller
             $this->redirect('admin/plugin/catalog');
         }
 
-        View::render('include/plugin.status.latte', [
+        View::render('include/status.latte', [
             'plugin' => $plugin,
         ]);
     }

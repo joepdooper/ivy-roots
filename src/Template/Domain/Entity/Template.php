@@ -2,8 +2,8 @@
 
 namespace Ivy\Template\Domain\Entity;
 
-use Ivy\Plugin\Domain\Enum\TemplateStatus;
 use Ivy\Shared\Base\Entity;
+use Ivy\Shared\Domain\Enum\Status;
 use Ivy\Shared\Traits\HasPolicies;
 use Ivy\Shared\Traits\Stash;
 
@@ -16,7 +16,7 @@ use Ivy\Shared\Traits\Stash;
  * @property string $description
  * @property string $type
  * @property string $url
- * @property TemplateStatus $status
+ * @property Status $status
  */
 class Template extends Entity
 {
@@ -35,6 +35,6 @@ class Template extends Entity
     ];
 
     protected $casts = [
-        'status' => TemplateStatus::class,
+        'status' => Status::class,
     ];
 }
