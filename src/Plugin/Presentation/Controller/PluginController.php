@@ -217,7 +217,8 @@ class PluginController extends Controller
         }
 
         View::render('include/status.latte', [
-            'plugin' => $plugin,
+            'status' => $plugin->status,
+            'url' => '/admin/plugin/'. $plugin->id.'/status',
         ]);
     }
 }
