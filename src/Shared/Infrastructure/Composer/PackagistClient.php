@@ -3,10 +3,7 @@
 namespace Ivy\Shared\Infrastructure\Composer;
 
 use Exception;
-use Illuminate\Container\Container;
-use Illuminate\Database\Eloquent\Builder;
 use Ivy\Plugin\Domain\Entity\Plugin;
-use Ivy\Shared\Infrastructure\Service\SearchService;
 use Ivy\Shared\Presentation\Form\FilterPackagistRequestForm;
 use Ivy\Template\Domain\Entity\Template;
 use Symfony\Component\HttpFoundation\Request;
@@ -168,5 +165,31 @@ final class PackagistClient
         $channel = $m[2] ?? null;
 
         return ['version' => $version, 'channel' => $channel];
+    }
+
+    public static function updateLatestVersions($models): void
+    {
+        foreach ($models as $model) {
+            $package = $model->package ?? '';
+            if (!preg_match('~^([^/]+)/([^/]+)$~', $package, $parts)) continue;
+
+            $url = "https://repo.packagist.org/p2/{$parts[1]}/{$parts[2]}.json";
+            $data = @json_decode(file_get_contents($url), true);
+            $installed = ($model->version ?? '')
+                . (!empty($model->version_channel) ? '-'.$model->version_channel : '');
+
+            foreach ($data['packages'][$package] ?? [] as $item) {
+                $v = self::splitComposerVersion($item['version'] ?? null);
+                if (!$v['version']) continue;
+
+                $candidate = $v['version'] . ($v['channel'] ? '-'.$v['channel'] : '');
+                if ($installed && version_compare($candidate, $installed, '<=')) continue;
+
+                $model->latest_version = $v['version'];
+                $model->latest_version_channel = $v['channel'];
+                $model->save();
+                break;
+            }
+        }
     }
 }
