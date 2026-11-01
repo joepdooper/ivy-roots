@@ -193,33 +193,6 @@ class LatteEngine implements ViewEngineInterface
                 return $url;
             }
         );
-
-        $this->latte->addFunction(
-            'queryUrl',
-            function (array $params = []) {
-
-                $query = $this->request->query->all();
-
-                foreach ($query as $key => $value) {
-                    if (is_array($value)) {
-                        $query[$key] = end($value);
-                    }
-                }
-
-                foreach ($params as $key => $value) {
-
-                    if (is_int($key)) {
-                        unset($query[$value]);
-
-                        continue;
-                    }
-
-                    $query[$key] = $value;
-                }
-
-                return $query ? '?'.http_build_query($query) : '';
-            }
-        );
     }
 
     private function registerExtensions(): void
