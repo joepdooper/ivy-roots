@@ -35,7 +35,7 @@ class PluginPolicy extends Policy
 
     public function collection(Plugin $plugin): bool
     {
-        if ($plugin->info->hasCollection() && $this->canEditAsAdmin()) {
+        if ($this->canEditAsAdmin()) {
             return true;
         }
 
@@ -44,7 +44,7 @@ class PluginPolicy extends Policy
 
     public function settings(Plugin $plugin): bool
     {
-        if ($plugin->info->hasSettings() && $this->canEditAsAdmin()) {
+        if ($this->canEditAsAdmin()) {
             return true;
         }
 
