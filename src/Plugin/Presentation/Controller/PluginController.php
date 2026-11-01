@@ -74,10 +74,11 @@ class PluginController extends Controller
     {
         $this->plugin->authorize('index');
 
-        $catalog = PackagistClient::getCatalog('ivy-plugin', $this->request);
+        $packagist = PackagistClient::getCatalog('ivy-plugin', $this->request);
 
         View::render('admin/plugin.catalog.latte', [
-            'catalog' => $catalog,
+            'catalog' => $packagist['catalog'],
+            'pagination' => $packagist['pagination'],
         ]);
     }
 

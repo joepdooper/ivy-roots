@@ -64,10 +64,11 @@ class TemplateController extends Controller
     {
         $this->template->authorize('index');
 
-        $catalog = PackagistClient::getCatalog('ivy-template', $this->request);
+        $packagist = PackagistClient::getCatalog('ivy-template', $this->request);
 
         View::render('admin/template.catalog.latte', [
-            'catalog' => $catalog,
+            'catalog' => $packagist['catalog'],
+            'pagination' => $packagist['pagination']
         ]);
     }
 

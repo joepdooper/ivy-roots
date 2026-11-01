@@ -5,6 +5,7 @@ namespace Ivy\Shared\Infrastructure\Composer;
 use Exception;
 use Ivy\Plugin\Domain\Entity\Plugin;
 use Ivy\Shared\Presentation\Form\FilterPackagistRequestForm;
+use Ivy\Shared\Presentation\Listing\PaginationState;
 use Ivy\Template\Domain\Entity\Template;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -72,7 +73,7 @@ final class PackagistClient
                 $v[] = $version['version'];
             }
 
-            $p[] = [
+            $p['catalog'][] = [
                 'package' => $packageName,
                 'versions' => $v,
                 'description' => $meta['packages'][$packageName][0]['description'] ?? null,
@@ -80,6 +81,15 @@ final class PackagistClient
                 'model' => $modelsByPackage->get($packageName),
             ];
         }
+
+        $total = (int) ($namesData['total'] ?? 0);
+
+        $p['pagination'] = new PaginationState(
+            currentPage: $query['page'] ?? 1,
+            perPage: $query['per_page'] ?? 25,
+            total: $total,
+            lastPage: max(1, (int) ceil($total / ($query['per_page'] ?? 25))),
+        );
 
         return $p;
     }
