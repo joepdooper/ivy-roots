@@ -3,13 +3,16 @@
 namespace Ivy\Template\Presentation\Controller;
 
 use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Domain\Exception\PluginException;
 use Ivy\Plugin\Infrastructure\Manager\PluginManager;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
 use Ivy\Shared\Core\Path;
+use Ivy\Shared\Domain\Enum\Status;
 use Ivy\Shared\Infrastructure\Composer\ComposerRunner;
 use Ivy\Shared\Infrastructure\Composer\PackagistClient;
+use Ivy\Shared\Infrastructure\Service\FileService;
 use Ivy\Template\Application\Asset\AssetPublisher;
 use Ivy\Template\Domain\Entity\Template;
 use Ivy\Template\Infrastructure\Manager\TemplateManager;
@@ -107,19 +110,19 @@ class TemplateController extends Controller
             return;
         }
 
-//        $template = Template::firstOrCreate(
-//            ['package' => $package],
-//            [
-//                ...$result->data,
-//                'status' => TemplateStatus::DOWNLOADING,
-//            ]
-//        );
+        $template = Template::firstOrCreate(
+            ['package' => $package],
+            [
+                ...$result->data,
+                'status' => Status::DOWNLOADING,
+            ]
+        );
 
         $this->composerRunner->require((string) $package);
 
         $this->flashBag->add(
             'success',
-            Language::translate('template.added_successfully', ['template' => '$template->name'])
+            Language::translate('template.added_successfully', ['template' => $template->name])
         );
 
         $this->redirect('admin/template');
@@ -207,6 +210,33 @@ class TemplateController extends Controller
         new AssetPublisher()->publishTemplate();
 
         $this->redirect('admin/template');
+    }
+
+    public function status(Template|int $template): void
+    {
+        if (is_int($template)) {
+            $template = Template::find($template);
+        }
+
+        if ($template->status === Status::DOWNLOADING) {
+            if (FileService::exists($template->url.DIRECTORY_SEPARATOR.'composer.json', Path::get('TEMPLATES_PATH'))) {
+                $template->status = Status::DOWNLOADED;
+                $template->save();
+            }
+        }
+        if ($template->status === Status::DOWNLOADED) {
+            $template->status = Status::INSTALLED;
+            $template->save();
+        }
+
+        if ($template->status === Status::FAILED) {
+            $this->redirect('admin/template/catalog');
+        }
+
+        View::render('include/status.latte', [
+            'status' => $template->status,
+            'url' => '/admin/template/'. $template->id.'/status',
+        ]);
     }
 
     private function isAlwaysPublicPath(string $current): bool
