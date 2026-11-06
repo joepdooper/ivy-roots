@@ -125,7 +125,7 @@ class TemplateController extends Controller
             Language::translate('template.added_successfully', ['template' => $template->name])
         );
 
-        $this->redirect('admin/template');
+        $this->redirect('admin/template/catalog');
     }
 
     public function update(Template|int $template, mixed $data): void
@@ -143,6 +143,9 @@ class TemplateController extends Controller
         $template->authorize('update');
 
         $template->save();
+
+        TemplateManager::init(true);
+        new AssetPublisher()->publishTemplate();
 
         $this->flashBag->add(
             'success',
@@ -176,38 +179,6 @@ class TemplateController extends Controller
                 $e->getMessage(),
             );
         }
-
-        $this->redirect('admin/template');
-    }
-
-    /**
-     * @throws AuthorizationException
-     */
-    public function sync(): void
-    {
-        $this->template->authorize('sync');
-
-        $errors = $old = [];
-
-        foreach ($this->request->request->all('template') as $index => $data) {
-
-            $result = $this->templateForm->validate($data);
-
-            if ($result->valid) {
-                $this->update($result->data['id'], $result->data);
-            } else {
-                $errors[$index] = $result->errors;
-                $old[$index] = $result->old;
-            }
-        }
-
-        if (! empty($errors)) {
-            $this->flashBag->set('errors', $errors);
-            $this->flashBag->set('old', $old);
-        }
-
-        TemplateManager::init(true);
-        new AssetPublisher()->publishTemplate();
 
         $this->redirect('admin/template');
     }
