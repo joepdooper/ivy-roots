@@ -38,8 +38,8 @@ class TemplateManager
             return;
         }
 
-        self::$baseTemplate = Template::where('type', 'base')->first();
-        self::$subTemplate = Template::where('type', 'sub')->first();
+        self::$baseTemplate = Template::where('type', 'base')->where('active', 1)->first();
+        self::$subTemplate = Template::where('type', 'sub')->where('active', 1)->first();
 
         if ($forceRefresh) {
             self::$cache = [];

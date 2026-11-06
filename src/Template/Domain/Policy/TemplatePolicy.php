@@ -24,7 +24,11 @@ class TemplatePolicy extends Policy
 
     public function uninstall(Template $template): bool
     {
-        return $this->canEditAsSuperAdmin();
+        if($this->canEditAsSuperAdmin() && !$template->active) {
+            return true;
+        }
+
+        return false;
     }
 
     public function update(Template $template): bool

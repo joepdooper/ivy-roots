@@ -4,7 +4,10 @@ namespace Ivy\Template\Domain\Entity;
 
 use Ivy\Shared\Base\Entity;
 use Ivy\Shared\Domain\Enum\Status;
+use Ivy\Shared\Traits\HasPagination;
 use Ivy\Shared\Traits\HasPolicies;
+use Ivy\Shared\Traits\HasSearching;
+use Ivy\Shared\Traits\HasSorting;
 use Ivy\Shared\Traits\Stash;
 
 /**
@@ -20,7 +23,7 @@ use Ivy\Shared\Traits\Stash;
  */
 class Template extends Entity
 {
-    use HasPolicies, Stash;
+    use Stash, HasPagination, HasPolicies, HasSearching, HasSorting;
 
     protected $fillable = [
         'name',
@@ -36,5 +39,17 @@ class Template extends Entity
 
     protected $casts = [
         'status' => Status::class,
+    ];
+
+    protected static array $sortable = [
+        'name',
+        'package',
+        'type',
+    ];
+
+    protected static array $searchable = [
+        'name',
+        'package',
+        'type',
     ];
 }

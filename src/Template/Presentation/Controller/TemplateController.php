@@ -3,6 +3,7 @@
 namespace Ivy\Template\Presentation\Controller;
 
 use Ivy\Plugin\Domain\Entity\Plugin;
+use Ivy\Plugin\Infrastructure\Manager\PluginManager;
 use Ivy\Setting\Domain\Entity\Setting;
 use Ivy\Shared\Base\Controller;
 use Ivy\Shared\Core\Language;
@@ -16,6 +17,7 @@ use Ivy\Template\Presentation\Form\TemplateDataForm;
 use Ivy\Template\Presentation\Form\TemplateForm;
 use Ivy\Template\Presentation\View\View;
 use Ivy\User\Domain\Exception\AuthorizationException;
+use Throwable;
 
 class TemplateController extends Controller
 {
@@ -50,7 +52,10 @@ class TemplateController extends Controller
     {
         $this->template->authorize('index');
 
-        $templates = Template::all();
+        $templates = Template::search($this->request)
+            ->sort($this->request, 'name')
+            ->pages($this->request)
+            ->get();
 
         View::render('admin/template.latte', [
             'templates' => $templates
@@ -140,6 +145,36 @@ class TemplateController extends Controller
             'success',
             $template->type.'-template updated successfully.'
         );
+    }
+
+    public function delete(Template|int $template): void
+    {
+        if (is_int($template)) {
+            $template = Template::find($template);
+        }
+
+        $template->authorize('uninstall');
+
+        try {
+            $this->composerRunner->remove($template->package);
+
+            $template->delete();
+
+            $this->flashBag->add(
+                'success',
+                Language::translate('template.uninstalled_successfully', [
+                    'template' => $template->name
+                ])
+            );
+
+        } catch (Throwable $e) {
+            $this->flashBag->add(
+                'error',
+                $e->getMessage(),
+            );
+        }
+
+        $this->redirect('admin/template');
     }
 
     /**
